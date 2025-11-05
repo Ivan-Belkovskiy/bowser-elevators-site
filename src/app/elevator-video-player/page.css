@@ -1,0 +1,21 @@
+.page-title {
+    font-size: 45px;
+    background: linear-gradient(90deg, #00b7ff 0%, #d900ff 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    margin: 20px 0;
+}
+
+hr {
+    width: 70%;
+    height: 4px;
+    background-color: #00b7ff;
+    border: none;
+    outline: none;
+    border-radius: 5px;
+}
+
+.evp-page {
+    position: relative;
+    margin-top: 40px;
+}

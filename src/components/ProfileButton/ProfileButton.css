@@ -1,0 +1,19 @@
+.profile-button {
+    /* width: 100%; */
+    height: 100%;
+    /* background-color: #fff; */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 0 10px;
+    transition: all 0.2s ease 0s;
+}
+
+.profile-button:hover {
+    cursor: pointer;
+    background-color: #fff;
+}
+
+.profile-button img {
+    border-radius: 60px;
+}

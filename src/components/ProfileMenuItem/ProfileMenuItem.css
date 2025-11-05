@@ -1,0 +1,9 @@
+.profile-menu-item {
+    padding: 7px 10px;
+    cursor: pointer;
+    background-color: #212a33;
+}
+
+.profile-menu-item:hover {
+    background-color: #616f7e;
+}
