@@ -1,5 +1,5 @@
 .new-elevator-modal {
-    position: absolute;
+    position: fixed;
     width: 100%;
     height: 100%;
     top: 0;
@@ -8,12 +8,13 @@
     display: flex;
     justify-content: center;
     align-items: center;
+    z-index: 500;
 }
 
 
 .new-elevator-modal__container {
-    width: 70%;
-    height: 80%;
+    width: 80%;
+    height: 90%;
     background-color: #fff;
     border-radius: 10px;
     border: 8px solid #0099ff;
@@ -31,6 +32,8 @@
     display: flex;
     align-items: center;
     flex-direction: column;
+    overflow-y: auto;
+    max-height: 600px;
 }
 
 .new-elevator-modal__item {
@@ -152,4 +155,25 @@
 .new-elevator-modal__input.floor-access-select {
     border-radius: 0;
     margin-left: 5px;
+    /* width: 150px; */
+}
+
+.new-elevator-modal__button.floor-video-button {
+    width: 65px;
+    height: 30px;
+    cursor: pointer;
+}
+
+.new-elevator-modal__button.floor-video-button:hover {
+    outline: 2px solid #001aff;
+}
+
+.new-elevator-modal__input.floor-view-count-input {
+    width: 45px;
+    border-radius: 0;
+    margin-left: 10px;
+}
+
+.new-elevator-modal__input.floor-number-select {
+    width: 50px;
 }

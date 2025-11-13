@@ -1,5 +1,6 @@
 import NewElevatorModal from '@/components/NewElevatorModal/NewElevatorModal';
 import './page.css';
+import VideoSettingsModal from '@/components/VideoSettingsModal/VideoSettingsModal';
 
 export const metadata = {
     title: "Elevator Video Player | Bowser Elevators",
