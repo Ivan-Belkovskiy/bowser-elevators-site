@@ -6,11 +6,7 @@ export type AccessCondition =
 | { type: 'blocked' };
 
 export interface FloorConfig {
-    floorNumber: number,
     displaySymbol?: string,
     accessCondition?: AccessCondition,
     videoData?: VideoData | null,
-    // videoTitle?: string,
-    // videoUrl?: string,
-    // thumbnail?: string,
 }

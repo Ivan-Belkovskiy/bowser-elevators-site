@@ -1,0 +1,60 @@
+.switch-checkbox {
+    position: relative;
+    display: inline-block;
+    border: 3px solid #0066ff;
+}
+
+.switch-checkbox__button {
+    flex: 1;
+    /* width: 100px; */
+    height: 100%;
+    background-color: #ffffff;
+    color: #8f8f8f;
+    cursor: pointer;
+    transition: all 0.3s ease 0s;
+    margin: 0;
+    padding: 0 10px;
+}
+
+.switch-checkbox__button.on-button {
+    /* background-color: #00c000; */
+}
+
+.switch-checkbox__button.off-button {
+    /* background-color: #c00000; */
+}
+
+.switch-checkbox__button.active {
+    /* background-color: #48ff00; */
+    color: #ffffff;
+    /* font-weight: 600; */
+}
+
+.switch-checkbox__button.active.on-button {
+    background-color: #00ff00;
+    color: #006100;
+}
+
+.switch-checkbox__button.active.off-button {
+    background-color: #ff0000;
+    color: #610000;
+}
+
+/* .switch-checkbox {
+    display: inline-block;
+    border: 3px solid #0066ff;
+}
+
+.switch-checkbox__button {
+    width: 100px;
+    background: #00ccff;
+    color: #0066ff;
+    cursor: pointer;
+    transition: all 0.5s ease 0s;
+}
+
+.switch-checkbox__button.active {
+    background-color: #0066ff;
+    color: #00ccff;
+    font-weight: 600;
+} */

@@ -90,55 +90,16 @@ export default function NewElevatorModal() {
         setOpenedModal(props);
     }
 
-    const createElevator = async () => {
-        const formData = new FormData();
-
-        formData.append("name", elevatorName);
-        formData.append("description", elevatorDescription);
-        formData.append("floors", JSON.stringify(floors));
-        formData.append("coursebotEnabled", String(withCoursebot));
-
-        if (soundEffects.doorOpen instanceof File) {
-            formData.append("sounds", soundEffects.doorOpen, "doorOpen.mp3");
-        }
-        if (soundEffects.doorClose instanceof File) {
-            formData.append("sounds", soundEffects.doorClose, "doorClose.mp3");
-        }
-        if (soundEffects.buttonClick instanceof File) {
-            formData.append("sounds", soundEffects.buttonClick, "buttonClick.mp3");
-        }
-        if (soundEffects.movement?.start instanceof File) {
-            formData.append("sounds", soundEffects.movement.start, "moveStart.mp3");
-        }
-        if (soundEffects.movement?.move instanceof File) {
-            formData.append("sounds", soundEffects.movement.move, "moveLoop.mp3");
-        }
-        if (soundEffects.movement?.end instanceof File) {
-            formData.append("sounds", soundEffects.movement.end, "moveStop.mp3");
-        }
-
-        floors.forEach((floor, idx) => {
-            if (floor.videoData?.image instanceof File) {
-                formData.append(`image_floor_${idx}`, floor.videoData.image, floor.videoData.image.name);
-            }
-        });
-
-        try {
-            const res = await fetch("/api/elevators/", {
-                method: "POST",
-                body: formData,
-            });
-
-            const data = await res.json();
-            if (data.success) {
-                alert(`Лифт создан! ID: ${data.liftId}`);
-            } else {
-                alert(`Ошибка: ${data.error}`);
-            }
-        } catch (err) {
-            console.error(err);
-            alert("Произошла ошибка при создании лифта");
-        }
+    const createElevator = () => {
+        alert('Лифт Создан!!!');
+        const elevatorObj = {
+            name: elevatorName,
+            description: elevatorDescription,
+            floorList: floors,
+            soundEffects: soundEffects,
+            coursebotEnabled: withCoursebot,
+        };
+        console.log(elevatorObj);
     }
 
     return (
@@ -185,7 +146,7 @@ export default function NewElevatorModal() {
                                                 <select
                                                     className="new-elevator-modal__input floor-access-select"
                                                     value={floor.accessCondition?.type || 'free'}
-                                                    onChange={(e) => updateFloor("accessCondition", ((e.target.value === 'viewCount') ? { type: e.target.value, requiredViews: 1, floor: 1 } : { type: e.target.value }), idx)}
+                                                    onChange={(e) => updateFloor("accessCondition", { type: e.target.value }, idx)}
                                                 >
                                                     <option value="free">всегда</option>
                                                     <option value="viewCount">после просмотра видео</option>
@@ -208,7 +169,7 @@ export default function NewElevatorModal() {
                                                             value={floor.accessCondition?.floor}
                                                             onChange={(e) => updateAccessCondition(idx, { floor: Number(e.target.value) })}
                                                         >
-                                                            {floors.map((floor, i) => (i !== idx) && <option key={i} value={(i + 1)}>{(i + 1)}F</option>)}
+                                                            {floors.map((floor, i) => (i !== idx) && <option key={i} value={(idx + 1)}>{(idx + 1)}F</option>)}
                                                         </select>
 
                                                     </>
