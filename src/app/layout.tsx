@@ -1,36 +1,19 @@
-import ProfileButton from '@/components/ProfileButton/ProfileButton';
-import './globals.css';
-import './page.css';
-
-import { ReactNode } from 'react';
-import ProfileDropdown from '@/components/ProfileDropdown/ProfileDropdown';
+import PageWrapper from "@/components/PageWrapper/PageWrapper";
+import "./globals.css";
+import "./page.css";
 
 export const metadata = {
   title: "Bowser Elevators",
   description: "Сайт компании Bowser Elevators",
-}
+};
 
-export default function RootLayout({ children }: { children: ReactNode }) {
+export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang='ru'>
+    <html lang="ru">
       <body>
-        <header className="site-header">
-          <a href='/' className="site-header__main-button">
-            <img src="/images/logo.png" alt="Bowser Elevators Logo" className="nav-logo" />
-          </a>
-          <div className="site-navigation">
-            <div className="site-navigation__left">
-              <a className='site-navigation__item' href="/mylift">Bowser Elevators MyLift</a>
-              <a className='site-navigation__item' href="/elevator-video-player">Elevator Video Player</a>
-            </div>
-            <div className="site-navigation__right">
-              <ProfileDropdown />
-            </div>
-          </div>
-        </header>
-        <main>{children}</main>
-        <footer className="site-footer">© Bowser Elevators</footer>
-
+        <PageWrapper>
+          <main>{children}</main>
+        </PageWrapper>
       </body>
     </html>
   );

@@ -9,12 +9,14 @@ import { VideoData } from "@/types/data/VideoData";
 import { EVPSoundEffects, EVPMovementSoundEffects } from "@/types/data/ElevatorVideoPlayer/ElevatorVideoPlayer";
 import SwitchCheckbox from "../SwitchCheckbox/SwitchCheckbox";
 import FileUploader from "../FileUploader/FileUploader";
+import { useRouter } from "next/navigation";
 export default function NewElevatorModal() {
     const [openedModal, setOpenedModal] = useState<VideoSettingsModalProps | null>(null);
     const [floors, setFloors] = useState<FloorConfig[]>([]);
     const [elevatorName, setElevatorName] = useState<string>('');
     const [elevatorDescription, setElevatorDescription] = useState<string>('');
     const [soundEffects, setSoundEffects] = useState<EVPSoundEffects>({});
+    const router = useRouter();
 
     const [withCoursebot, setWithCoursebot] = useState<boolean>(true);
 
@@ -99,22 +101,22 @@ export default function NewElevatorModal() {
         formData.append("coursebotEnabled", String(withCoursebot));
 
         if (soundEffects.doorOpen instanceof File) {
-            formData.append("sounds", soundEffects.doorOpen, "doorOpen.mp3");
+            formData.append("sound_doorOpen", soundEffects.doorOpen, "doorOpen.mp3");
         }
         if (soundEffects.doorClose instanceof File) {
-            formData.append("sounds", soundEffects.doorClose, "doorClose.mp3");
+            formData.append("sound_doorClose", soundEffects.doorClose, "doorClose.mp3");
         }
         if (soundEffects.buttonClick instanceof File) {
-            formData.append("sounds", soundEffects.buttonClick, "buttonClick.mp3");
+            formData.append("sound_buttonClick", soundEffects.buttonClick, "buttonClick.mp3");
         }
         if (soundEffects.movement?.start instanceof File) {
-            formData.append("sounds", soundEffects.movement.start, "moveStart.mp3");
+            formData.append("sound_moveStart", soundEffects.movement.start, "moveStart.mp3");
         }
         if (soundEffects.movement?.move instanceof File) {
-            formData.append("sounds", soundEffects.movement.move, "moveLoop.mp3");
+            formData.append("sound_moveLoop", soundEffects.movement.move, "moveLoop.mp3");
         }
         if (soundEffects.movement?.end instanceof File) {
-            formData.append("sounds", soundEffects.movement.end, "moveStop.mp3");
+            formData.append("sound_moveEnd", soundEffects.movement.end, "moveStop.mp3");
         }
 
         floors.forEach((floor, idx) => {
@@ -131,7 +133,8 @@ export default function NewElevatorModal() {
 
             const data = await res.json();
             if (data.success) {
-                alert(`Лифт создан! ID: ${data.liftId}`);
+                // alert(`Лифт создан! ID: ${data.liftId}`);
+                router.push(`/mylift/editor/${data.liftId}`);
             } else {
                 alert(`Ошибка: ${data.error}`);
             }

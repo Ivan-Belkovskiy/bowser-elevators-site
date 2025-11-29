@@ -1,0 +1,109 @@
+.elevator-video-player {
+    position: relative;
+    width: 100vw;
+    height: 100vh;
+    display: flex;
+    justify-content: start;
+    background-color: #000;
+    user-select: none;
+    /* align-items: center; */
+}
+
+.elevator-video-player img {
+    -webkit-user-drag: none;
+    user-select: none;
+}
+
+.elevator-video-player__wall {
+    /* background-position: center; */
+    background-repeat: no-repeat;
+    background-size: 450px 100%;
+}
+
+.elevator-video-player__wall.left-wall {
+    display: inline-block;
+    width: 450px;
+    height: 100%;
+}
+
+.elevator-video-player__wall.right-wall {
+    position: relative;
+    display: inline-block;
+    width: 27.7%;
+    height: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.elevator-video-player__door {
+    display: inline-block;
+    width: 350px;
+    height: 100%;
+}
+
+.elevator-video-player__door.right-door {
+    transform: rotateY(180deg);
+}
+
+.elevator-video-player__button-panel {
+    width: 200px;
+    height: 100%;
+    background-repeat: no-repeat;
+    background-size: cover;
+    margin-left: 50px;
+}
+
+.elevator-video-player__button {
+    width: 30px;
+    height: 30px;
+    background-repeat: no-repeat;
+    background-size: contain;
+    border-radius: 30px;
+}
+
+.elevator-video-player__button-block.edit-move .elevator-video-player__button:hover {
+    cursor: move;
+}
+
+.elevator-video-player__button-block:not(.edit-move) .elevator-video-player__button:not(.empty-button):hover {
+    cursor: pointer;
+}
+
+.elevator-video-player__button-block.floor-buttons {
+    position: relative;
+    top: 480px;
+    left: 40px;
+    width: 120px;
+    display: flex;
+    flex-direction: row-reverse;
+    flex-wrap: wrap;
+    justify-content: space-around;
+    gap: 10px;
+    transition: all 0.5s ease 0s;
+    outline: 2px solid transparent;
+}
+
+.elevator-video-player__button-block.action-buttons {
+    position: relative;
+    top: 550px;
+    left: 40px;
+    width: 120px;
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    justify-content: space-around;
+    gap: 10px;
+    transition: all 0.5s ease 0s;
+    outline: 2px solid transparent;
+}
+
+.elevator-video-player.edit-mode .elevator-video-player__button-block:hover {
+    outline: 2px solid #0084ff;
+}
+
+.elevator-video-player.edit-mode .elevator-video-player__button-block.edit-move {
+    transition: none;
+    outline: 4px solid #0084ff;
+    cursor: move;
+}
