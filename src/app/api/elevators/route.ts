@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import fs from "fs";
 import path from "path";
 import { v4 as uuid } from "uuid";
+import { LiftJson, ElevatorButton, ButtonBlock, Floor } from "@/types/elevator";
 
 const soundMap: Record<string, (lift: LiftJson, fileName: string) => void> = {
   sound_doorOpen: (lift, name) => lift.elevator.soundEffects.doorOpen = `assets/sounds/${name}`,
@@ -17,7 +18,6 @@ const imageMap: Record<string, (lift: LiftJson, fileName: string) => void> = {
   image_elevator_doors_right: (lift, name) => lift.elevator.images.doors.right = `assets/images/elevator/${name}`,
   image_elevator_walls: (lift, name) => lift.elevator.images.walls = `assets/images/elevator/${name}`,
   image_elevator_panel: (lift, name) => lift.elevator.images.panel = `assets/images/elevator/${name}`,
-  image_elevator_button: (lift, name) => lift.elevator.images.button = `assets/images/elevator/${name}`,
 };
 
 
@@ -53,97 +53,6 @@ export async function GET(req: NextRequest) {
   }
 }
 
-interface Floor {
-  id: string;
-  displaySymbol: string;
-  videoData?: {
-    title: string;
-    image?: string;
-    url?: string;
-  };
-}
-
-type ElevatorButton = {
-  type: "floor";
-  destinationFloor: number;
-  blocked: boolean;
-  styles: {
-    default: string;
-    active: string | Partial<CSSStyleDeclaration>;
-  };
-  // deletable: boolean;
-} | {
-  type: "action";
-  action: {
-    element: string;
-    command: string;
-  };
-  blocked: boolean;
-  styles: {
-    default: string;
-    active: string | Partial<CSSStyleDeclaration>;
-  };
-  deletable: boolean;
-} | {
-  type: "empty", // Пустое поле для кнопки
-};
-
-interface ButtonBlock {
-  type: "floors" | "actions";
-  // rows: number; // Убрал rows для автоматической подстройки рядов относительно количества кнопок
-  cols: number;
-  buttons: ElevatorButton[];
-  position: {
-    y: number;
-  };
-  customPosition?: {
-    x?: number;
-    y?: number;
-  };
-}
-
-interface LiftJson {
-  id: string;
-  title: string;
-  description: string;
-  floors: Floor[];
-  coursebot: {
-    enabled: boolean;
-    options: {}; // Настройки Уровнебота (такие, как скрытое автосохранение, время после паузы для активации автосохранения)
-  };
-  elevator: {
-    soundEffects: {
-      doorOpen: string | null;
-      doorClose: string | null;
-      buttonClick: string | null;
-      movement: {
-        start: string | null;
-        move: string | null;
-        end: string | null;
-      };
-    };
-    images: {
-      doors: { left: string | null; right: string | null };
-      walls: string | null;
-      panel: string | null;
-      button: string | null;
-    };
-    doorConfig: {
-      type: "central" | "telescopic" | "single"; // Тип дверей (центрального открывания, телескопические, однодверные)
-      direction: "left" | "right" | null; // Направление открытия дверей (для центрального открывания = null)
-      animation: {}; // Настройка анимации дверей: Я планирую, чтобы можно было самому редактировать анимации. Редактор анимации я предлагаю сделать как в Blender 3D (по ключевым кадрам, например, 0 сек (начало) = положение дверей 0 (закрыто) | 1 сек (финал) = положение дверей 1 (открыто))
-    };
-    display: { // Настройки табло индикации //
-      type: string; // Вид табло
-      options: { [key: string]: string | boolean }; // Настраиваемые параметры табло //
-      allowedOptions: string[];
-    };
-    buttonPanel: {
-      blocks: ButtonBlock[];
-    };
-  };
-}
-
 export async function POST(req: NextRequest) {
   try {
     const formData = await req.formData();
@@ -156,11 +65,13 @@ export async function POST(req: NextRequest) {
     const liftId = uuid();
     const userId = "demoUser";
     const basePath = path.join(process.cwd(), "Elevators", userId, liftId);
+    const assetsPath = path.join(process.cwd(), "public", "Elevators", userId, liftId);
 
-    fs.mkdirSync(path.join(basePath, "floors"), { recursive: true });
-    fs.mkdirSync(path.join(basePath, "assets", "sounds"), { recursive: true });
-    fs.mkdirSync(path.join(basePath, "assets", "images", "floors"), { recursive: true });
-    fs.mkdirSync(path.join(basePath, "assets", "images", "elevator"), { recursive: true });
+    fs.mkdirSync(basePath, { recursive: true });
+    fs.mkdirSync(path.join(assetsPath, "floors"), { recursive: true });
+    fs.mkdirSync(path.join(assetsPath, "assets", "sounds"), { recursive: true });
+    fs.mkdirSync(path.join(assetsPath, "assets", "images", "floors"), { recursive: true });
+    fs.mkdirSync(path.join(assetsPath, "assets", "images", "elevator"), { recursive: true });
 
     const liftJson: LiftJson = {
       id: liftId,
@@ -179,7 +90,6 @@ export async function POST(req: NextRequest) {
           doors: { left: null, right: null },
           walls: null,
           panel: null,
-          button: null,
         },
         doorConfig: {
           type: "central",
@@ -322,6 +232,7 @@ export async function POST(req: NextRequest) {
       }
     });
 
+    liftJson.elevator.buttonPanel.blocks[0].buttons.reverse();
     // Маппинг для звуков
     const soundMap: Record<string, (lift: LiftJson, fileName: string) => void> = {
       sound_doorOpen: (lift, name) => (lift.elevator.soundEffects.doorOpen = `assets/sounds/${name}`),
@@ -338,7 +249,6 @@ export async function POST(req: NextRequest) {
       image_elevator_doors_right: (lift, name) => (lift.elevator.images.doors.right = `assets/images/elevator/${name}`),
       image_elevator_walls: (lift, name) => (lift.elevator.images.walls = `assets/images/elevator/${name}`),
       image_elevator_panel: (lift, name) => (lift.elevator.images.panel = `assets/images/elevator/${name}`),
-      image_elevator_button: (lift, name) => (lift.elevator.images.button = `assets/images/elevator/${name}`),
     };
 
     for (const [key, value] of formData.entries()) {
@@ -348,14 +258,14 @@ export async function POST(req: NextRequest) {
 
         if (soundMap[key]) {
           soundMap[key](liftJson, value.name);
-          targetDir = path.join(basePath, "assets", "sounds");
+          targetDir = path.join(assetsPath, "assets", "sounds");
         } else if (imageMap[key]) {
           imageMap[key](liftJson, value.name);
-          targetDir = path.join(basePath, "assets", "images", "elevator");
+          targetDir = path.join(assetsPath, "assets", "images", "elevator");
         } else if (key.startsWith("image_floor")) {
-          targetDir = path.join(basePath, "assets", "images", "floors");
+          targetDir = path.join(assetsPath, "assets", "images", "floors");
         } else {
-          targetDir = path.join(basePath, "assets", "images");
+          targetDir = path.join(assetsPath, "assets", "images");
         }
 
         fs.mkdirSync(targetDir, { recursive: true });

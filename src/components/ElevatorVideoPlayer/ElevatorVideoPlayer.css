@@ -62,12 +62,23 @@
     border-radius: 30px;
 }
 
+.elevator-video-player.edit-mode .elevator-video-player__button {
+    border-radius: 0;
+    transition: outline-color 0.3s ease 0s;
+    outline: 2px solid transparent;
+}
+
 .elevator-video-player__button-block.edit-move .elevator-video-player__button:hover {
     cursor: move;
 }
 
 .elevator-video-player__button-block:not(.edit-move) .elevator-video-player__button:not(.empty-button):hover {
     cursor: pointer;
+}
+
+.elevator-video-player__button-block.edit-active .elevator-video-player__button:not(.empty-button):hover,
+.elevator-video-player__button-block.edit-active .elevator-video-player__button:not(.empty-button).edit-active {
+    outline: 2px solid #0022ff;
 }
 
 .elevator-video-player__button-block.floor-buttons {
@@ -98,7 +109,7 @@
     outline: 2px solid transparent;
 }
 
-.elevator-video-player.edit-mode .elevator-video-player__button-block:hover {
+.elevator-video-player.edit-mode .elevator-video-player__button-block:not(.edit-active):hover {
     outline: 2px solid #0084ff;
 }
 
@@ -106,4 +117,10 @@
     transition: none;
     outline: 4px solid #0084ff;
     cursor: move;
+}
+
+.elevator-video-player__button-block.edit-active {
+    transition: none;
+    outline: 3.5px solid #001aff;
+    cursor: default;
 }

@@ -116,11 +116,7 @@ export async function PUT(
           const button = liftData.elevator.buttonPanel.blocks[blockIdx].buttons[btnIdx];
           if (button.type !== "empty") {
             button.styles[mode as "default" | "active"] = `/Elevators/${userId}/${id}/assets/images/elevator/buttons/${value.name}`;
-            if (button.type === 'floor') {
-              button.showFloorSymbol = false;
-              const destinationFloor = formData.get("button_destination_floor");
-              if (destinationFloor) button.destinationFloor = parseInt(destinationFloor as string);
-            }
+            if (button.type === 'floor') button.showFloorSymbol = false;
           }
         }
         else {
@@ -139,10 +135,7 @@ export async function PUT(
         const button = liftData.elevator.buttonPanel.blocks[blockIdx].buttons[btnIdx];
         if (button.type !== "empty") {
           button.styles[mode] = styleData;
-          if (button.type === 'floor') {
-            button.showFloorSymbol = Boolean(showFloorSymbol);
-            if (formData.get("button_destination_floor")) button.destinationFloor = parseInt(formData.get("button_destination_floor") as string);
-          }
+          if (button.type === 'floor' && showFloorSymbol) button.showFloorSymbol = true;
         }
       }
 
