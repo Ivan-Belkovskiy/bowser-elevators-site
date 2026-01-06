@@ -64,6 +64,20 @@ export default function ButtonOptionsModal({ elevator, button, onSave, onClose }
     const handleSave = async () => {
         const formData = new FormData();
         let updatedButton = { ...currentButton };
+        // !!! ДОРАБОТАТЬ КОД, УБРАТЬ ДУБЛИРОВАНИЕ КОДА + ИСПРАВИТЬ ОШИБКУ: Не сохраняется destinationFloor если нет uploadedImage !!! //
+        const buttonData = {
+            blockIdx: button[0],
+            buttonIdx: button[1],
+            styleEditMode,
+            buttonEditMode: btnEditMode,
+            data: {
+                uploadedImage: uploadedImage || null,
+                destinationFloor: (updatedButton.type === 'floor') ? updatedButton.destinationFloor : null,
+                
+            }
+            // Дописать код позже //
+        };
+
         if (styleEditMode === 'image') {
             if (uploadedImage) {
 

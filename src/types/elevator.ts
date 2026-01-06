@@ -81,7 +81,7 @@ export interface LiftJson {
       animation: {}; // Настройка анимации дверей: Я планирую, чтобы можно было самому редактировать анимации. Редактор анимации я предлагаю сделать как в Blender 3D (по ключевым кадрам, например, 0 сек (начало) = положение дверей 0 (закрыто) | 1 сек (финал) = положение дверей 1 (открыто))
     };
     display: { // Настройки табло индикации //
-      type: string; // Вид табло
+      type: ElevatorDisplayTypes; // Вид табло
       options: { [key: string]: string | boolean }; // Настраиваемые параметры табло //
       allowedOptions: string[];
     };
@@ -90,3 +90,8 @@ export interface LiftJson {
     };
   };
 }
+
+
+export type ElevatorDisplayTypes = 'MLMLCD' | 'TIM2';
+
+export type ElevatorDirections = "UP" | "DOWN" | "NONE";

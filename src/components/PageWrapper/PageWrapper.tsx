@@ -6,7 +6,7 @@ import { ReactNode } from "react";
 export default function PageWrapper({ children }: { children?: ReactNode }) {
   const pathname = usePathname();
   const hideMenu =
-    pathname.startsWith("/mylift/editor") || pathname.startsWith("/mylift/view");
+    pathname.startsWith("/mylift/editor") || pathname.startsWith("/mylift/elevator");
 
   if (hideMenu) return children;
 

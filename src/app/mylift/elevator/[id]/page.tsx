@@ -3,9 +3,10 @@ import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 import MyLiftEditor from "@/components/MyLiftEditor/MyLiftEditor";
 import { LiftJson } from "@/types/elevator";
+import ElevatorVideoPlayer from "@/components/ElevatorVideoPlayer/ElevatorVideoPlayer";
 
 
-export default function EditorPage() {
+export default function MyLiftElevatorPage() {
   const { id } = useParams();
   const [lift, setLift] = useState<LiftJson | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -27,5 +28,5 @@ export default function EditorPage() {
   if (error) return <div>Ошибка: {error}</div>;
   if (!lift) return <div>Загрузка...</div>;
 
-  return <MyLiftEditor elevator={lift} />;
+  return <ElevatorVideoPlayer liftData={lift} />
 }
