@@ -6,6 +6,7 @@ import { CSSProperties, useEffect, useState } from "react";
 import TabButton from "@/components/TabButton/TabButton";
 import TabButtonGroup from "@/components/TabButtonGroup/TabButtonGroup";
 import FileUploader from "@/components/FileUploader/FileUploader";
+import { ELEMENTS, ParamOption } from "@/constants/elements";
 
 interface ButtonStyles {
     [key: string]: CSSProperties
@@ -64,66 +65,54 @@ export default function ButtonOptionsModal({ elevator, button, onSave, onClose }
     const handleSave = async () => {
         const formData = new FormData();
         let updatedButton = { ...currentButton };
-        // !!! ДОРАБОТАТЬ КОД, УБРАТЬ ДУБЛИРОВАНИЕ КОДА + ИСПРАВИТЬ ОШИБКУ: Не сохраняется destinationFloor если нет uploadedImage !!! //
+        // if (updatedButton.type === 'floor') console.log('FLOOR:' + updatedButton.destinationFloor);
+        if (!selectedAction?.params && updatedButton.type === 'action') delete updatedButton.action.params;
+
         const buttonData = {
             blockIdx: button[0],
             buttonIdx: button[1],
             styleEditMode,
             buttonEditMode: btnEditMode,
             data: {
-                uploadedImage: uploadedImage || null,
-                destinationFloor: (updatedButton.type === 'floor') ? updatedButton.destinationFloor : null,
-                
+                destinationFloor: updatedButton.type === "floor" ? updatedButton.destinationFloor : null,
+                showFloorSymbol: updatedButton.type === "floor" ? updatedButton.showFloorSymbol : null,
+                styles: buttonStyles,
+                action: (updatedButton.type === "action") ? updatedButton.action : null,
+                innerText: (updatedButton.type === "action") ? (updatedButton.innerText || null) : null,
             }
-            // Дописать код позже //
         };
 
-        if (styleEditMode === 'image') {
-            if (uploadedImage) {
+        formData.append("updated_button_data", JSON.stringify(buttonData));
 
-                formData.append(
-                    `button_image_block${button[0]}_btn${button[1]}_${btnEditMode}`,
-                    uploadedImage
-                );
+        if (uploadedImage) {
+            formData.append("uploadedImage", uploadedImage);
+        }
 
-                if (updatedButton.type === 'floor') formData.append("button_destination_floor", String(updatedButton.destinationFloor));
+        const res = await fetch(`/api/elevators/${elevator.id}`, {
+            method: "PUT",
+            body: formData,
+        });
 
-                const res = await fetch(`/api/elevators/${elevator.id}`, {
-                    method: "PUT",
-                    body: formData,
-                });
-
-                const data = await res.json();
-                if (data.success) {
-                    updatedButton.styles[btnEditMode] =
-                        data.lift.elevator.buttonPanel.blocks[button[0]].buttons[button[1]].styles[btnEditMode];
-                    if (updatedButton.type === 'floor') updatedButton.showFloorSymbol = false;
-                }
-            }
-        } else {
-            formData.append("button_style_block", String(button[0]));
-            formData.append("button_style_index", String(button[1]));
-            formData.append("button_style_mode", btnEditMode); // "default" или "active"
-            if (updatedButton.type === 'floor') {
-                formData.append("button_show_symbol", updatedButton.showFloorSymbol ? "true" : "false");
-                formData.append("button_destination_floor", String(updatedButton.destinationFloor));
-            }
-            formData.append("button_style_data", JSON.stringify(buttonStyles[styleEditMode]));
-
-            const res = await fetch(`/api/elevators/${elevator.id}`, {
-                method: "PUT",
-                body: formData,
-            });
-
-            const data = await res.json();
-            if (data.success) {
-                updatedButton.styles[btnEditMode] =
-                    data.lift.elevator.buttonPanel.blocks[button[0]].buttons[button[1]].styles[btnEditMode];
+        const data = await res.json();
+        if (data.success) {
+            updatedButton.styles[btnEditMode] =
+                data.lift.elevator.buttonPanel.blocks[button[0]].buttons[button[1]].styles[btnEditMode];
+            if (updatedButton.type === "floor" && styleEditMode === "image") {
+                updatedButton.showFloorSymbol = false;
+            } else if (updatedButton.type === "action" && styleEditMode === "image") {
+                updatedButton.innerText = {
+                    on: false,
+                    text: "",
+                };
             }
         }
 
         onSave(button[0], button[1], updatedButton);
     };
+
+    const selectedElement = ELEMENTS.find(el => (currentButton.type === 'action') && el.id === currentButton.action?.element);
+    const selectedAction = selectedElement?.actions.find(act => (currentButton.type === 'action') && act.id === currentButton.action?.command);
+
 
     useEffect(() => {
         setCurrentButton(button[2]);
@@ -167,7 +156,9 @@ export default function ButtonOptionsModal({ elevator, button, onSave, onClose }
                                 ) : (
                                     <>
                                         <div className="button-options-modal__bottom-left">
-                                            <button className="button-options-modal__elevator-button" style={buttonStyles[styleEditMode]}>{(currentButton.type === 'floor' && currentButton.showFloorSymbol) && currentButton.destinationFloor + 1}</button>
+                                            <button className="button-options-modal__elevator-button" style={buttonStyles[styleEditMode]}>
+                                                {(currentButton.type === 'floor' && currentButton.showFloorSymbol) ? currentButton.destinationFloor + 1 : (currentButton.type === 'action' && currentButton.innerText?.on) && currentButton.innerText.text}
+                                            </button>
                                         </div>
                                         <div className="button-options-modal__bottom-right">
                                             <div className="button-options-modal__button-property">
@@ -192,26 +183,86 @@ export default function ButtonOptionsModal({ elevator, button, onSave, onClose }
                                                     })}
                                                 />
                                             </div>
-                                            <div className="button-options-modal__button-property">
-                                                <span className="button-options-modal__label">Символ этажа:</span>
-                                                <input
-                                                    type="checkbox"
-                                                    checked={(currentButton.type === 'floor' && currentButton.showFloorSymbol) || false}
-                                                    onChange={(e) => updateButtonData('showFloorSymbol', e.target.checked)}
-                                                />
-                                            </div>
-                                            {(currentButton.type === 'floor' && currentButton.showFloorSymbol) && (
-                                                <div className="button-options-modal__button-property">
-                                                    <span className="button-options-modal__label">Цвет символа этажа:</span>
-                                                    <input
-                                                        type="color"
-                                                        value={buttonStyles[styleEditMode].color || '#000'}
-                                                        onChange={(e) => updateButtonStyles({
-                                                            ...buttonStyles[styleEditMode],
-                                                            color: e.target.value,
-                                                        })}
-                                                    />
-                                                </div>
+                                            {(currentButton.type === 'floor') ? (
+                                                <>
+                                                    <div className="button-options-modal__button-property">
+                                                        <span className="button-options-modal__label">Символ этажа:</span>
+                                                        <input
+                                                            type="checkbox"
+                                                            checked={currentButton.showFloorSymbol || false}
+                                                            onChange={(e) => updateButtonData('showFloorSymbol', e.target.checked)}
+                                                        />
+                                                    </div>
+                                                    {(currentButton.showFloorSymbol) && (
+                                                        <div className="button-options-modal__button-property">
+                                                            <span className="button-options-modal__label">Цвет символа этажа:</span>
+                                                            <input
+                                                                type="color"
+                                                                value={buttonStyles[styleEditMode].color || '#000'}
+                                                                onChange={(e) => updateButtonStyles({
+                                                                    ...buttonStyles[styleEditMode],
+                                                                    color: e.target.value,
+                                                                })}
+                                                            />
+                                                        </div>
+                                                    )}
+                                                </>
+
+                                            ) : (
+                                                <>
+                                                    <div className="button-options-modal__button-property">
+                                                        <span className="button-options-modal__label">Текст кнопки:</span>
+                                                        <input
+                                                            type="checkbox"
+                                                            checked={currentButton.innerText?.on || false}
+                                                            onChange={(e) => updateButtonData('innerText', {
+                                                                ...currentButton.innerText,
+                                                                on: e.target.checked,
+                                                            })}
+                                                        />
+                                                    </div>
+                                                    {(currentButton.innerText?.on) && (
+                                                        <>
+                                                            <div className="button-options-modal__button-property">
+                                                                <span className="button-options-modal__label">Текст:</span>
+                                                                <input
+                                                                    type="text"
+                                                                    className="button-options-modal__input button-text-input"
+                                                                    value={currentButton.innerText.text || ''}
+                                                                    onChange={(e) => updateButtonData('innerText', {
+                                                                        ...currentButton.innerText,
+                                                                        text: e.target.value,
+                                                                    })}
+                                                                />
+                                                            </div>
+                                                            <div className="button-options-modal__button-property">
+                                                                <span className="button-options-modal__label">Цвет текста:</span>
+                                                                <input
+                                                                    type="color"
+                                                                    value={buttonStyles[styleEditMode].color || '#000'}
+                                                                    onChange={(e) => updateButtonStyles({
+                                                                        ...buttonStyles[styleEditMode],
+                                                                        color: e.target.value,
+                                                                    })}
+                                                                />
+                                                            </div>
+                                                            <div className="button-options-modal__button-property">
+                                                                <span className="button-options-modal__label">Размер текста:</span>
+                                                                <input
+                                                                    type="range"
+                                                                    min={8}
+                                                                    max={15}
+                                                                    step={1}
+                                                                    value={buttonStyles[styleEditMode].fontSize || 15}
+                                                                    onChange={(e) => updateButtonStyles({
+                                                                        ...buttonStyles[styleEditMode],
+                                                                        fontSize: parseInt(e.target.value),
+                                                                    })}
+                                                                />
+                                                            </div>
+                                                        </>
+                                                    )}
+                                                </>
                                             )}
                                         </div>
                                     </>
@@ -235,19 +286,162 @@ export default function ButtonOptionsModal({ elevator, button, onSave, onClose }
                                     </div>
                                 </div>
                             ) : (
-                                <div className="button-options-modal__properties">
+                                <div className="button-options-modal__properties" style={{
+                                    marginLeft: 5
+                                }}>
                                     <div className="button-options-modal__property">
-                                        <span className="button-options-modal__label">Действие:</span>
                                         <select
-                                            className="button-options-modal__input floor-input"
+                                            className="button-options-modal__input element-input"
                                             value={currentButton.action.element}
-                                            onChange={(e) => updateButtonData('destinationFloor', Number(e.target.value))}
+                                            disabled
+                                        // onChange={(e) => updateButtonData('destinationFloor', Number(e.target.value))}
                                         >
-                                            {elevator.floors.map((floor, idx) => (
-                                                <option value={idx} key={idx}>{(idx + 1)}F</option>
+                                            {ELEMENTS.map((el, idx) => (
+                                                <option value={el.id} key={idx}>{el.label}</option>
                                             ))}
                                         </select>
+                                        <span className="button-options-modal__label ml-2">::</span>
+                                        <select
+                                            className="button-options-modal__input action-input"
+                                            value={currentButton.action.command}
+                                            onChange={(e) => {
+                                                const newCommand = e.target.value;
+
+                                                const selectedElement = ELEMENTS.find(el => el.id === currentButton.action.element);
+                                                const newAction = selectedElement?.actions.find(a => a.id === newCommand);
+
+                                                setCurrentButton({
+                                                    ...currentButton,
+                                                    action: {
+                                                        element: currentButton.action.element,
+                                                        command: newCommand,
+                                                        params: newAction?.params ? {} : undefined
+                                                    }
+                                                });
+                                            }}
+
+                                        >
+                                            {selectedElement?.actions.map((action, idx) => (
+                                                <option value={action.id} key={idx}>{action.label}</option>
+                                            ))}
+                                            {/* <option value=""></option> */}
+                                        </select>
                                     </div>
+                                    {selectedAction?.params?.map((param, index) => {
+                                        const value = currentButton.action.params?.[param.id];
+
+                                        if (param.type === "select") {
+                                            let options = param.options;
+
+                                            if (param.optionsSource === "floors") {
+                                                options = elevator.floors.map((_, i) => ({
+                                                    value: i,
+                                                    label: `${i + 1}F`
+                                                }));
+                                            }
+
+                                            return (
+                                                <div key={index} className="button-options-modal__property action-parameter">
+                                                    <span className="button-options-modal__label ml-2">{param.label}:</span>
+                                                    <select
+                                                        className="button-options-modal__input floor-input"
+                                                        value={value ?? ""}
+                                                        onChange={(e) =>
+                                                            setCurrentButton({
+                                                                ...currentButton,
+                                                                action: {
+                                                                    ...currentButton.action,
+                                                                    params: {
+                                                                        ...currentButton.action.params,
+                                                                        [param.id]: e.target.value
+                                                                    }
+                                                                }
+                                                            })
+                                                        }
+                                                    >
+                                                        {options?.map((opt, idx) => (
+                                                            <option key={idx} value={opt.value}>{opt.label}</option>
+                                                        ))}
+                                                    </select>
+                                                </div>
+                                            );
+                                        }
+
+                                        if (param.type === "number") {
+                                            return (
+                                                <div key={index} className="button-options-modal__property action-parameter">
+                                                    <span className="button-options-modal__label ml-2">{param.label}:</span>
+                                                    <input
+                                                        type="number"
+                                                        value={value ?? ""}
+                                                        onChange={(e) =>
+                                                            setCurrentButton({
+                                                                ...currentButton,
+                                                                action: {
+                                                                    ...currentButton.action,
+                                                                    params: {
+                                                                        ...currentButton.action.params,
+                                                                        [param.id]: Number(e.target.value)
+                                                                    }
+                                                                }
+                                                            })
+                                                        }
+                                                    />
+                                                </div>
+                                            );
+                                        }
+
+                                        if (param.type === "string") {
+                                            return (
+                                                <div key={index} className="button-options-modal__property action-parameter">
+                                                    <span className="button-options-modal__label ml-2">{param.label}:</span>
+                                                    <input
+                                                        type="text"
+                                                        value={value ?? ""}
+                                                        onChange={(e) =>
+                                                            setCurrentButton({
+                                                                ...currentButton,
+                                                                action: {
+                                                                    ...currentButton.action,
+                                                                    params: {
+                                                                        ...currentButton.action.params,
+                                                                        [param.id]: e.target.value
+                                                                    }
+                                                                }
+                                                            })
+                                                        }
+                                                    />
+                                                </div>
+                                            );
+                                        }
+
+                                        if (param.type === "boolean") {
+                                            return (
+                                                <div key={index} className="button-options-modal__property action-parameter">
+                                                    <span className="button-options-modal__label ml-2">{param.label}:</span>
+                                                    <input
+                                                        type="checkbox"
+                                                        checked={value ?? false}
+                                                        onChange={(e) =>
+                                                            setCurrentButton({
+                                                                ...currentButton,
+                                                                action: {
+                                                                    ...currentButton.action,
+                                                                    params: {
+                                                                        ...currentButton.action.params,
+                                                                        [param.id]: e.target.checked
+                                                                    }
+                                                                }
+                                                            })
+                                                        }
+                                                    />
+                                                </div>
+                                            );
+                                        }
+
+                                        return null;
+                                    })}
+
                                 </div>
                             )}
                         </div>

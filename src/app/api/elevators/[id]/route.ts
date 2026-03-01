@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import fs from "fs";
 import path from "path";
-import { LiftJson, Floor, ElevatorButton, ButtonBlock } from "@/types/elevator";
+import { LiftJson, Floor, ElevatorButton, ButtonBlock, ElevatorButtonStyles } from "@/types/elevator";
 
 export async function GET(
   req: NextRequest,
@@ -65,7 +65,6 @@ export async function PUT(
     if (floors) liftData.floors = floors;
     if (coursebotEnabled !== null) liftData.coursebot.enabled = coursebotEnabled;
 
-    // Маппинг для звуков
     const soundMap: Record<string, (lift: LiftJson, fileName: string) => void> = {
       sound_doorOpen: (lift, name) => (lift.elevator.soundEffects.doorOpen = `assets/sounds/${name}`),
       sound_doorClose: (lift, name) => (lift.elevator.soundEffects.doorClose = `assets/sounds/${name}`),
@@ -75,17 +74,71 @@ export async function PUT(
       sound_moveEnd: (lift, name) => (lift.elevator.soundEffects.movement.end = `assets/sounds/${name}`),
     };
 
-    // Маппинг для изображений
     const imageMap: Record<string, (lift: LiftJson, fileName: string) => void> = {
       image_elevator_doors_left: (lift, name) => (lift.elevator.images.doors.left = `assets/images/elevator/${name}`),
       image_elevator_doors_right: (lift, name) => (lift.elevator.images.doors.right = `assets/images/elevator/${name}`),
       image_elevator_walls: (lift, name) => (lift.elevator.images.walls = `assets/images/elevator/${name}`),
       image_elevator_panel: (lift, name) => (lift.elevator.images.panel = `assets/images/elevator/${name}`),
-      // image_elevator_button: (lift, name) => (lift.elevator.images.button = `assets/images/elevator/${name}`),
     };
 
-    // Обработка файлов
-    for (const [key, value] of formData.entries()) {
+    if (formData.has('updated_button_data') && typeof formData.get('updated_button_data') === 'string') {
+
+      const updatedButtonRaw = formData.get("updated_button_data");
+      if (updatedButtonRaw && typeof updatedButtonRaw === "string") {
+        const newButton = JSON.parse(updatedButtonRaw);
+        const { blockIdx, buttonIdx, styleEditMode, buttonEditMode, data } = newButton;
+        const button = liftData.elevator.buttonPanel.blocks[blockIdx].buttons[buttonIdx];
+
+        if (button.type !== "empty") {
+          const uploadedFile = formData.get("uploadedImage");
+
+          if (styleEditMode === "image") {
+            if (uploadedFile instanceof File) {
+              const buffer = Buffer.from(await uploadedFile.arrayBuffer());
+              const targetDir = path.join(assetsPath, "assets", "images", "elevator", "buttons");
+              fs.mkdirSync(targetDir, { recursive: true });
+              const filePath = path.join(targetDir, uploadedFile.name);
+              fs.writeFileSync(filePath, buffer);
+
+              button.styles[buttonEditMode as "default" | "active"] =
+                `/Elevators/${userId}/${id}/assets/images/elevator/buttons/${uploadedFile.name}`;
+            }
+            if (button.type === "floor") {
+              button.showFloorSymbol = false;
+              if (data.destinationFloor !== null) {
+                button.destinationFloor = parseInt(data.destinationFloor);
+              }
+            } else if (button.type === "action") {
+              button.innerText = {
+                on: false,
+                text: "",
+              };
+            }
+          }
+
+          if (button.type === "action") {
+            if (data.action !== null) button.action = data.action;
+          }
+
+          if (styleEditMode === "styles" && data.styles) {
+            button.styles[buttonEditMode as "default" | "active"] = data.styles[styleEditMode];
+            if (button.type === "action") {
+              if (data.innerText !== null) button.innerText = data.innerText;
+            }
+            if (button.type === "floor") {
+              if (data.showFloorSymbol !== null) {
+                button.showFloorSymbol = data.showFloorSymbol;
+              }
+              if (data.destinationFloor !== null) {
+                button.destinationFloor = parseInt(data.destinationFloor);
+              }
+            }
+          }
+        }
+      }
+
+
+    } else for (const [key, value] of formData.entries()) {
       if (value instanceof File) {
         const buffer = Buffer.from(await value.arrayBuffer());
         let targetDir: string;

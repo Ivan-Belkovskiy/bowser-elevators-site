@@ -1,3 +1,4 @@
+import { ActionParam } from "@/constants/elements";
 import { CSSProperties } from "react";
 
 export interface Floor {
@@ -10,30 +11,33 @@ export interface Floor {
   };
 }
 
+export interface ElevatorButtonStyles {
+  default: string | Partial<CSSStyleDeclaration>;
+  active: string | Partial<CSSStyleDeclaration>;
+};
+
 export type ElevatorButton = {
   type: "floor";
   destinationFloor: number;
   blocked: boolean;
-  styles: {
-    default: string | Partial<CSSStyleDeclaration>;
-    active: string | Partial<CSSStyleDeclaration>;
-  };
+  styles: ElevatorButtonStyles;
   showFloorSymbol?: boolean;
-  // deletable: boolean;
 } | {
   type: "action";
   action: {
     element: string;
     command: string;
+    params?: Record<string, any>,
   };
   blocked: boolean;
-  styles: {
-    default: string | Partial<CSSStyleDeclaration>;
-    active: string | Partial<CSSStyleDeclaration>;
-  };
+  styles: ElevatorButtonStyles;
   deletable: boolean;
+  innerText?: {
+    on: boolean;
+    text: string;
+  };
 } | {
-  type: "empty", // Пустое поле для кнопки
+  type: "empty",
 };
 
 export interface ButtonBlock {
@@ -82,7 +86,7 @@ export interface LiftJson {
     };
     display: { // Настройки табло индикации //
       type: ElevatorDisplayTypes; // Вид табло
-      options: { [key: string]: string | boolean }; // Настраиваемые параметры табло //
+      options: Record<string, string | number | boolean >; // Настраиваемые параметры табло //
       allowedOptions: string[];
     };
     buttonPanel: {

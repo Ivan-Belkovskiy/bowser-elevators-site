@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import fs from "fs";
 import path from "path";
-import { LiftJson, Floor, ElevatorButton, ButtonBlock } from "@/types/elevator";
+import { LiftJson, Floor, ElevatorButton, ButtonBlock, ElevatorButtonStyles } from "@/types/elevator";
 
 export async function GET(
   req: NextRequest,
@@ -85,7 +85,41 @@ export async function PUT(
     };
 
     // Обработка файлов
-    for (const [key, value] of formData.entries()) {
+    if (formData.has('updated_button_data') && typeof formData.get('updated_button_data') === 'string') {
+      const newButton = JSON.parse(formData.get('updated_button_data') as string);
+      const {
+        blockIdx,
+        buttonIdx,
+        styleEditMode,
+        buttonEditMode,
+        data,
+      } = newButton;
+      const {
+        uploadedImage,
+        destinationFloor,
+        showFloorSymbol,
+        styles
+      } = data;
+      const button = liftData.elevator.buttonPanel.blocks[blockIdx].buttons[buttonIdx];
+      if (button.type !== "empty") {
+        if (uploadedImage instanceof File && styleEditMode === 'image') {
+          button.styles[buttonEditMode as "default" | "active"] = `/Elevators/${userId}/${id}/assets/images/elevator/buttons/${uploadedImage.name}`;
+          const buffer = Buffer.from(await uploadedImage.arrayBuffer());
+          
+          let targetDir = path.join(assetsPath, "assets", "images", "elevator", "buttons");
+          fs.mkdirSync(targetDir, { recursive: true });
+
+          const filePath = path.join(targetDir, uploadedImage.name);
+          fs.writeFileSync(filePath, buffer);
+        }
+        if (button.type === 'floor') {
+          if (styleEditMode === 'image') button.showFloorSymbol = false; else if (showFloorSymbol) button.showFloorSymbol = showFloorSymbol;
+          // const destinationFloor = formData.get("button_destination_floor");
+          if (destinationFloor) button.destinationFloor = parseInt(destinationFloor as string);
+          if (styles && styleEditMode === 'styles') button.styles[buttonEditMode as "default" | "active"] = (styles as string | Partial<CSSStyleDeclaration>);
+        }
+      }
+    } else for (const [key, value] of formData.entries()) {
       if (value instanceof File) {
         const buffer = Buffer.from(await value.arrayBuffer());
         let targetDir: string;
@@ -116,7 +150,11 @@ export async function PUT(
           const button = liftData.elevator.buttonPanel.blocks[blockIdx].buttons[btnIdx];
           if (button.type !== "empty") {
             button.styles[mode as "default" | "active"] = `/Elevators/${userId}/${id}/assets/images/elevator/buttons/${value.name}`;
-            if (button.type === 'floor') button.showFloorSymbol = false;
+            if (button.type === 'floor') {
+              button.showFloorSymbol = false;
+              const destinationFloor = formData.get("button_destination_floor");
+              if (destinationFloor) button.destinationFloor = parseInt(destinationFloor as string);
+            }
           }
         }
         else {
@@ -135,7 +173,10 @@ export async function PUT(
         const button = liftData.elevator.buttonPanel.blocks[blockIdx].buttons[btnIdx];
         if (button.type !== "empty") {
           button.styles[mode] = styleData;
-          if (button.type === 'floor' && showFloorSymbol) button.showFloorSymbol = true;
+          if (button.type === 'floor') {
+            button.showFloorSymbol = Boolean(showFloorSymbol);
+            if (formData.get("button_destination_floor")) button.destinationFloor = parseInt(formData.get("button_destination_floor") as string);
+          }
         }
       }
 

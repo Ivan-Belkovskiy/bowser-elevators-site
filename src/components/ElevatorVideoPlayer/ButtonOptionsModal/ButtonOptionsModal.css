@@ -74,12 +74,16 @@
 }
 
 .button-options-modal__properties {
-    margin-top: 55px;
+    margin-top: 45px;
     margin-left: 55px;
 }
 
 .button-options-modal__property {
+    margin-top: 10px;
+}
 
+.button-options-modal__property.action-parameter {
+    text-align: center;
 }
 
 .button-options-modal__label {
@@ -95,7 +99,7 @@
     cursor: pointer;
 }
 
-.button-options-modal__input.floor-input option {
+.button-options-modal__input option {
     color: #0022ff;
 }
 
@@ -205,4 +209,38 @@
 .button-options-modal__button.upload-image-button:hover {
     border-color: #001181;
     color: #001181;
+}
+
+.button-options-modal__input.element-input {
+    width: 100px;
+    margin-left: 10px;
+    outline: 2px solid #fff;
+    color: #fff;
+    padding-left: 5px;
+    cursor: pointer;
+    font-size: 15px;
+}
+
+.button-options-modal__input.action-input {
+    width: 155px;
+    margin-left: 10px;
+    outline: 2px solid #fff;
+    color: #fff;
+    padding-left: 5px;
+    cursor: pointer;
+    font-size: 15px;
+}
+
+.button-options-modal__input:disabled {
+    filter: brightness(0.8);
+    cursor: not-allowed;
+}
+
+
+.button-options-modal__input.button-text-input {
+    border: 2px solid #fff;
+    width: 150px;
+    outline: none;
+    padding-left: 5px;
+    color: #fff;
 }

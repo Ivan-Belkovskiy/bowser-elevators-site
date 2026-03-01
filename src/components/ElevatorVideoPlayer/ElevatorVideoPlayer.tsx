@@ -97,93 +97,95 @@ export default function ElevatorVideoPlayer({ liftData, editMode }: { liftData: 
         speed: 1.0,
     });
 
-    return (
-        <div>
-            <ElevatorDisplay
-                type={liftData.elevator.display.type}
-                floor={state.currentFloor}
-                direction={state.direction}
-            />
-            <br /><br /><br /><br /><br />
-            <p>Этаж: {state.currentFloor}</p>
-            <p>Двери: {state.doorState}</p>
-            <button onClick={() => callElevator(5)}>Вызвать на 5 этаж</button>
-        </div>
-    )
-
     // return (
-    //     <div className={`elevator-video-player ${(editMode) && 'edit-mode'}`}>
-    //         <div className="elevator-video-player__wall left-wall" style={{
-    //             backgroundImage: `url('/images/elevators/template/MLM-2023/elevator-wall-left.png')`,
-    //         }}></div>
-
-    //         <div className="elevator-video-player__doors">
-    //             <img src="/images/elevators/template/MLM-2023/elevator-door.png" alt="" className="elevator-video-player__door left-door" />
-    //             <img src="/images/elevators/template/MLM-2023/elevator-door.png" alt="" className="elevator-video-player__door right-door" />
-    //         </div>
-
-    //         <div className="elevator-video-player__wall right-wall" style={{
-    //             backgroundImage: `url('/images/elevators/template/MLM-2023/elevator-wall-right.png')`,
-    //         }}>
-    //             <div className="elevator-video-player__button-panel" style={{
-    //                 backgroundImage: `url('/images/elevators/template/MLM-2023/elevator-buttonpanel-01.png')`
-    //             }}>
-    //                 {/* Floor buttons block */}
-    //                 <div
-    //                     // className={`elevator-video-player__button-block floor-buttons ${(editMode && editingBlockIs(0, 'move')) && 'edit-move'}`}
-    //                     className={`elevator-video-player__button-block floor-buttons ${(editMode && editingBlock?.[0] === 0) && `edit-${editingBlock[1]}`}`}
-    //                     style={{ top: `${data.elevator.buttonPanel.blocks[0].position?.y || 480}px` }}
-    //                     onMouseDown={(e) => onMouseDownBlock(e, 0)}
-    //                     onMouseMove={onMouseMoveBlock}
-    //                     onMouseUp={onMouseUpBlock}
-    //                 >
-    //                     {data.elevator.buttonPanel.blocks[0].buttons.map((button: ElevatorButton, index: number) => {
-    //                         const styles = (button.type !== 'empty') ? ((typeof button.styles?.default === 'string') ? {
-    //                             backgroundImage: `url('${button.styles.default}')`,
-    //                         } : button.styles.default) : {
-    //                             backgroundImage: undefined,
-    //                         };
-    //                         if (button.type !== 'empty') console.log(button.styles.default);
-    //                         return (
-    //                             <button
-    //                                 className={`elevator-video-player__button ${button.type === 'empty' ? 'empty-button' : ''} ${activeButton && activeButton[0] === 0 && activeButton[1] === index ? 'edit-active' : ''}`}
-    //                                 style={styles as CSSProperties}
-    //                                 key={index}
-    //                                 onClick={() => onButtonClick(button, index, 0)}
-    //                             >{(button.type === 'floor' && button.showFloorSymbol) && (button.destinationFloor + 1)}</button>
-    //                         );
-    //                     })}
-    //                 </div>
-
-    //                 {/* Action buttons block */}
-    //                 <div
-    //                     // className={`elevator-video-player__button-block action-buttons ${(editMode && editingBlockIs(1, 'move')) && 'edit-move'}`}
-    //                     className={`elevator-video-player__button-block action-buttons ${(editMode && editingBlock?.[0] === 1) ? `edit-${editingBlock[1]}` : ``}`}
-    //                     style={{ top: `${data.elevator.buttonPanel.blocks[1].position?.y || 550}px` }}
-    //                     onMouseDown={(e) => onMouseDownBlock(e, 1)}
-    //                     onMouseMove={onMouseMoveBlock}
-    //                     onMouseUp={onMouseUpBlock}
-    //                 >
-    //                     {data.elevator.buttonPanel.blocks[1].buttons.map((button: any, index: number) => {
-    //                         const styles = (button.styles?.default instanceof CSSStyleDeclaration) ? button.styles.default : {
-    //                             backgroundImage: button.type !== 'empty' ? `url('${button.styles.default}')` : undefined,
-    //                         };
-    //                         return (
-    //                             <button
-    //                                 className={`elevator-video-player__button ${button.type === 'empty' ? 'empty-button' : ''} ${activeButton && activeButton[0] === 1 && activeButton[1] === index ? 'edit-active' : ''}`}
-    //                                 style={styles}
-    //                                 key={index}
-    //                                 onClick={() => onButtonClick(button, index, 1)}
-    //                             ></button>
-    //                         );
-    //                     })}
-    //                 </div>
-    //                 <ElevatorDisplay type={data.elevator.display.type} floor={1} direction="NONE" styles={{
-    //                     top: '85.5px'
-    //                 }} />
-    //             </div>
-    //             <ButtonOptionsModal elevator={data} button={activeButton} onSave={onSaveButton} onClose={() => setActiveButton(null)} />
-    //         </div>
+    //     <div>
+    //         <ElevatorDisplay
+    //             type={liftData.elevator.display.type}
+    //             floor={state.currentFloor}
+    //             direction={state.direction}
+    //         />
+    //         <br /><br /><br /><br /><br />
+    //         <p>Этаж: {state.currentFloor}</p>
+    //         <p>Двери: {state.doorState}</p>
+    //         <button onClick={() => callElevator(5)}>Вызвать на 5 этаж</button>
     //     </div>
-    // );
+    // )
+
+    return (
+        <div className={`elevator-video-player ${(editMode) && 'edit-mode'}`}>
+            <div className="elevator-video-player__wall left-wall" style={{
+                backgroundImage: `url('/images/elevators/template/MLM-2023/elevator-wall-left.png')`,
+            }}></div>
+
+            <div className="elevator-video-player__doors">
+                <img src="/images/elevators/template/MLM-2023/elevator-door.png" alt="" className="elevator-video-player__door left-door" />
+                <img src="/images/elevators/template/MLM-2023/elevator-door.png" alt="" className="elevator-video-player__door right-door" />
+            </div>
+
+            <div className="elevator-video-player__wall right-wall" style={{
+                backgroundImage: `url('/images/elevators/template/MLM-2023/elevator-wall-right.png')`,
+            }}>
+                <div className="elevator-video-player__button-panel" style={{
+                    backgroundImage: `url('/images/elevators/template/MLM-2023/elevator-buttonpanel-01.png')`
+                }}>
+                    {/* Floor buttons block */}
+                    <div
+                        // className={`elevator-video-player__button-block floor-buttons ${(editMode && editingBlockIs(0, 'move')) && 'edit-move'}`}
+                        className={`elevator-video-player__button-block floor-buttons ${(editMode && editingBlock?.[0] === 0) && `edit-${editingBlock[1]}`}`}
+                        style={{ top: `${data.elevator.buttonPanel.blocks[0].position?.y || 480}px` }}
+                        onMouseDown={(e) => onMouseDownBlock(e, 0)}
+                        onMouseMove={onMouseMoveBlock}
+                        onMouseUp={onMouseUpBlock}
+                    >
+                        {data.elevator.buttonPanel.blocks[0].buttons.map((button: ElevatorButton, index: number) => {
+                            const styles = (button.type !== 'empty') ? ((typeof button.styles?.default === 'string') ? {
+                                backgroundImage: `url('${button.styles.default}')`,
+                            } : button.styles.default) : {
+                                backgroundImage: undefined,
+                            };
+                            if (button.type !== 'empty') console.log(button.styles.default);
+                            return (
+                                <button
+                                    className={`elevator-video-player__button ${button.type === 'empty' ? 'empty-button' : ''} ${activeButton && activeButton[0] === 0 && activeButton[1] === index ? 'edit-active' : ''}`}
+                                    style={styles as CSSProperties}
+                                    key={index}
+                                    onClick={() => onButtonClick(button, index, 0)}
+                                >{(button.type === 'floor' && button.showFloorSymbol) && (button.destinationFloor + 1)}</button>
+                            );
+                        })}
+                    </div>
+
+                    {/* Action buttons block */}
+                    <div
+                        // className={`elevator-video-player__button-block action-buttons ${(editMode && editingBlockIs(1, 'move')) && 'edit-move'}`}
+                        className={`elevator-video-player__button-block action-buttons ${(editMode && editingBlock?.[0] === 1) ? `edit-${editingBlock[1]}` : ``}`}
+                        style={{ top: `${data.elevator.buttonPanel.blocks[1].position?.y || 550}px` }}
+                        onMouseDown={(e) => onMouseDownBlock(e, 1)}
+                        onMouseMove={onMouseMoveBlock}
+                        onMouseUp={onMouseUpBlock}
+                    >
+                        {data.elevator.buttonPanel.blocks[1].buttons.map((button: ElevatorButton, index: number) => {
+                            const styles = (button.type !== 'empty') ? ((typeof button.styles?.default === 'string') ? {
+                                backgroundImage: `url('${button.styles.default}')`,
+                            } : button.styles.default) : {
+                                backgroundImage: undefined,
+                            };
+                            return (
+                                <button
+                                    className={`elevator-video-player__button ${button.type === 'empty' ? 'empty-button' : ''} ${activeButton && activeButton[0] === 1 && activeButton[1] === index ? 'edit-active' : ''}`}
+                                    style={styles as CSSProperties}
+                                    key={index}
+                                    onClick={() => onButtonClick(button, index, 1)}
+                                >{(button.type === 'action' && button.innerText?.on) && (button.innerText.text)}</button>
+                            );
+                        })}
+                    </div>
+                    <ElevatorDisplay type={data.elevator.display.type} floor={1} direction="NONE" styles={{
+                        top: '85.5px'
+                    }} />
+                </div>
+                <ButtonOptionsModal elevator={data} button={activeButton} onSave={onSaveButton} onClose={() => setActiveButton(null)} />
+            </div>
+        </div>
+    );
 }

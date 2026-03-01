@@ -5,3 +5,49 @@
 .mylift-editor__elevator-container {
     
 }
+
+
+.mylift-editor__toolbar {
+    position: absolute;
+    top: 0;
+    left: -4%;
+    width: 5%;
+    height: 100%;
+    background-color: #00b7ff;
+    transition: all 0.5s ease 0s;
+    border-radius: 20px;
+    border-right: 10px solid transparent;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.mylift-editor__toolbar:hover {
+    left: 0;
+    border-radius: 0;
+    border-color: #9900ff;
+}
+
+.mylift-editor__button {
+    width: 55px;
+    height: 55px;
+    background-color: #0022ff;
+    border-radius: 10px;
+    margin-top: 10px;
+    color: #00ffea;
+    font-size: 25px;
+    cursor: pointer;
+    transition: all 0.25s ease 0s;
+    outline: 4px solid transparent;
+}
+
+.mylift-editor__button:hover {
+    outline-color: #00ffea;
+    /* color: #0022ff; */
+}
+
+.mylift-editor__button.preview-mode {
+    background-color: #00ffea;
+    border-radius: 20px;
+    color: #0022ff;
+}
