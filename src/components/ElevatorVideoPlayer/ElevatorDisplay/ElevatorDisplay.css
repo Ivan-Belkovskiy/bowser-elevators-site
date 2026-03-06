@@ -1,5 +1,19 @@
 .elevator-display {
+    scale: 0.6;
+}
+
+.elevator-display.in-elevator {
     position: absolute;
     top: 0;
-    scale: 0.6;
+    transition: outline 0.5s ease 0s;
+    outline: 4px solid transparent;
+}
+
+.elevator-display.edit-mode:hover {
+    outline: 4px solid #0084ff;
+    cursor: pointer;
+}
+
+.elevator-display.edit-mode.editing {
+    outline: 5px solid #001aff;
 }

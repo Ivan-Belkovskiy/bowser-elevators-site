@@ -1,0 +1,165 @@
+.display-options-modal__overlay {
+    position: fixed;
+    width: 100%;
+    height: 100%;
+    top: 0;
+    left: 0;
+    background-color: #00000015;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 300;
+}
+
+.display-options-modal {
+    width: 50%;
+    height: 65%;
+    background-color: #0077ff;
+    border-radius: 15px;
+    border: 3px solid #fff;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.display-options-modal__header {
+    width: 100%;
+    height: 12%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    border-bottom: 12px solid #ffffff;
+}
+
+.display-options-modal__content {
+    width: 100%;
+    height: 87%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.display-options-modal__title {
+    font-size: 22px;
+    color: #fff;
+}
+
+.display-options-modal__primary {
+    width: 40%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    background-color: #ffffff;
+}
+
+.display-options-modal__secondary {
+    width: 60%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;    
+    justify-content: start;
+    align-items: center;
+    padding: 25px 0;
+}
+
+.display-options-modal__label.display-label {
+    text-align: center;
+    margin-top: 15px;
+    font-size: 19px;
+    color: #0077ff;
+    font-weight: bold;
+}
+
+.display-options-modal__label.display-param-label {
+    margin-right: 10px;
+}
+
+.display-options-modal__block.display-parameter {
+    width: 100%;
+    margin-top: 10px;
+    margin-left: 40px;
+    color: #fff;
+}
+
+.display-options-modal__select {
+    cursor: pointer;
+}
+
+.display-options-modal__select.display-param-select {
+    color: #fff;
+    border: 2px solid #fff;
+    outline: none;
+}
+
+.display-options-modal__select.display-param-select option {
+    color: #0077ff;
+}
+
+.display-options-modal__input.display-param-boolean {
+    cursor: pointer;
+}
+
+.display-options-modal__buttons {
+    width: 100%;
+    height: 13%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    border-top: 6px solid #fff;
+}
+
+.display-options-modal__button {
+    width: 100%;
+    height: 100%;
+    cursor: pointer;
+}
+
+.display-options-modal__button:first-child {
+    border-bottom-left-radius: 10px;
+}
+
+.display-options-modal__button:last-child {
+    border-bottom-right-radius: 10px;
+}
+
+.display-options-modal__button.save-button {
+    color: #fff;
+    background-color: #00b400;
+}
+
+.display-options-modal__button.close-button {
+    color: #fff;
+    background-color: #bb0000;
+}
+
+.display-options-modal__button.save-button:hover {
+    color: #006100;
+    background-color: #00ff00;
+}
+
+.display-options-modal__button.close-button:hover {
+    color: #630000;
+    background-color: #ff0000;
+}
+
+.display-options-modal__button.display-selection-btn {
+    width: 250px;
+    height: 30px;
+    background-color: #0077ff;
+    border-radius: 5px;
+    color: #fff;
+    font-size: 15px;
+    margin-top: 40px;
+}
+
+.display-options-modal__button.display-selection-btn:hover {
+    outline: 4px solid #00f7ff;
+    color: #00f7ff;
+}
+
+.display-options-modal__container {
+    width: 100%;
+    height: 88%;
+}

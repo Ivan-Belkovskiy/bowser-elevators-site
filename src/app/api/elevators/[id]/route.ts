@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import fs from "fs";
 import path from "path";
-import { LiftJson, Floor, ElevatorButton, ButtonBlock, ElevatorButtonStyles } from "@/types/elevator";
+import { LiftJson, Floor, ElevatorButton, ButtonBlock, ElevatorButtonStyles, ElevatorDisplayConfig } from "@/types/elevator";
 
 export async function GET(
   req: NextRequest,
@@ -81,7 +81,14 @@ export async function PUT(
       image_elevator_panel: (lift, name) => (lift.elevator.images.panel = `assets/images/elevator/${name}`),
     };
 
-    if (formData.has('updated_button_data') && typeof formData.get('updated_button_data') === 'string') {
+    if (formData.has('updated_display_data') && typeof formData.get('updated_display_data') === 'string') {
+      const updated = formData.get('updated_display_data');
+      if (updated && typeof updated === 'string') {
+        const data: ElevatorDisplayConfig = JSON.parse(updated);
+        liftData.elevator.display = data;
+      }
+
+    } else if (formData.has('updated_button_data') && typeof formData.get('updated_button_data') === 'string') {
 
       const updatedButtonRaw = formData.get("updated_button_data");
       if (updatedButtonRaw && typeof updatedButtonRaw === "string") {

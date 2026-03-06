@@ -14,10 +14,10 @@ const soundMap: Record<string, (lift: LiftJson, fileName: string) => void> = {
 };
 
 const imageMap: Record<string, (lift: LiftJson, fileName: string) => void> = {
-  image_elevator_doors_left: (lift, name) => lift.elevator.images.doors.left = `assets/images/elevator/${name}`,
-  image_elevator_doors_right: (lift, name) => lift.elevator.images.doors.right = `assets/images/elevator/${name}`,
-  image_elevator_walls: (lift, name) => lift.elevator.images.walls = `assets/images/elevator/${name}`,
-  image_elevator_panel: (lift, name) => lift.elevator.images.panel = `assets/images/elevator/${name}`,
+  image_elevator_doors_left: (lift, name) => lift.elevator.images.doors.left.url = `assets/images/elevator/${name}`,
+  image_elevator_doors_right: (lift, name) => lift.elevator.images.doors.right.url = `assets/images/elevator/${name}`,
+  image_elevator_walls: (lift, name) => lift.elevator.images.walls.url = `assets/images/elevator/${name}`,
+  image_elevator_panel: (lift, name) => lift.elevator.images.panel.url = `assets/images/elevator/${name}`,
 };
 
 
@@ -78,7 +78,12 @@ export async function POST(req: NextRequest) {
       title: name,
       description,
       floors,
-      coursebot: { enabled: coursebotEnabled, options: {} },
+      coursebot: {
+        enabled: coursebotEnabled,
+        autosaveDelaySec: 30,
+        hiddenAutosave: false,
+        slots: {}
+      },
       elevator: {
         soundEffects: {
           doorOpen: null,
@@ -87,19 +92,39 @@ export async function POST(req: NextRequest) {
           movement: { start: null, move: null, end: null },
         },
         images: {
-          doors: { left: null, right: null },
-          walls: null,
-          panel: null,
+          doors: {
+            left: {
+              url: "",
+            },
+            right: {
+              url: "",
+            }
+          },
+          walls: {
+            url: "",
+          },
+          panel: {
+            url: "",
+          },
         },
         doorConfig: {
           type: "central",
           direction: null,
-          animation: {}
+          animation: {
+            durationMs: 2,
+            keyframes: []
+          }
+        },
+        motion: {
+          preDelayMs: 500,
+          accelMs: 200,
+          speedMsPerFloor: 2000,
+          decelMs: 200,
+          postDelayMs: 800,
         },
         display: {
           type: "MLMLCD",
           options: {},
-          allowedOptions: [],
         },
         buttonPanel: {
           blocks: [
@@ -195,6 +220,10 @@ export async function POST(req: NextRequest) {
           ]
         },
       },
+      meta: {
+        createdAt: new Date().toISOString(),
+        version: 1.0
+      }
     };
 
     floors.forEach((floor: Floor, idx: number) => {
@@ -245,10 +274,10 @@ export async function POST(req: NextRequest) {
 
     // Маппинг для изображений
     const imageMap: Record<string, (lift: LiftJson, fileName: string) => void> = {
-      image_elevator_doors_left: (lift, name) => (lift.elevator.images.doors.left = `assets/images/elevator/${name}`),
-      image_elevator_doors_right: (lift, name) => (lift.elevator.images.doors.right = `assets/images/elevator/${name}`),
-      image_elevator_walls: (lift, name) => (lift.elevator.images.walls = `assets/images/elevator/${name}`),
-      image_elevator_panel: (lift, name) => (lift.elevator.images.panel = `assets/images/elevator/${name}`),
+      image_elevator_doors_left: (lift, name) => (lift.elevator.images.doors.left.url = `assets/images/elevator/${name}`),
+      image_elevator_doors_right: (lift, name) => (lift.elevator.images.doors.right.url = `assets/images/elevator/${name}`),
+      image_elevator_walls: (lift, name) => (lift.elevator.images.walls.url = `assets/images/elevator/${name}`),
+      image_elevator_panel: (lift, name) => (lift.elevator.images.panel.url = `assets/images/elevator/${name}`),
     };
 
     for (const [key, value] of formData.entries()) {

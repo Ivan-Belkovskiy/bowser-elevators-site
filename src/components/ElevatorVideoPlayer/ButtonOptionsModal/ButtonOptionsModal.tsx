@@ -6,7 +6,7 @@ import { CSSProperties, useEffect, useState } from "react";
 import TabButton from "@/components/TabButton/TabButton";
 import TabButtonGroup from "@/components/TabButtonGroup/TabButtonGroup";
 import FileUploader from "@/components/FileUploader/FileUploader";
-import { ELEMENTS, ParamOption } from "@/constants/elements";
+import { ELEMENTS, ActionParamOption } from "@/constants/elements";
 
 interface ButtonStyles {
     [key: string]: CSSProperties
@@ -448,7 +448,7 @@ export default function ButtonOptionsModal({ elevator, button, onSave, onClose }
                     </div>
                     <div className="button-options-modal__buttons">
                         <button className="button-options-modal__button save-button" onClick={handleSave}>Сохранить изменения</button>
-                        <button className="button-options-modal__button close-button" onClick={() => onClose()}>Отменить изменения</button>
+                        <button className="button-options-modal__button close-button" onClick={() => onClose()}>Отменить и закрыть окно</button>
                     </div>
                 </div>
             </div>

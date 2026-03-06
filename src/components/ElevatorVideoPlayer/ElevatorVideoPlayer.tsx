@@ -2,15 +2,18 @@
 import { CSSProperties, useEffect, useState } from "react";
 import "./ElevatorVideoPlayer.css";
 import ButtonOptionsModal from "./ButtonOptionsModal/ButtonOptionsModal";
-import { ElevatorButton, LiftJson } from "@/types/elevator";
+import { ElevatorButton, ElevatorDisplayConfig, LiftJson } from "@/types/elevator";
 import ElevatorDisplay from "./ElevatorDisplay/ElevatorDisplay";
 import { useElevatorMovement } from "@/hooks/elevator/useElevatorMovement";
+import DisplayOptionsModal from "./DisplayOptionsModal/DisplayOptionsModal";
+import LiftAppearanceModal from "../LiftAppearanceModal/LiftAppearanceModal";
 
 export default function ElevatorVideoPlayer({ liftData, editMode }: { liftData: LiftJson, editMode?: boolean }) {
     const [data, setData] = useState(liftData);
     const [editingBlock, setEditingBlock] = useState<[number, string] | null>(null);
     const [dragInfo, setDragInfo] = useState<{ idx: number, startY: number, mouseStartY: number } | null>(null);
     const [activeButton, setActiveButton] = useState<[number, number, ElevatorButton] | null>(null);
+    const [selectedDisplay, setSelectedDisplay] = useState<ElevatorDisplayConfig | null>(null);
     // const [draggedButton, setDraggedButton] = useState<{ blockIdx: number, btnIdx: number } | null>(null);
 
     const updateButtonPanelBlock = (idx: number, block: any) => {
@@ -71,6 +74,17 @@ export default function ElevatorVideoPlayer({ liftData, editMode }: { liftData: 
         const newButtons = block.buttons.map((btn, idx) => idx === btnIdx ? button : btn);
         updateButtonPanelBlock(blockIdx, { ...block, buttons: newButtons });
         setActiveButton(null);
+    }
+
+    const onSaveDisplay = (updated: ElevatorDisplayConfig) => {
+        setData({
+            ...data,
+            elevator: {
+                ...data.elevator,
+                display: updated,
+            }
+        });
+        setSelectedDisplay(null);
     }
 
     // useEffect(() => {
@@ -180,11 +194,41 @@ export default function ElevatorVideoPlayer({ liftData, editMode }: { liftData: 
                             );
                         })}
                     </div>
-                    <ElevatorDisplay type={data.elevator.display.type} floor={1} direction="NONE" styles={{
-                        top: '85.5px'
-                    }} />
+                    <ElevatorDisplay
+                        type={data.elevator.display.type}
+                        floor={1}
+                        direction="NONE"
+                        data={data.elevator.display}
+                        styles={{
+                            top: '85.5px'
+                        }}
+                        inElevator
+                        editMode={editMode}
+                        isEditing={selectedDisplay !== null}
+                        onClick={() => (editMode) && setSelectedDisplay(data.elevator.display)}
+                    />
                 </div>
-                <ButtonOptionsModal elevator={data} button={activeButton} onSave={onSaveButton} onClose={() => setActiveButton(null)} />
+                {editMode && (
+                    <>
+                        <ButtonOptionsModal
+                            elevator={data}
+                            button={activeButton}
+                            onSave={onSaveButton}
+                            onClose={() => setActiveButton(null)}
+                        />
+                        <DisplayOptionsModal
+                            elevator={data}
+                            display={selectedDisplay}
+                            onSave={onSaveDisplay}
+                            onClose={() => setSelectedDisplay(null)}
+                        />
+                        {/* <LiftAppearanceModal
+                            elevator={data}
+                            onUpdate={(updated) => 123}
+                            onClose={() => 1}
+                        /> */}
+                    </>
+                )}
             </div>
         </div>
     );

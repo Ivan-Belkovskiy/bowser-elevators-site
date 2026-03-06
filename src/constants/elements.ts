@@ -2,11 +2,11 @@ export interface ActionParam {
     id: string;
     label: string;
     type: "number" | "string" | "boolean" | "select";
-    options?: ParamOption[];
+    options?: ActionParamOption[];
     optionsSource?: "floors";
 }
 
-export interface ParamOption {
+export interface ActionParamOption {
     value: string | number;
     label: string;
 }
