@@ -12,7 +12,7 @@
 }
 
 .button-options-modal {
-    width: 50%;
+    width: 60%;
     height: 55%;
     background-color: #0022ff;
     border-radius: 15px;
@@ -223,7 +223,7 @@
 }
 
 .button-options-modal__input.action-input {
-    width: 155px;
+    width: 185px;
     margin-left: 10px;
     outline: 2px solid #fff;
     color: #fff;

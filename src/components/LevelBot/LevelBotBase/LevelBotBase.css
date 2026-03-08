@@ -1,0 +1,144 @@
+.coursebot-base {
+    position: absolute;
+    width: calc(443px * 2.44);
+    height: calc(301px * 2.44);
+    background-image: url("/images/coursebot/Base.svg");
+    background-repeat: no-repeat;
+    background-size: contain;
+    top: 35px;
+    z-index: 5;
+    /* opacity: 0; */
+    left: 120px;
+}
+
+.coursebot-base__top {
+    width: calc(100% - 39px);
+    height: 68px;
+    margin-top: 77px;
+    margin-left: 19px;
+    display: flex;
+    flex-direction: column;
+    justify-content: start;
+    align-items: center;
+    /* background-color: blue; */
+}
+
+.coursebot-base__buttons {
+    width: 100%;
+    height: 88%;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.coursebot-base__buttons-decoration {
+    width: 100%;
+    height: 12%;
+    background-color: #384f75;
+}
+
+.coursebot-base__button.tab-button {
+    width: 49.2%;
+    height: 100%;
+    background-color: #c5c5da;
+    color: #384f75;
+    font-size: 22px;
+    border-top-left-radius: 10px;
+    border-top-right-radius: 10px;
+    cursor: pointer;
+}
+
+.coursebot-base__button.tab-button.active-tab {
+    background-color: #384f75;
+    color: #fff;
+}
+
+.coursebot-base__button.tab-button:disabled {
+    opacity: 0.7;
+    cursor: not-allowed;
+}
+
+.coursebot-base__transition {
+    position: absolute;
+    width: calc(100% - 40px);
+    margin-left: 20px;
+    background: #323245;
+    background: linear-gradient(0deg, rgba(50, 50, 69, 1) 0%, rgba(50, 50, 69, 1) 20%, rgba(79, 79, 96, 1) 20%, rgba(79, 79, 96, 1) 80%, rgba(50, 50, 69, 1) 80%);
+    background-size: 100% 25px;
+    height: 0px;
+    transition: height 0.2s ease 0s;
+    z-index: 90;
+}
+
+.coursebot-base__transition.active {
+    height: 569px;
+}
+
+.coursebot-base__content {
+    width: 85%;
+    margin-top: 37px;
+    margin-left: 113px;
+    display: grid;
+    grid-template-columns: repeat(4, 200px);
+    gap: 13px;
+    max-height: 530px;
+    overflow-y: auto;
+}
+
+.coursebot-base__slot {
+    width: 200px;
+    height: 167px;
+    background-color: #a0a0af;
+    border-radius: 4px;
+    display: flex;
+    flex-direction: column;
+    padding: 8px 9px;
+    transition: scale 0.2s ease 0s;
+}
+
+
+.coursebot-base__slot.autosave {
+    background-color: #dab900;
+}
+
+.coursebot-base__slot:hover {
+    scale: 1.02;
+    cursor: pointer;
+}
+
+.coursebot-slot__preview {
+    width: 180px;
+    height: 100px;
+    background-color: #323245;
+}
+
+.coursebot-slot__title {
+    width: 180px;
+    height: 37px;
+    background-color: #e5e5ef;
+    margin-top: 11px;
+    border-radius: 3px;
+    font-size: 20px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    color: #384f75;
+}
+
+.coursebot-base__slot.autosave .coursebot-slot__title {
+    color: #917b00;
+}
+
+.coursebot-base__content::-webkit-scrollbar {
+    width: 7px;
+}
+
+.coursebot-base__content::-webkit-scrollbar-track {
+    background: #4e4e6046;
+    border-radius: 20px;
+}
+
+.coursebot-base__content::-webkit-scrollbar-thumb {
+    background-color: #4e4e60;
+    border-radius: 20px;
+}

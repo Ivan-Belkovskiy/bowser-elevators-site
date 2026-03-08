@@ -2,24 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import fs from "fs";
 import path from "path";
 import { v4 as uuid } from "uuid";
-import { LiftJson, ElevatorButton, ButtonBlock, Floor } from "@/types/elevator";
-
-const soundMap: Record<string, (lift: LiftJson, fileName: string) => void> = {
-  sound_doorOpen: (lift, name) => lift.elevator.soundEffects.doorOpen = `assets/sounds/${name}`,
-  sound_doorClose: (lift, name) => lift.elevator.soundEffects.doorClose = `assets/sounds/${name}`,
-  sound_buttonClick: (lift, name) => lift.elevator.soundEffects.buttonClick = `assets/sounds/${name}`,
-  sound_moveStart: (lift, name) => lift.elevator.soundEffects.movement.start = `assets/sounds/${name}`,
-  sound_moveLoop: (lift, name) => lift.elevator.soundEffects.movement.move = `assets/sounds/${name}`,
-  sound_moveEnd: (lift, name) => lift.elevator.soundEffects.movement.end = `assets/sounds/${name}`,
-};
-
-const imageMap: Record<string, (lift: LiftJson, fileName: string) => void> = {
-  image_elevator_doors_left: (lift, name) => lift.elevator.images.doors.left.url = `assets/images/elevator/${name}`,
-  image_elevator_doors_right: (lift, name) => lift.elevator.images.doors.right.url = `assets/images/elevator/${name}`,
-  image_elevator_walls: (lift, name) => lift.elevator.images.walls.url = `assets/images/elevator/${name}`,
-  image_elevator_panel: (lift, name) => lift.elevator.images.panel.url = `assets/images/elevator/${name}`,
-};
-
+import { LiftJson, ElevatorButton, ButtonBlock, Floor, CoursebotFloorSlotConfig, SlotData } from "@/types/elevator";
 
 export async function GET(req: NextRequest) {
   try {
@@ -59,7 +42,7 @@ export async function POST(req: NextRequest) {
 
     const name = formData.get("name") as string;
     const description = formData.get("description") as string;
-    const floors = JSON.parse(formData.get("floors") as string);
+    const floors: Floor[] = JSON.parse(formData.get("floors") as string);
     const coursebotEnabled = formData.get("coursebotEnabled") === "true";
 
     const liftId = uuid();
@@ -73,6 +56,46 @@ export async function POST(req: NextRequest) {
     fs.mkdirSync(path.join(assetsPath, "assets", "images", "floors"), { recursive: true });
     fs.mkdirSync(path.join(assetsPath, "assets", "images", "elevator"), { recursive: true });
 
+    // fs.writeFileSync(path.join(process.cwd(), 'LOG.txt'), JSON.stringify(floors, null, 4));
+    // return;
+
+    const coursebotButton: ElevatorButton = (coursebotEnabled) ? {
+      type: 'action',
+      action: {
+        element: 'Coursebot',
+        command: 'openDefaultMode',
+      },
+      blocked: false,
+      deletable: false,
+      styles: {
+        active: {
+          boxShadow: '0px 0px 11px 2px #0056ff87',
+          outline: '1px solid #0055ffff',
+        },
+        default: `/images/elevators/template/MLM-2023/buttons/button-coursebot.png`,
+      }
+    } : {
+      type: "empty",
+    }
+
+    const coursebotSlotConfig: {
+      [floorId: string]: CoursebotFloorSlotConfig;
+    } = {};
+
+    floors.forEach((floor, idx) => {
+      coursebotSlotConfig[floor.id] = {
+        autosave: undefined,
+        fragments: []
+      };
+
+      for (let i = 0; i < 51; i++) {
+        coursebotSlotConfig[floor.id].fragments.push({
+          id: i,
+          empty: true,
+        });
+      }
+    })
+
     const liftJson: LiftJson = {
       id: liftId,
       title: name,
@@ -82,7 +105,7 @@ export async function POST(req: NextRequest) {
         enabled: coursebotEnabled,
         autosaveDelaySec: 30,
         hiddenAutosave: false,
-        slots: {}
+        slots: coursebotSlotConfig
       },
       elevator: {
         soundEffects: {
@@ -110,17 +133,36 @@ export async function POST(req: NextRequest) {
         doorConfig: {
           type: "central",
           direction: null,
-          animation: {
-            durationMs: 2,
-            keyframes: []
+          animations: {
+            open: {
+              durationMs: 2000,
+              curve: "linear",
+              keyframes: []
+            },
+            close: {
+              durationMs: 2000,
+              curve: "linear",
+              keyframes: []
+            }
           }
         },
         motion: {
-          preDelayMs: 500,
-          accelMs: 200,
-          speedMsPerFloor: 2000,
-          decelMs: 200,
-          postDelayMs: 800,
+          up: {
+            preDelayMs: 1000,
+            accelMs: 700,
+            speedMsPerFloor: 2000,
+            decelMs: 800,
+            postDelayMs: 1000,
+            curve: "linear",
+          },
+          down: {
+            preDelayMs: 1000,
+            accelMs: 700,
+            speedMsPerFloor: 2000,
+            decelMs: 800,
+            postDelayMs: 1000,
+            curve: "linear",
+          },
         },
         display: {
           type: "MLMLCD",
@@ -193,9 +235,7 @@ export async function POST(req: NextRequest) {
                     default: `/images/elevators/template/MLM-2023/buttons/button-door-close.png`,
                   }
                 },
-                {
-                  type: 'empty',
-                },
+                coursebotButton,
                 {
                   type: 'action',
                   action: {
@@ -262,17 +302,16 @@ export async function POST(req: NextRequest) {
     });
 
     liftJson.elevator.buttonPanel.blocks[0].buttons.reverse();
-    // Маппинг для звуков
+
     const soundMap: Record<string, (lift: LiftJson, fileName: string) => void> = {
-      sound_doorOpen: (lift, name) => (lift.elevator.soundEffects.doorOpen = `assets/sounds/${name}`),
-      sound_doorClose: (lift, name) => (lift.elevator.soundEffects.doorClose = `assets/sounds/${name}`),
-      sound_buttonClick: (lift, name) => (lift.elevator.soundEffects.buttonClick = `assets/sounds/${name}`),
-      sound_moveStart: (lift, name) => (lift.elevator.soundEffects.movement.start = `assets/sounds/${name}`),
-      sound_moveLoop: (lift, name) => (lift.elevator.soundEffects.movement.move = `assets/sounds/${name}`),
-      sound_moveEnd: (lift, name) => (lift.elevator.soundEffects.movement.end = `assets/sounds/${name}`),
+      sound_doorOpen: (lift, name) => (lift.elevator.soundEffects.doorOpen = `/Elevators/${userId}/${liftId}/assets/sounds/${name}`),
+      sound_doorClose: (lift, name) => (lift.elevator.soundEffects.doorClose = `/Elevators/${userId}/${liftId}/assets/sounds/${name}`),
+      sound_buttonClick: (lift, name) => (lift.elevator.soundEffects.buttonClick = `/Elevators/${userId}/${liftId}/assets/sounds/${name}`),
+      sound_moveStart: (lift, name) => (lift.elevator.soundEffects.movement.start = `/Elevators/${userId}/${liftId}/assets/sounds/${name}`),
+      sound_moveLoop: (lift, name) => (lift.elevator.soundEffects.movement.move = `/Elevators/${userId}/${liftId}/assets/sounds/${name}`),
+      sound_moveEnd: (lift, name) => (lift.elevator.soundEffects.movement.end = `/Elevators/${userId}/${liftId}/assets/sounds/${name}`),
     };
 
-    // Маппинг для изображений
     const imageMap: Record<string, (lift: LiftJson, fileName: string) => void> = {
       image_elevator_doors_left: (lift, name) => (lift.elevator.images.doors.left.url = `assets/images/elevator/${name}`),
       image_elevator_doors_right: (lift, name) => (lift.elevator.images.doors.right.url = `assets/images/elevator/${name}`),
@@ -293,6 +332,10 @@ export async function POST(req: NextRequest) {
           targetDir = path.join(assetsPath, "assets", "images", "elevator");
         } else if (key.startsWith("image_floor")) {
           targetDir = path.join(assetsPath, "assets", "images", "floors");
+          const floorIdx = Number(key.replace(/\D/g, ''));
+          if (liftJson.floors[floorIdx].videoData) {
+            liftJson.floors[floorIdx].videoData.image = `/Elevators/${userId}/${liftId}/assets/images/floors/${value.name}`;
+          }
         } else {
           targetDir = path.join(assetsPath, "assets", "images");
         }

@@ -1,7 +1,17 @@
+export interface FileUploaderData {
+    label: string | {
+        upload: string;
+        replace: string;
+    };
+    accept?: string;
+
+}
+
 export interface CategoryOption {
     id: string;
     label?: string;
     type: "string" | "number" | "boolean" | "select" | "fileUploader" | "floorSelector";
+    fileUploaderData?: FileUploaderData;
     property?: string; // Свойство лифта из LiftJson, которое привязано к данной опции.
 }
 
@@ -71,36 +81,78 @@ export const CATEGORIES: CategoryDefinition[] = [
                         label: "Открытие дверей",
                         type: "fileUploader",
                         property: "elevator>soundEffects>doorOpen",
+                        fileUploaderData: {
+                            accept: "audio/*",
+                            label: {
+                                upload: "Загрузить аудиофайл...",
+                                replace: "Заменить аудиофайл"
+                            }
+                        }
                     },
                     {
                         id: "doorClose",
                         label: "Закрытие дверей",
                         type: "fileUploader",
                         property: "elevator>soundEffects>doorClose",
+                        fileUploaderData: {
+                            accept: "audio/*",
+                            label: {
+                                upload: "Загрузить аудиофайл...",
+                                replace: "Заменить аудиофайл"
+                            }
+                        }
                     },
                     {
                         id: "buttonClick",
                         label: "Нажатие на кнопку",
                         type: "fileUploader",
                         property: "elevator>soundEffects>buttonClick",
+                        fileUploaderData: {
+                            accept: "audio/*",
+                            label: {
+                                upload: "Загрузить аудиофайл...",
+                                replace: "Заменить аудиофайл"
+                            }
+                        }
                     },
                     {
                         id: "startMove",
                         label: "Начало движения лифта",
                         type: "fileUploader",
                         property: "elevator>soundEffects>movement>start",
+                        fileUploaderData: {
+                            accept: "audio/*",
+                            label: {
+                                upload: "Загрузить аудиофайл...",
+                                replace: "Заменить аудиофайл"
+                            }
+                        }
                     },
                     {
                         id: "movement",
                         label: "Движение лифта",
                         type: "fileUploader",
                         property: "elevator>soundEffects>movement>move",
+                        fileUploaderData: {
+                            accept: "audio/*",
+                            label: {
+                                upload: "Загрузить аудиофайл...",
+                                replace: "Заменить аудиофайл"
+                            }
+                        }
                     },
                     {
                         id: "endMove",
                         label: "Остановка лифта",
                         type: "fileUploader",
-                        property: "elevator>soundEffects>movement>end"
+                        property: "elevator>soundEffects>movement>end",
+                        fileUploaderData: {
+                            accept: "audio/*",
+                            label: {
+                                upload: "Загрузить аудиофайл...",
+                                replace: "Заменить аудиофайл"
+                            }
+                        }
                     }
                 ]
             }

@@ -47,4 +47,14 @@ export const ELEMENTS: ElementDefinition[] = [
             { id: "callService", label: "Вызов диспетчера" }
         ],
     },
+    {
+        id: "Coursebot",
+        label: "Уровнебот",
+        actions: [
+            {
+                id: "openDefaultMode",
+                label: "Открыть Уровнебот"
+            }
+        ]
+    }
 ];

@@ -1,0 +1,175 @@
+/* Анимации головы */
+@keyframes levelbot-head-lines {
+    0% { background-position-y: 0px; }
+    100% { background-position-y: 9px; }
+}
+
+@keyframes levelbot-head-animation {
+    0% { translate: 0 0; }
+    5% { translate: 0 -12px; }
+    15% { translate: 0 -12px; }
+    20% { translate: 0 0; }
+    21% { translate: 0 0; }
+    21.5% { translate: 0 -5px; }
+    22.5% { translate: 0 -5px; }
+    23% { translate: 0 0; }
+    24% { translate: 0 0; }
+    24.5% { translate: 0 -5px; }
+    25% { translate: 0 -5px; }
+    26% { translate: 0 0; }
+    48% { translate: 0 0; }
+    56% { translate: 0 -18px; }
+    66% { translate: 0 -18px; }
+    71% { translate: 0 0; }
+    72% { translate: 0 0; }
+    72.5% { translate: 0 -8px; }
+    73.5% { translate: 0 -8px; }
+    74% { translate: 0 0; }
+    75% { translate: 0 0; }
+    75.5% { translate: 0 -8px; }
+    76% { translate: 0 -8px; }
+    76.5% { translate: 0 0; }
+}
+
+@keyframes levelbot-head-part-anim {
+    0% { translate: 0 0; scale: 1; }
+    75% { translate: 0 0; scale: 1; }
+    76% { translate: -13px 0; scale: 1.1; }
+    77% { translate: -13px 0; scale: 1.1; }
+    78% { translate: 0 0; scale: 1; }
+    79% { translate: 0 0; scale: 1; }
+    80% { translate: -13px 0; scale: 1.1; }
+    81% { translate: -13px 0; scale: 1.1; }
+    82% { translate: 0 0; scale: 1; }
+}
+
+@keyframes levelbot-head-part-right-anim {
+    0% { translate: 0 0; scale: 1; }
+    75% { translate: 0 0; scale: 1; }
+    76% { translate: 13px 0; scale: 1.1; }
+    77% { translate: 13px 0; scale: 1.1; }
+    78% { translate: 0 0; scale: 1; }
+    79% { translate: 0 0; scale: 1; }
+    80% { translate: 13px 0; scale: 1.1; }
+    81% { translate: 13px 0; scale: 1.1; }
+    82% { translate: 0 0; scale: 1; }
+}
+
+@keyframes levelbot-head-text-anim {
+    0% { text-shadow: none; }
+    70% { text-shadow: none; }
+    74% { text-shadow: -3px 0 #a7ff6d; }
+    76% { text-shadow: 5px 0 #a7ff6d; }
+    79% { text-shadow: none; }
+}
+
+@keyframes levelbot-head-eye-anim {
+    0% { scale: 0.95; }
+    73% { scale: 0.95; }
+    75% { scale: 1.4; }
+    77% { scale: 1; }
+    80% { scale: 1.2; }
+    83% { scale: 0.95; }
+}
+
+/* Контейнер головы */
+.levelbot-head__container {
+    position: absolute;
+    top: 0;
+    width: 571px;
+    height: 79px;
+    animation: levelbot-head-animation 2s linear infinite;
+    z-index: 10;
+    /* margin: 0 auto; */
+    left: 390px;
+}
+
+/* Основная часть головы */
+.levelbot-head {
+    pointer-events: none;
+    user-select: none;
+    position: absolute;
+    border: 9px solid #6b6b7a;
+    background: linear-gradient(0deg, #0d2645 0%, #0d2645 20%, #0a223d 20%, #0a223d 80%, #0d2645 80%);
+    background-size: 100% 9px;
+    width: 571px;
+    height: 79px;
+    border-radius: 4px;
+    left: -9px;
+    top: 29px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    animation: levelbot-head-lines 0.7s linear infinite reverse;
+}
+
+/* Глаза */
+.levelbot-head::before,
+.levelbot-head::after {
+    content: "";
+    position: absolute;
+    top: -30px;
+    width: 39px;
+    height: 39px;
+    background-image: url("/images/coursebot/Eye_New.svg");
+    background-size: contain;
+    border-radius: 40px;
+    animation: levelbot-head-eye-anim 2s linear infinite;
+    z-index: 10;
+}
+
+.levelbot-head::before { left: 205px; }
+.levelbot-head::after { left: 307px; }
+
+/* Текст */
+.levelbot-head__text {
+    color: #a7ff6d;
+    font-size: 23px;
+    animation: levelbot-head-text-anim 2s linear infinite;
+}
+
+/* Боковые части */
+.levelbot-head__side-part {
+    position: absolute;
+    width: 105px;
+    height: 72px;
+    background-image: url("/images/coursebot/SidePart.svg");
+    background-size: contain;
+}
+
+.levelbot-head__left {
+    top: 30px;
+    left: -57px;
+    animation: levelbot-head-part-anim 2s linear infinite;
+}
+
+.levelbot-head__right {
+    top: 30px;
+    left: 503px;
+    transform: rotateY(180deg);
+    animation: levelbot-head-part-right-anim 2s linear infinite;
+}
+
+/* Переходные полосы */
+.levelbot-head__transition {
+    position: absolute;
+    width: 100%;
+    height: 0;
+    background-color: #51515b;
+    transition: height 0.15s ease-in-out, border-color 0.45s cubic-bezier(0.165, 0.84, 0.44, 1);
+}
+
+.levelbot-head__transition.top { top: 0; }
+.levelbot-head__transition.bottom { bottom: 0; }
+
+.levelbot-head__transition.active {
+    height: calc(50%);
+}
+
+.levelbot-head__transition.top.active {
+    border-bottom: 6px solid #7f7f88;
+}
+
+.levelbot-head__transition.bottom.active {
+    border-top: 6px solid #7f7f88;
+}

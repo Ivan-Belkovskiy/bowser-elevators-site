@@ -7,6 +7,7 @@ import ElevatorDisplay from "./ElevatorDisplay/ElevatorDisplay";
 import { useElevatorMovement } from "@/hooks/elevator/useElevatorMovement";
 import DisplayOptionsModal from "./DisplayOptionsModal/DisplayOptionsModal";
 import LiftAppearanceModal from "../LiftAppearanceModal/LiftAppearanceModal";
+import LevelBotModal from "../LevelBot/LevelBotModal";
 
 export default function ElevatorVideoPlayer({ liftData, editMode }: { liftData: LiftJson, editMode?: boolean }) {
     const [data, setData] = useState(liftData);
@@ -14,6 +15,8 @@ export default function ElevatorVideoPlayer({ liftData, editMode }: { liftData: 
     const [dragInfo, setDragInfo] = useState<{ idx: number, startY: number, mouseStartY: number } | null>(null);
     const [activeButton, setActiveButton] = useState<[number, number, ElevatorButton] | null>(null);
     const [selectedDisplay, setSelectedDisplay] = useState<ElevatorDisplayConfig | null>(null);
+
+    const [isCoursebotOpened, setCoursebotOpened] = useState<boolean>(false);
     // const [draggedButton, setDraggedButton] = useState<{ blockIdx: number, btnIdx: number } | null>(null);
 
     const updateButtonPanelBlock = (idx: number, block: any) => {
@@ -65,6 +68,20 @@ export default function ElevatorVideoPlayer({ liftData, editMode }: { liftData: 
         if (editMode) {
             if (button.type === 'empty') return;
             setActiveButton([blockIdx, btnIdx, button]);
+        } else {
+            // In-Elevator Button Click
+            if (button.type === 'action') {
+                if (button.action.element === 'Coursebot') {
+                    switch (button.action.command) {
+                        case "openDefaultMode":
+                            // alert(button.action.command)
+                            setCoursebotOpened(true);
+                            break;
+
+
+                    }
+                }
+            }
         }
     }
 
@@ -86,6 +103,8 @@ export default function ElevatorVideoPlayer({ liftData, editMode }: { liftData: 
         });
         setSelectedDisplay(null);
     }
+
+    useEffect(() => setData(liftData), [liftData]);
 
     // useEffect(() => {
     //     const reversed01 = [...liftData.elevator.buttonPanel.blocks[0].buttons].reverse();
@@ -206,9 +225,10 @@ export default function ElevatorVideoPlayer({ liftData, editMode }: { liftData: 
                         editMode={editMode}
                         isEditing={selectedDisplay !== null}
                         onClick={() => (editMode) && setSelectedDisplay(data.elevator.display)}
+                        options={data.elevator.display.options}
                     />
                 </div>
-                {editMode && (
+                {editMode ? (
                     <>
                         <ButtonOptionsModal
                             elevator={data}
@@ -228,7 +248,17 @@ export default function ElevatorVideoPlayer({ liftData, editMode }: { liftData: 
                             onClose={() => 1}
                         /> */}
                     </>
-                )}
+                ) : isCoursebotOpened && (
+                    <LevelBotModal
+                        elevator={data}
+                        activeFloorId="1"
+                        mode="default"
+                        onClose={() => setCoursebotOpened(false)}
+                        onOpenInCoursebotPlayer={() => true}
+                        onOpenInMyLiftPlayer={() => true}
+                    />
+                )
+                }
             </div>
         </div>
     );

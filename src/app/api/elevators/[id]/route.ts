@@ -48,9 +48,8 @@ export async function PUT(
     }
 
     const formData = await req.formData();
-    const liftData: LiftJson = JSON.parse(fs.readFileSync(jsonPath, "utf-8"));
+    let liftData: LiftJson = JSON.parse(fs.readFileSync(jsonPath, "utf-8"));
 
-    // Обновляем текстовые поля
     const name = formData.get("name") as string | null;
     const description = formData.get("description") as string | null;
     const floors = formData.get("floors")
@@ -66,22 +65,52 @@ export async function PUT(
     if (coursebotEnabled !== null) liftData.coursebot.enabled = coursebotEnabled;
 
     const soundMap: Record<string, (lift: LiftJson, fileName: string) => void> = {
-      sound_doorOpen: (lift, name) => (lift.elevator.soundEffects.doorOpen = `assets/sounds/${name}`),
-      sound_doorClose: (lift, name) => (lift.elevator.soundEffects.doorClose = `assets/sounds/${name}`),
-      sound_buttonClick: (lift, name) => (lift.elevator.soundEffects.buttonClick = `assets/sounds/${name}`),
-      sound_moveStart: (lift, name) => (lift.elevator.soundEffects.movement.start = `assets/sounds/${name}`),
-      sound_moveLoop: (lift, name) => (lift.elevator.soundEffects.movement.move = `assets/sounds/${name}`),
-      sound_moveEnd: (lift, name) => (lift.elevator.soundEffects.movement.end = `assets/sounds/${name}`),
+      sound_doorOpen: (lift, name) => (lift.elevator.soundEffects.doorOpen = `/Elevators/${userId}/${liftData.id}/assets/sounds/${name}`),
+      sound_doorClose: (lift, name) => (lift.elevator.soundEffects.doorClose = `/Elevators/${userId}/${liftData.id}/assets/sounds/${name}`),
+      sound_buttonClick: (lift, name) => (lift.elevator.soundEffects.buttonClick = `/Elevators/${userId}/${liftData.id}/assets/sounds/${name}`),
+      sound_moveStart: (lift, name) => (lift.elevator.soundEffects.movement.start = `/Elevators/${userId}/${liftData.id}/assets/sounds/${name}`),
+      sound_moveLoop: (lift, name) => (lift.elevator.soundEffects.movement.move = `/Elevators/${userId}/${liftData.id}/assets/sounds/${name}`),
+      sound_moveEnd: (lift, name) => (lift.elevator.soundEffects.movement.end = `/Elevators/${userId}/${liftData.id}/assets/sounds/${name}`),
     };
 
     const imageMap: Record<string, (lift: LiftJson, fileName: string) => void> = {
-      image_elevator_doors_left: (lift, name) => (lift.elevator.images.doors.left = `assets/images/elevator/${name}`),
-      image_elevator_doors_right: (lift, name) => (lift.elevator.images.doors.right = `assets/images/elevator/${name}`),
-      image_elevator_walls: (lift, name) => (lift.elevator.images.walls = `assets/images/elevator/${name}`),
-      image_elevator_panel: (lift, name) => (lift.elevator.images.panel = `assets/images/elevator/${name}`),
+      image_elevator_doors_left: (lift, name) => (lift.elevator.images.doors.left.url = `assets/images/elevator/${name}`),
+      image_elevator_doors_right: (lift, name) => (lift.elevator.images.doors.right.url = `assets/images/elevator/${name}`),
+      image_elevator_walls: (lift, name) => (lift.elevator.images.walls.url = `assets/images/elevator/${name}`),
+      image_elevator_panel: (lift, name) => (lift.elevator.images.panel.url = `assets/images/elevator/${name}`),
     };
 
-    if (formData.has('updated_display_data') && typeof formData.get('updated_display_data') === 'string') {
+    if (formData.has('updated_lift_json')) {
+      for (const [key, value] of formData.entries()) {
+
+
+        if (key === 'updated_lift_json') {
+          const newData = formData.get('updated_lift_json');
+          if (newData && typeof newData === 'string') {
+            const updatedLiftData = JSON.parse(newData);
+            if (updatedLiftData satisfies LiftJson) {
+              liftData = updatedLiftData;
+            }
+          }
+        } else if (key.startsWith('image_floor') && value instanceof File) {
+          const floorIdx = Number(key.replace(/\D/g, ''));
+          const buffer = Buffer.from(await value.arrayBuffer());
+          const targetDir = path.join(assetsPath, "assets", "images", "floors");
+          fs.mkdirSync(targetDir, { recursive: true });
+          fs.writeFileSync(path.join(targetDir, value.name), buffer);
+          if (liftData.floors[floorIdx].videoData) liftData.floors[floorIdx].videoData.image = `/Elevators/${userId}/${liftData.id}/assets/images/floors/${value.name}`;
+        } else if (soundMap[key] && value instanceof File) {
+          soundMap[key](liftData, value.name);
+          const targetDir = path.join(assetsPath, "assets", "sounds");
+          const buffer = Buffer.from(await value.arrayBuffer());
+          
+          fs.mkdirSync(targetDir, { recursive: true });
+          fs.writeFileSync(path.join(targetDir, value.name), buffer);
+        }
+
+
+      }
+    } else if (formData.has('updated_display_data') && typeof formData.get('updated_display_data') === 'string') {
       const updated = formData.get('updated_display_data');
       if (updated && typeof updated === 'string') {
         const data: ElevatorDisplayConfig = JSON.parse(updated);
@@ -208,7 +237,6 @@ export async function PUT(
 
     }
 
-    // Сохраняем обновлённый lift.json
     fs.writeFileSync(jsonPath, JSON.stringify(liftData, null, 2));
 
     return NextResponse.json({ success: true, lift: liftData });

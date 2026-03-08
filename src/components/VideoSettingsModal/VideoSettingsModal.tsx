@@ -5,18 +5,37 @@ import { ChangeEvent, ChangeEventHandler, useRef, useState } from "react";
 import VideoFileNavigation from "../VideoFileNavigation/VideoFileNavigation";
 import FileUploader from "../FileUploader/FileUploader";
 export default function VideoSettingsModal({ floor, idx, updateVideoData, onClose }: VideoSettingsModalProps) {
-    const fileInputRef = useRef<HTMLInputElement>(null);
     const [isVideoLoaded, setIsVideoLoaded] = useState<boolean | null>(null);
     const [fileNavOpened, setFileNavOpened] = useState<boolean>(false);
 
-    const onFileUpload = (e: ChangeEvent<HTMLInputElement>) => {
+    const onFileUpload = async (e: ChangeEvent<HTMLInputElement>) => {
+        // onUpload={(e) => (e.target.files?.[0]) && updateVideoData?.(idx, { image: e.target.files[0] })}
         if (e.target?.files?.[0] && updateVideoData) {
-            // Для загрузки обложки!!!
-            // const uploadedFile = e.target.files[0];
-            // updateVideoData(idx, {
-            //     title: uploadedFile.name.replace(/\(.+\)|.mp4/g, "").trim(),
-            //     url: ''
-            // });
+            try {
+                // alert(e.target.files[0].name);
+                updateVideoData(idx, {
+                    image: e.target.files[0],
+                })
+                // const formData = new FormData();
+                // const uploadData = {
+                //     floorIdx: idx,
+                //     file: e.target.files[0],
+                // };
+                // formData.append("floor_video_image", JSON.stringify(uploadData));
+
+                // const res = await fetch(`/api/elevators/${elevatorId}`, {
+                //     method: "PUT",
+                //     body: formData,
+                // });
+
+                // const data: { success: boolean; lift: LiftJson } = await res.json();
+
+                // if (data.success) {
+                //     onSave?.(data.lift.elevator.display);
+                // }
+            } catch (error) {
+
+            }
         }
     };
 
@@ -56,7 +75,7 @@ export default function VideoSettingsModal({ floor, idx, updateVideoData, onClos
                                 controls
                                 onError={() => setIsVideoLoaded(false)}
                                 onLoadedData={() => setIsVideoLoaded(true)}
-                                poster={(floor.videoData?.image instanceof File) ? URL.createObjectURL(floor.videoData.image) : undefined}
+                                poster={(floor.videoData?.image instanceof File) ? URL.createObjectURL(floor.videoData.image) : floor.videoData?.image || ""}
                             ></video>
                         </div>
                         {/* {isVideoLoaded && <button className="video-settings-modal__button upload-image-button" onClick={() => fileInputRef.current?.click()}>
@@ -67,7 +86,8 @@ export default function VideoSettingsModal({ floor, idx, updateVideoData, onClos
                                 btnClass="video-settings-modal__button upload-image-button"
                                 label={{ upload: "Загрузить обложку видео", replace: "Заменить обложку..." }}
                                 file={floor.videoData?.image}
-                                onUpload={(e) => (e.target.files?.[0]) && updateVideoData?.(idx, { image: e.target.files[0] })}
+                                onUpload={onFileUpload}
+                                // onUpload={(e) => (e.target.files?.[0]) && updateVideoData?.(idx, { image: e.target.files[0] })}
                                 hideMessage
                                 accept="image/*"
                             />

@@ -10,6 +10,8 @@ import { EVPSoundEffects, EVPMovementSoundEffects } from "@/types/data/ElevatorV
 import SwitchCheckbox from "../SwitchCheckbox/SwitchCheckbox";
 import FileUploader from "../FileUploader/FileUploader";
 import { useRouter } from "next/navigation";
+import FloorSelector from "../ElevatorVideoPlayer/FloorSelector/FloorSelector";
+import { Floor } from "@/types/elevator";
 export default function NewElevatorModal() {
     const [openedModal, setOpenedModal] = useState<VideoSettingsModalProps | null>(null);
     const [floors, setFloors] = useState<FloorConfig[]>([]);
@@ -43,8 +45,9 @@ export default function NewElevatorModal() {
     }
 
     const addFloor = () => {
-        const newFloor: FloorConfig = {
+        const newFloor: Floor = {
             // floorNumber: (floors.length + 1),
+            id: String(floors.length + 1),
             displaySymbol: String(floors.length + 1),
             accessCondition: { type: 'free' },
             videoData: {
@@ -93,6 +96,9 @@ export default function NewElevatorModal() {
     }
 
     const createElevator = async () => {
+        // console.log('FLOORS:');
+        // console.log(floors);
+        // return 0;
         const formData = new FormData();
 
         formData.append("name", elevatorName);
@@ -174,7 +180,17 @@ export default function NewElevatorModal() {
                     <div className="new-elevator-modal__item">
                         <span className="new-elevator-modal__label">Этажи лифта</span>
                         <div className="new-elevator-modal__item-content">
-                            <div className="new-elevator-modal__block flex-col floor-list">
+                            <FloorSelector
+                                floorList={floors}
+                                addFloor={addFloor}
+                                updateFloor={updateFloor}
+                                removeFloor={removeFloor}
+                                updateAccessCondition={updateAccessCondition}
+                                updateVideoData={updateVideoData}
+                                openVideoSettingsModal={openVideoSettingsModal}
+                                closeVideoSettingsModal={() => setOpenedModal(null)}
+                            />
+                            {/* <div className="new-elevator-modal__block flex-col floor-list">
                                 {floors.map((floor, idx) => (
                                     <div className="new-elevator-modal__floor-block" key={idx}>
                                         <div className="new-elevator-modal__floor-block-left">
@@ -244,7 +260,7 @@ export default function NewElevatorModal() {
                             </div>
                             <div className="new-elevator-modal__block">
                                 <button className="new-elevator-modal__button add-floor-button" onClick={addFloor}>+ Новый этаж</button>
-                            </div>
+                            </div> */}
                         </div>
                     </div>
                     <div className="new-elevator-modal__item">

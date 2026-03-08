@@ -1,0 +1,23 @@
+[
+    {
+        "displaySymbol": "1",
+        "accessCondition": {
+            "type": "free"
+        },
+        "videoData": {
+            "title": "Гарри Поттер и Философский Камень",
+            "url": "D:\\Media\\Video\\Фильмы\\Гарри Поттер\\[1] Гарри Поттер и Философский Камень (2001)\\1080.mp4",
+            "image": {}
+        }
+    },
+    {
+        "displaySymbol": "2",
+        "accessCondition": {
+            "type": "free"
+        },
+        "videoData": {
+            "title": "",
+            "url": ""
+        }
+    }
+]

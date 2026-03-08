@@ -1,14 +1,13 @@
 import { ActionParam } from "@/constants/elements";
 import { CSSProperties } from "react";
+import { AccessCondition } from "./data/FloorTypes";
+import { VideoData } from "./data/VideoData";
 
 export interface Floor {
   id: string;
   displaySymbol: string;
-  videoData?: {
-    title: string;
-    image?: string;
-    url?: string;
-  };
+  accessCondition?: AccessCondition;
+  videoData?: VideoData;
 }
 
 export interface ElevatorButtonStyles {
@@ -59,13 +58,31 @@ export interface ElevatorDisplayConfig { // Настройки табло инд
 }
 
 export interface SlotData {
-  id: string;
-  title: string;
-  createdAt: string;
-  timecodeMs: number;
+  id: number;
+  empty: boolean;
+  title?: string;
+  createdAt?: string;
+  timecode?: number;
   thumbnailUrl?: string;
   videoUrl?: string;
 }
+
+export interface DoorKeyframe {
+  time: number;
+  leftDoorX: number;
+  rightDoorX: number;
+}
+
+export interface DoorAnimationConfig {
+  durationMs: number;
+  curve: "linear" | "ease-in" | "ease-out" | "ease-in-out";
+  keyframes: DoorKeyframe[];
+}
+
+export interface CoursebotFloorSlotConfig {
+  autosave?: SlotData;
+  fragments: SlotData[];
+};
 
 
 export interface LiftJson {
@@ -80,10 +97,7 @@ export interface LiftJson {
     autosaveDelaySec: number;
     hiddenAutosave: boolean;
     slots: {
-      [floorId: string]: {
-        autosave?: SlotData;
-        fragments: SlotData[];
-      };
+      [floorId: string]: CoursebotFloorSlotConfig;
     };
   };
 
@@ -111,23 +125,33 @@ export interface LiftJson {
     doorConfig: {
       type: "central" | "telescopic" | "single";
       direction: "left" | "right" | null;
-      animation: {
-        durationMs: number;
-        keyframes: {
-          time: number;
-          leftDoorX: number;
-          rightDoorX: number;
-        }[];
+      animations: {
+        open: DoorAnimationConfig;
+        close: DoorAnimationConfig;
       };
-    };
+    }
+
+
 
     motion: {
-      preDelayMs: number;
-      accelMs: number;
-      speedMsPerFloor: number;
-      decelMs: number;
-      postDelayMs: number;
-    };
+      up: {
+        preDelayMs: number;
+        accelMs: number;
+        speedMsPerFloor: number;
+        decelMs: number;
+        postDelayMs: number;
+        curve: "linear" | "ease-in" | "ease-out" | "ease-in-out";
+      };
+      down: {
+        preDelayMs: number;
+        accelMs: number;
+        speedMsPerFloor: number;
+        decelMs: number;
+        postDelayMs: number;
+        curve: "linear" | "ease-in" | "ease-out" | "ease-in-out";
+      };
+    }
+
 
     display: ElevatorDisplayConfig;
 
@@ -144,6 +168,9 @@ export interface LiftJson {
 }
 
 
+export type ElevatorDoorTypes = "central" | "telescopic" | "single";
+
+export type ElevatorDoorOpenDirections = "left" | "right" | null;
 
 export type ElevatorDisplayTypes = 'MLMLCD' | 'TIM2' | "7SEGMENT_NEW";
 

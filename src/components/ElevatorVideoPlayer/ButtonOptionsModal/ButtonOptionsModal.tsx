@@ -293,7 +293,19 @@ export default function ButtonOptionsModal({ elevator, button, onSave, onClose }
                                         <select
                                             className="button-options-modal__input element-input"
                                             value={currentButton.action.element}
-                                            disabled
+                                            onChange={(e) => {
+                                                const selectedElement = ELEMENTS.find(el => el.id === e.target.value);
+                                                setCurrentButton({
+                                                    ...currentButton,
+                                                    action: {
+                                                        element: e.target.value,
+                                                        command: selectedElement?.actions[0].id || "",
+                                                        params: {}
+                                                    }
+
+                                                })
+                                            }}
+                                        // disabled
                                         // onChange={(e) => updateButtonData('destinationFloor', Number(e.target.value))}
                                         >
                                             {ELEMENTS.map((el, idx) => (

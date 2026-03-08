@@ -1,0 +1,217 @@
+.floor-selector {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.floor-selector__block {
+    display: flex;
+    margin: 15px 0;
+    /* flex-direction: column; */
+    justify-content: center;
+    /* align-items: center; */
+}
+
+.floor-selector__text {
+    color: #0084ff;
+    font-weight: 600;
+    display: inline-block;
+    border: none;
+    margin-right: 10px;
+}
+
+.floor-selector__input {
+    display: inline-block;
+    border: 2px solid #0099ff;
+    color: #006eff;
+    font-weight: 600;
+    border-radius: 7px;
+    padding: 0 5px;
+    margin: 0;
+    outline: none;
+}
+
+.floor-selector__input:focus {
+    color: #fff;
+    background-color: #0099ff;
+}
+
+.floor-selector__input.name-description-input {
+    width: 500px;
+}
+
+.floor-selector__item-content {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+
+.floor-selector__button.add-floor-button {
+    width: 400px;
+    border: 2px solid #0066ff;
+    border-radius: 15px;
+    background-color: #0066ff;
+    color: #fff;
+    cursor: pointer;
+    transition: all 0.3s ease 0s;
+}
+
+.floor-selector__button.add-floor-button:hover {
+    width: 600px;
+    background-color: #fff;
+    color: #0066ff;
+}
+
+.floor-selector__floor-block {
+    position: relative;
+    display: flex;
+    flex-direction: row;
+    width: 100%;
+    height: 50px;
+    /* display: block; */
+    border: 2px solid #0099ff;
+    /* padding: 10px 0; */
+}
+
+.floor-selector__floor-block-left {
+    position: relative;
+    width: 97%;
+    height: 100%;
+}
+
+.floor-selector__floor-block-right {
+    position: relative;
+    width: 3%;
+    height: 100%;
+    display: flex;
+    flex-direction: row;
+    justify-content: right;
+}
+
+.floor-selector__floor-tile {
+    /* display: inline-block; */
+    display: inline-flex;
+    justify-content: center;
+    align-items: center;
+    font-weight: 600;
+    color: #001aff;
+    padding: 0 5px;
+    height: 100%;
+    border-right: 2px solid #0099ff;
+}
+
+.floor-selector__floor-block-right .floor-selector__floor-tile:last-child {
+    border-right: none;
+    border-left: 2px solid #0099ff;
+    padding: 0;
+}
+
+.floor-selector__block.floor-list {
+    position: relative;
+    width: 95%;
+    /* max-height: 250px; */
+    /* overflow-y: auto; */
+    /* border: 2px solid #0066ff; */
+    /* border-radius: 5px; */
+    /* padding: 10px; */
+}
+
+.floor-selector__input.floor-symbol-input {
+    border-radius: 0;
+    width: 40px;
+    margin-left: 5px;
+}
+
+.floor-selector__input.floor-access-select {
+    border-radius: 0;
+    margin-left: 5px;
+    /* width: 150px; */
+}
+
+.floor-selector__button.floor-video-button {
+    min-width: 65px;
+    height: 30px;
+    cursor: pointer;
+}
+
+.floor-selector__button.floor-video-button:hover {
+    outline: 2px solid #001aff;
+}
+
+.floor-selector__input.floor-view-count-input {
+    width: 45px;
+    border-radius: 0;
+    margin-left: 10px;
+}
+
+.floor-selector__input.floor-number-select {
+    width: 50px;
+}
+
+.floor-selector__button.remove-floor-button {
+    position: relative;
+    font-size: 30px;
+    color: #ff0000;
+    transition: all 0.4s ease 0s;
+    width: 100%;
+    height: 100%;
+    padding: 0 5px;
+}
+
+.floor-selector__button.remove-floor-button span {
+    position: relative;
+    transition: rotate 0.4s ease 0s, color 0.8s ease 0s;
+    rotate: 0deg;
+    display: inline-block;
+}
+
+.floor-selector__button.remove-floor-button:hover span {
+    rotate: 180deg;
+    color: #ffffff;
+}
+
+.floor-selector__button.remove-floor-button:hover {
+    cursor: pointer;
+    background-color: #ff0000;
+}
+
+.small-text {
+    color: #0099ff;
+    font-size: 13px;
+}
+
+.floor-selector__block.sound-effect-block {
+    width: 80%;
+    border: 2px solid #0084ff;
+    padding: 5px 0;
+    color: #0084ff;
+    font-weight: 600;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin: 10px 0;
+}
+
+
+.floor-selector__button.upload-sound-button {
+    border: 3px solid #001aff;
+    margin: 0 10px;
+    padding: 0 10px;
+    color: #001aff;
+}
+
+.floor-selector__button.upload-sound-button:hover {
+    outline: 2px solid #0099ff;
+    cursor: pointer;
+}
+
+.floor-selector__text.coursebot-span {
+    padding: 5px 10px;
+}
+
+.floor-selector__message.uploaded-sound-name {
+    margin: 0 10px;
+    color: #001aff;
+}

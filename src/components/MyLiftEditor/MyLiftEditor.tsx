@@ -1,25 +1,34 @@
 'use client';
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import ElevatorVideoPlayer from "../ElevatorVideoPlayer/ElevatorVideoPlayer";
 import "./MyLiftEditor.css";
 import CustomButton from "../CustomButton/CustomButton";
 import MyLiftEditorModal from "./MyLiftEditorModal/MyLiftEditorModal";
 import { CATEGORIES, CategoryDefinition } from "@/constants/elevatorPanel";
+import { LiftJson } from "@/types/elevator";
 
-export default function MyLiftEditor({ elevator }: { elevator: any }) {
+export default function MyLiftEditor({ elevator }: { elevator: LiftJson }) {
     const [modalCategory, setModalCategory] = useState<CategoryDefinition | null>(null);
     const [previewMode, setPreviewMode] = useState<boolean>(false);
+    const [editingLiftData, setEditingLiftData] = useState<LiftJson>(elevator);
 
-    const switchCategory = (category: CategoryDefinition) => {
+    const switchCategory = (category: CategoryDefinition | null) => {
         if (modalCategory === category) return setModalCategory(null);
         setModalCategory(category);
     }
+
+    const onSaveData = (updated: LiftJson) => {
+        setEditingLiftData(updated);
+        switchCategory(null);
+    }
+
+    useEffect(() => setEditingLiftData(elevator), [elevator]);
 
     return (
         <div className="mylift-editor">
             <title>{`${elevator.title} | MyLift Editor` || `MyLift Editor`}</title>
             <div className="mylift-editor__elevator-container">
-                <ElevatorVideoPlayer liftData={elevator} editMode={!previewMode} />
+                <ElevatorVideoPlayer liftData={editingLiftData} editMode={!previewMode} />
                 <div className="mylift-editor__toolbar">
                     <CustomButton
                         text={previewMode ? "↩" : "▶"}
@@ -40,30 +49,14 @@ export default function MyLiftEditor({ elevator }: { elevator: any }) {
                             onClick={() => switchCategory(category)}
                         />
                     ))}
-                    {/* <CustomButton
-                        className="mylift-editor__button"
-                        tooltipClassName="mylift-editor__button-tooltip"
-                        image="/images/liftPanel_mainInfo.svg"
-                        disabled={previewMode}
-                        tooltip="Основная информация"
-                    />
-                    <CustomButton
-                        className="mylift-editor__button"
-                        tooltipClassName="mylift-editor__button-tooltip"
-                        image="/images/liftPanel_elevatorSettings.svg"
-                        disabled={previewMode}
-                        tooltip="Лифт"
-                    />
-                    <CustomButton
-                        className="mylift-editor__button"
-                        tooltipClassName="mylift-editor__button-tooltip"
-                        image="/images/liftPanel_coursebotOptions.svg"
-                        disabled={previewMode}
-                        tooltip="Уровнебот"
-                    /> */}
                 </div>
             </div>
-            <MyLiftEditorModal activeCondition={modalCategory !== null && !previewMode} category={modalCategory} elevator={elevator} />
+            <MyLiftEditorModal
+                activeCondition={modalCategory !== null && !previewMode}
+                category={modalCategory}
+                elevator={editingLiftData}
+                onSave={onSaveData}
+            />
         </div>
     );
 }

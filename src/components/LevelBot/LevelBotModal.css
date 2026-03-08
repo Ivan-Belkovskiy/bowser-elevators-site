@@ -1,0 +1,195 @@
+/* Overlay */
+.levelbot-overlay {
+    position: fixed;
+    inset: 0;
+    background: #000000cc;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 500;
+}
+
+/* Modal */
+.levelbot-modal {
+    width: 80%;
+    height: 80%;
+    background: #0d2645;
+    border: 6px solid #6b6b7a;
+    border-radius: 12px;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+/* Placeholder for head (will be replaced by CoursebotHead) */
+.levelbot-head-placeholder {
+    height: 70px;
+    background: #1a355c;
+    color: #a7ff6d;
+    font-size: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-bottom: 4px solid #6b6b7a;
+}
+
+/* Content layout */
+.levelbot-content {
+    flex: 1;
+    display: flex;
+}
+
+/* Slots area */
+.levelbot-slots {
+    flex: 1;
+    padding: 16px;
+    overflow-y: auto;
+}
+
+/* Slot */
+.levelbot-slot {
+    background: #1f3a63;
+    border: 3px solid #6b6b7a;
+    border-radius: 8px;
+    padding: 8px;
+    margin-bottom: 12px;
+    cursor: pointer;
+    color: #fff;
+}
+
+.levelbot-slot--autosave {
+    border-color: #a7ff6d;
+}
+
+.levelbot-slot-title {
+    font-weight: bold;
+    margin-bottom: 6px;
+}
+
+.levelbot-slot-thumb {
+    width: 100%;
+    height: 120px;
+    background: #000;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.levelbot-slot-thumb img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.levelbot-slot-thumb-empty {
+    width: 100%;
+    height: 100%;
+    background: #333;
+}
+
+.levelbot-slots-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+}
+
+/* Sidebar floors */
+.levelbot-sidebar {
+    width: 180px;
+    border-left: 4px solid #6b6b7a;
+    padding: 12px;
+    overflow-y: auto;
+}
+
+.levelbot-floor-btn {
+    width: 100%;
+    background: #1f3a63;
+    border: 3px solid #6b6b7a;
+    border-radius: 8px;
+    padding: 8px;
+    margin-bottom: 12px;
+    cursor: pointer;
+    color: #fff;
+}
+
+.levelbot-floor-btn.active {
+    border-color: #a7ff6d;
+}
+
+.levelbot-floor-thumb {
+    width: 100%;
+    height: 80px;
+    background: #000;
+    margin-top: 6px;
+}
+
+.levelbot-floor-thumb img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+/* Footer */
+.levelbot-footer {
+    height: 60px;
+    border-top: 4px solid #6b6b7a;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background: #1a355c;
+}
+
+.levelbot-footer button {
+    padding: 8px 16px;
+    background: #fff;
+    border: 2px solid #6b6b7a;
+    border-radius: 6px;
+    cursor: pointer;
+}
+
+/* Slot modal */
+.levelbot-slot-modal-overlay {
+    position: absolute;
+    inset: 0;
+    background: #000000aa;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.levelbot-slot-modal {
+    width: 400px;
+    background: #1f3a63;
+    border: 4px solid #6b6b7a;
+    border-radius: 12px;
+    padding: 16px;
+    color: #fff;
+}
+
+.levelbot-slot-modal-thumb img {
+    width: 100%;
+    border-radius: 6px;
+}
+
+.levelbot-slot-modal-buttons {
+    margin-top: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+
+.coursebot__button.close-button {
+    position: absolute;
+    top: 2%;
+    left: 1%;
+    width: 70px;
+    height: 70px;
+    font-size: 36px;
+    background-color: #ffc400;
+    color: #fff;
+    border-radius: 5px;
+    border: 3px solid #fff;
+    cursor: pointer;
+}
+

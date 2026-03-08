@@ -1,0 +1,224 @@
+.slot-info-modal {
+    position: absolute;
+    width: calc(100% - 40px);
+    margin-left: 20px;
+    background-size: 100% 25px;
+    height: 569px;
+    background-color: #cecde9;
+    z-index: 80;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    transition: all 0.25s ease-in-out 0s;
+}
+
+.slot-info-modal.closed {
+    translate: 0 100%;
+    opacity: 0;
+    pointer-events: none;
+}
+
+.slot-info-modal__top {
+    width: 100%;
+    height: 70px;
+    display: flex;
+    justify-content: start;
+    align-items: center;
+}
+
+.slot-info-modal__top-left {
+    width: 85%;
+    height: 100%;
+    display: flex;
+    justify-content: start;
+    align-items: center;
+}
+
+.slot-info-modal__top-right {
+    width: 15%;
+    height: 100%;
+    display: flex;
+    justify-content: end;
+    align-items: center;
+}
+
+.slot-info-modal__top.empty-slot {
+    background-color: #ce5f5f;
+}
+
+.slot-info-modal__top.autosave-slot {
+    background-color: #dab900;
+}
+
+.slot-info-modal__title {
+    font-size: 27px;
+    margin-left: 20px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.slot-info-modal__title::before {
+    content: "";
+    position: relative;
+    display: inline-block;
+    width: 30px;
+    height: 30px;
+    background-color: #000;
+    border-radius: 40px;
+    margin-right: 15px;
+}
+
+.slot-info-modal__button.close-button {
+    width: 50px;
+    height: 50px;
+    font-size: 40px;
+    background-color: #051b3a;
+    color: #fff;
+    border-radius: 3px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-right: 10px;
+    cursor: pointer;
+    scale: 1;
+    transition: scale 0.2s ease 0s;
+}
+
+.slot-info-modal__button.close-button:hover {
+    scale: 1.1;
+}
+
+.slot-info-modal__main {
+    width: 100%;
+    height: 330px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.slot-info-modal__main-left {
+    width: 51%;
+    height: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.slot-info-modal__preview {
+    position: relative;
+    width: 500px;
+    min-height: 300px;
+    background-color: #051b3a;
+}
+
+.slot-info-modal__main-right {
+    width: 48%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: start;
+    align-items: center;
+}
+
+.slot-info-modal__metadata {
+    position: absolute;
+    width: 100%;
+    height: 40px;
+    bottom: 0;
+    background-color: #00000071;
+    color: #fff;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.slot-info-modal__label.metadata-createdAt {
+    width: 50%;
+    height: 100%;
+    display: flex;
+    justify-content: left;
+    align-items: center;
+    margin-left: 10px;
+    font-size: 17px;
+}
+
+.slot-info-modal__label.metadata-currentTime {
+    width: 50%;
+    height: 100%;
+    display: flex;
+    justify-content: right;
+    align-items: center;
+    margin-right: 10px;
+    font-size: 17px;
+}
+
+.slot-info-modal__buttons {
+    width: 100%;
+    height: 140px;
+    border-top: 3px solid #000;
+    margin-top: 25px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-evenly;
+    align-items: center;
+    background-color: #babbd4;
+    padding: 0 25px;
+}
+
+.slot-info-modal__button-group {
+    width: 100%;
+    height: 50px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.slot-info-modal__buttons.autosave-slot {
+    /* display: grid;
+    grid-template-columns: repeat(2, 48%); */
+}
+
+.slot-info-modal__button {
+    width: 100%;
+    height: 50px;
+    background-color: #e2e4ed;
+    border-radius: 6px;
+    color: #051b3a;
+    font-size: 20px;
+    cursor: pointer;
+    scale: 1;
+    transition: all 0.2s ease 0s;
+    margin: 0 5px;
+}
+
+.slot-info-modal__buttons .slot-info-modal__button:hover {
+    scale: 1.03;
+}
+
+.clear-autosave-button {
+    background-color: #b30000 !important;
+    color: #ffffff !important;
+}
+
+.mylift {
+    color: transparent;
+    background: #0029f8;
+    background: linear-gradient(90deg, rgba(0, 41, 248, 1) 0%, rgba(223, 0, 248, 1) 100%);
+    background-clip: text;
+    /* font-weight: bold; */
+}
+
+.slot-info-modal__notification.empty-slot-notification {
+    width: 70%;
+    height: 499px;
+    font-size: 20px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+
+.slot-info-modal__notification.empty-slot-notification button {
+    margin-top: 20px;
+}
