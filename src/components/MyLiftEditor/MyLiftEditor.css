@@ -1,4 +1,8 @@
-.mylift-editor {}
+.mylift-editor {
+    max-width: 100vw;
+    max-height: 100vh;
+    overflow: hidden;
+}
 
 .mylift-editor__elevator-container {}
 

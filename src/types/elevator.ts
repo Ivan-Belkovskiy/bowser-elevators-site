@@ -2,6 +2,7 @@ import { ActionParam } from "@/constants/elements";
 import { CSSProperties } from "react";
 import { AccessCondition } from "./data/FloorTypes";
 import { VideoData } from "./data/VideoData";
+import { PlayerState } from "@/components/MyLiftPlayer/MyLiftPlayer";
 
 export interface Floor {
   id: string;
@@ -67,6 +68,16 @@ export interface SlotData {
   videoUrl?: string;
 }
 
+export interface AutosaveSlotData {
+  main: SlotData;
+  playerState: PlayerState;
+  video: {
+    id: string;
+    progress: number;
+    viewCount: number;
+  }
+}
+
 export interface DoorKeyframe {
   time: number;
   leftDoorX: number;
@@ -83,6 +94,20 @@ export interface CoursebotFloorSlotConfig {
   autosave?: SlotData;
   fragments: SlotData[];
 };
+
+export interface VideoStats {
+  views: number;
+  firstWatched?: string;
+  lastWatched?: string;
+  totalWatchTime?: number;
+  progress?: number; // 0–1
+  completed?: boolean;
+  watchHistory?: {
+    timestamp: string;
+    watchTime: number; // в секундах
+    completed: boolean;
+  }[];
+}
 
 
 export interface LiftJson {
@@ -129,6 +154,7 @@ export interface LiftJson {
         open: DoorAnimationConfig;
         close: DoorAnimationConfig;
       };
+      closeDelay: number; // Время ожидания перед закрытием дверей
     }
 
 
@@ -158,7 +184,10 @@ export interface LiftJson {
     buttonPanel: {
       blocks: ButtonBlock[];
     };
+
   };
+
+  videoStats: Record<string, VideoStats>;
 
   meta: {
     createdAt: string;

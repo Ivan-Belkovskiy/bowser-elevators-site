@@ -101,7 +101,11 @@
     background-color: #dab900;
 }
 
-.coursebot-base__slot:hover {
+.coursebot-base__slot.autosave.locked {
+    cursor: not-allowed;
+}
+
+.coursebot-base__slot:hover:not(.locked) {
     scale: 1.02;
     cursor: pointer;
 }
@@ -109,7 +113,12 @@
 .coursebot-slot__preview {
     width: 180px;
     height: 100px;
-    background-color: #323245;
+    background-color: #323245;display: flex;justify-content: center;
+    align-items: center;
+}
+
+.coursebot-slot__preview.with-data {
+    background-color: #000;
 }
 
 .coursebot-slot__title {
@@ -123,6 +132,7 @@
     justify-content: center;
     align-items: center;
     color: #384f75;
+    text-overflow: ellipsis;
 }
 
 .coursebot-base__slot.autosave .coursebot-slot__title {
@@ -141,4 +151,56 @@
 .coursebot-base__content::-webkit-scrollbar-thumb {
     background-color: #4e4e60;
     border-radius: 20px;
+}
+
+
+@keyframes slotFillReveal {
+    0% {
+        clip-path: inset(100% 0 0 0);
+        opacity: 0.2;
+    }
+    60% {
+        clip-path: inset(0 0 0 0);
+        opacity: 1;
+    }
+    100% {
+        clip-path: inset(0 0 0 0);
+        opacity: 1;
+    }
+}
+
+.coursebot-slot__preview.filling img {
+    animation: slotFillReveal 1.4s linear forwards;
+}
+
+@keyframes slotBounce {
+     0%   { transform: translateY(0); }
+    30%  { transform: translateY(-60px); }
+    40%  { transform: translateY(-60px); }
+    60%  { transform: translateY(0); }
+    70%  { transform: translateY(-10px); }
+    80%  { transform: translateY(0); }
+    90%  { transform: translateY(-5px); }
+    100% { transform: translateY(0); }
+    /* 0%   { transform: translateY(0); }
+    20%  { transform: translateY(-14px); }
+    35%  { transform: translateY(0); }
+    50%  { transform: translateY(-8px); }
+    65%  { transform: translateY(0); }
+    80%  { transform: translateY(-4px); }
+    100% { transform: translateY(0); } */
+}
+
+.coursebot-base__slot.bouncing {
+    animation: slotBounce 0.7s ease-out;
+}
+
+@keyframes slotPop {
+    0%   { transform: scale(1); }
+    40%  { transform: scale(1.2); }
+    100% { transform: scale(1); }
+}
+
+.coursebot-base__slot.pop {
+    animation: slotPop 0.35s ease-out;
 }

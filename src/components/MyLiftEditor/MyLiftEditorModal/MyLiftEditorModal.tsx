@@ -52,10 +52,10 @@ export default function MyLiftEditorModal({ activeCondition, category, elevator,
             id: String(liftData.floors.length + 1),
             displaySymbol: String(liftData.floors.length + 1),
             accessCondition: { type: 'free' },
-            videoData: {
-                title: '',
-                url: '',
-            }, // No video
+            // videoData: {
+            //     title: '',
+            //     url: '',
+            // }, // No video
         };
         setLiftData({
             ...liftData,
@@ -485,6 +485,26 @@ export default function MyLiftEditorModal({ activeCondition, category, elevator,
                                             }
                                         })}
                                     >Открыть редактор анимации</button>
+                                </div>
+                                <div className="mylift-editor-modal__property">
+                                    <span className="mylift-editor-modal__label">Время ожидания перед закрытием дверей:</span>
+                                    <input
+                                        type="number"
+                                        className="mylift-editor-modal__input door-time-input"
+                                        min={0}
+                                        max={18}
+                                        value={liftData.elevator.doorConfig.closeDelay || 4}
+                                        onChange={(e) => setLiftData({
+                                            ...liftData,
+                                            elevator: {
+                                                ...liftData.elevator,
+                                                doorConfig: {
+                                                    ...liftData.elevator.doorConfig,
+                                                    closeDelay: Number(e.target.value),
+                                                }
+                                            }
+                                        })}
+                                    />
                                 </div>
                             </section>
                             <section className="mylift-editor-modal__section">

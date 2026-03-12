@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import fs from "fs";
 import path from "path";
 import { LiftJson, Floor, ElevatorButton, ButtonBlock, ElevatorButtonStyles, ElevatorDisplayConfig } from "@/types/elevator";
+import { SavePayload } from "@/components/LevelBot/LevelBotModal";
 
 export async function GET(
   req: NextRequest,
@@ -80,7 +81,93 @@ export async function PUT(
       image_elevator_panel: (lift, name) => (lift.elevator.images.panel.url = `assets/images/elevator/${name}`),
     };
 
-    if (formData.has('updated_lift_json')) {
+    if (formData.has('coursebot__autosave')) {
+      const data = formData.get('coursebot__autosave');
+      if (data && typeof data === 'string') {
+        const slotData = JSON.parse(data);
+
+        const base64 = slotData.thumbnailUrl.replace(/^data:image\/png;base64,/, "");
+        const targetPath = path.join(
+          assetsPath,
+          "assets",
+          "images",
+          "coursebot",
+          slotData.videoId,
+          `AUTOSAVE.png`
+        );
+
+        fs.mkdirSync(path.dirname(targetPath), { recursive: true });
+
+        fs.writeFileSync(targetPath, Buffer.from(base64, "base64"));
+
+        liftData.coursebot.slots[slotData.floorId].autosave = {
+          id: 0,
+          empty: false,
+          ...slotData,
+          thumbnailUrl: `/Elevators/${userId}/${liftData.id}/assets/images/coursebot/${slotData.videoId}/AUTOSAVE.png`,
+          createdAt: new Date().toLocaleString().replace(',', ''),
+        }
+      }
+    } else if (formData.has('coursebot__edit_fragment')) {
+      const data = formData.get('coursebot__edit_fragment');
+      if (data && typeof data === 'string') {
+        const slotData = JSON.parse(data);
+
+        liftData.coursebot.slots[slotData.floorId].fragments[slotData.slotId] = {
+          ...liftData.coursebot.slots[slotData.floorId].fragments[slotData.slotId],
+          ...slotData,
+        }
+      }
+    } else if (formData.has('coursebot__autosave_clear')) {
+      const data = formData.get('coursebot__autosave_clear');
+      if (data && typeof data === 'string') {
+        const floorId: string = data;
+
+        liftData.coursebot.slots[floorId].autosave = {
+          id: 0,
+          empty: true,
+        }
+      }
+    } else if (formData.has('coursebot__delete_fragment')) {
+      const data = formData.get('coursebot__delete_fragment');
+      if (data && typeof data === 'string') {
+        const slotData = JSON.parse(data);
+
+        liftData.coursebot.slots[slotData.floorId].fragments[slotData.slotId] = {
+          id: slotData.slotId,
+          empty: true
+        }
+      }
+    } else if (formData.has('coursebot__save_fragment')) {
+      const data = formData.get('coursebot__save_fragment');
+      if (data && typeof data === 'string') {
+        const payload: SavePayload & { title: string; slotIndex: number } = JSON.parse(data);
+        const base64 = payload.thumbnailUrl.replace(/^data:image\/png;base64,/, "");
+        const targetPath = path.join(
+          assetsPath,
+          "assets",
+          "images",
+          "coursebot",
+          payload.videoId,
+          `slot_${payload.slotIndex}.png`
+        );
+
+        fs.mkdirSync(path.dirname(targetPath), { recursive: true });
+
+        fs.writeFileSync(targetPath, Buffer.from(base64, "base64"));
+
+
+        liftData.coursebot.slots[payload.floorId].fragments[payload.slotIndex] = {
+          id: payload.slotIndex,
+          title: payload.title,
+          empty: false,
+          createdAt: new Date().toLocaleString().replace(',', ''),
+          thumbnailUrl: `/Elevators/${userId}/${liftData.id}/assets/images/coursebot/${payload.videoId}/slot_${payload.slotIndex}.png`,
+          timecode: payload.timecode,
+
+        }
+      }
+    } else if (formData.has('updated_lift_json')) {
       for (const [key, value] of formData.entries()) {
 
 
@@ -103,7 +190,7 @@ export async function PUT(
           soundMap[key](liftData, value.name);
           const targetDir = path.join(assetsPath, "assets", "sounds");
           const buffer = Buffer.from(await value.arrayBuffer());
-          
+
           fs.mkdirSync(targetDir, { recursive: true });
           fs.writeFileSync(path.join(targetDir, value.name), buffer);
         }

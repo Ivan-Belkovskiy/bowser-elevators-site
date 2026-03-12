@@ -1,0 +1,40 @@
+.mylift-seek-buttons {
+  display: flex;
+  align-items: center;
+  /* gap: 10px; */
+}
+
+.mylift-seek-button {
+  width: 35px;
+  height: 35px;
+  background-size: contain;
+  background-repeat: no-repeat;
+  cursor: pointer;
+  transition: transform 0.2s ease;
+  background-position: center;
+  scale: 0.95;
+}
+
+.mylift-seek-button.left {
+  background-image: url('/images/player/mylift-player/ui/controls-left-button.svg');
+}
+
+.mylift-seek-button.left:hover {
+  background-image: url('/images/player/mylift-player/ui/controls-left-button-hover.svg');
+  /* transform: scale(1.05); */
+}
+
+.mylift-seek-button.right {
+  background-image: url('/images/player/mylift-player/ui/controls-right-button.svg');
+}
+
+.mylift-seek-button.right:hover {
+  background-image: url('/images/player/mylift-player/ui/controls-right-button-hover.svg');
+  /* transform: scale(1.05); */
+}
+
+.mylift-seek-button.right.disabled {
+  /* opacity: 0.3;
+  cursor: default;
+  transform: none; */
+}

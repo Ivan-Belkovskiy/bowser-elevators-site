@@ -107,6 +107,7 @@ export async function POST(req: NextRequest) {
         hiddenAutosave: false,
         slots: coursebotSlotConfig
       },
+      videoStats: {},
       elevator: {
         soundEffects: {
           doorOpen: null,
@@ -133,6 +134,7 @@ export async function POST(req: NextRequest) {
         doorConfig: {
           type: "central",
           direction: null,
+          closeDelay: 4,
           animations: {
             open: {
               durationMs: 2000,

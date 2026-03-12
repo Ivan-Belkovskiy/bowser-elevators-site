@@ -4,6 +4,7 @@ import "./VideoSettingsModal.css";
 import { ChangeEvent, ChangeEventHandler, useRef, useState } from "react";
 import VideoFileNavigation from "../VideoFileNavigation/VideoFileNavigation";
 import FileUploader from "../FileUploader/FileUploader";
+import { v4 } from "uuid";
 export default function VideoSettingsModal({ floor, idx, updateVideoData, onClose }: VideoSettingsModalProps) {
     const [isVideoLoaded, setIsVideoLoaded] = useState<boolean | null>(null);
     const [fileNavOpened, setFileNavOpened] = useState<boolean>(false);
@@ -102,7 +103,10 @@ export default function VideoSettingsModal({ floor, idx, updateVideoData, onClos
                     {fileNavOpened && <VideoFileNavigation
                         defaultPath={floor.videoData?.url || "D:/Media/"}
                         onClose={() => setFileNavOpened(false)}
-                        onSelect={(value) => updateVideoData?.(idx, { url: value })}
+                        onSelect={(value) => updateVideoData?.(idx, {
+                            id: v4(),
+                            url: value,
+                        })}
                     />}
                 </div>
             </div>

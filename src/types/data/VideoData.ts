@@ -1,4 +1,5 @@
 export interface VideoData {
+    id: string;
     title: string,
     url: string,
     image?: File | string,

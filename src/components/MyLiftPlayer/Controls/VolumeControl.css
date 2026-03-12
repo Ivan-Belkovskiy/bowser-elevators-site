@@ -1,0 +1,33 @@
+.mylift-volume-control {
+  position: relative;
+  display: flex;
+  align-items: center;
+  width: 32px;
+  height: 32px;
+}
+
+.mylift-volume-button {
+  width: 35px;
+  height: 100%;
+  background-size: contain;
+  background-repeat: no-repeat;
+  background-position: center;
+  cursor: pointer;
+  scale: 0.9;
+}
+
+.mylift-volume-button.unmuted {
+  background-image: url('/images/player/mylift-player/ui/controls-volume-button.svg');
+}
+
+.mylift-volume-button.muted {
+  background-image: url('/images/player/mylift-player/ui/controls-volume-off-button.svg');
+}
+
+.mylift-volume-slider {
+  position: absolute;
+  bottom: 40px;
+  left: 50%;
+  transform: translateX(-50%) rotate(-90deg);
+  width: 80px;
+}

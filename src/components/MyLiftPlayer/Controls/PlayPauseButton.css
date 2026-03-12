@@ -1,0 +1,31 @@
+.mylift-play-button {
+  display: inline-block;
+  width: 30px;
+  height: 30px;
+  background-size: contain;
+  background-repeat: no-repeat;
+  background-position: center;
+  cursor: pointer;
+  transition: transform 0.2s ease, opacity 0.2s ease;
+  scale: 0.85;
+}
+
+/* Play */
+.mylift-play-button.play {
+  background-image: url('/images/player/mylift-player/ui/controls-play-button.svg');
+}
+
+.mylift-play-button.play:hover {
+  background-image: url('/images/player/mylift-player/ui/controls-play-button-hover.svg');
+  /* transform: scale(1.05); */
+}
+
+/* Pause */
+.mylift-play-button.pause {
+  background-image: url('/images/player/mylift-player/ui/controls-pause-button.svg');
+}
+
+.mylift-play-button.pause:hover {
+  background-image: url('/images/player/mylift-player/ui/controls-pause-button-hover.svg');
+  /* transform: scale(1.05); */
+}

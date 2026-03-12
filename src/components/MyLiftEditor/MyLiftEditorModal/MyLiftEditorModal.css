@@ -179,3 +179,7 @@ input[type=checkbox]:disabled {
 .mylift-editor-modal__button.display-button:hover {
     outline: 4px dashed #00ffea;
 }
+
+.door-time-input {
+    width: 80px;
+}

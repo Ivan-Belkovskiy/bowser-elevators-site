@@ -1,7 +1,8 @@
 import { ElevatorDirections, ElevatorDisplayConfig, ElevatorDisplayTypes } from "@/types/elevator";
 import "./ElevatorDisplay.css";
 import { generateDisplaySVG } from "@/utils/elevator/displayGenerator";
-import { CSSProperties, useEffect, useRef, useState } from "react";
+import { CSSProperties, useEffect, useRef } from "react";
+import AudioController from "@/core/audio/AudioController";
 
 export default function ElevatorDisplay({
     inElevator,
@@ -27,55 +28,43 @@ export default function ElevatorDisplay({
     options?: ElevatorDisplayConfig['options']
 }) {
 
-    const audioRef = useRef<HTMLAudioElement | null>(null);
-    const [playingTrack, setPlayingTrack] = useState<number | null>(null);
+    const prevFloor = useRef<number>(floor);
+    const prevDirection = useRef<ElevatorDirections>(direction);
 
-    useEffect(() => {
-        if (playingTrack === null) return;
-
-        const trackNumber = ((playingTrack - 1) % 5) + 1;
-
-        const audio = new Audio(
-            `/audio/music/elevator/MogilevLiftMach/elevator-music-${String(trackNumber).padStart(2, "0")}.mp3`
-        );
-        audioRef.current = audio;
-
-        const handleEnded = () => {
-            setPlayingTrack(prev => (prev ?? 0) + 1);
-        };
-
-        audio.addEventListener("ended", handleEnded);
-
-        audio.addEventListener("canplay", () => {
-            audio.currentTime = 0;
-            audio.play().catch(() => { });
-        }, { once: true });
-
-        return () => {
-            audio.removeEventListener("ended", handleEnded);
-            audio.pause();
-        };
-    }, [playingTrack]);
-
-    const playBackgroundMusic = () => {
-        setPlayingTrack(1);
-    };
-
-    const stopBackgroundMusic = () => {
-        setPlayingTrack(null);
-        if (audioRef.current) {
-            audioRef.current.pause();
-            audioRef.current = null;
-        }
-    };
-
+    // -----------------------------
+    // Background music control
+    // -----------------------------
     useEffect(() => {
         if (options?.backgroundMusic === true && !editMode) {
-            playBackgroundMusic();
+            AudioController.enableElevatorMusic();
         } else {
-            stopBackgroundMusic();
+            AudioController.disableElevatorMusic();
         }
-    }, [editMode, options]);
+    }, [options?.backgroundMusic, editMode]);
+
+    // -----------------------------
+    // Floor announcements
+    // -----------------------------
+    useEffect(() => {
+        if (editMode) return;
+
+        if (floor !== prevFloor.current) {
+            AudioController.playFloorAnnouncement(floor);
+            prevFloor.current = floor;
+        }
+    }, [floor, editMode]);
+
+    // -----------------------------
+    // Direction announcements
+    // -----------------------------
+    useEffect(() => {
+        if (editMode) return;
+
+        if (direction !== prevDirection.current && direction !== "NONE") {
+            AudioController.playDirectionAnnouncement(direction);
+            prevDirection.current = direction;
+        }
+    }, [direction, editMode]);
 
     return (
         <div

@@ -50,10 +50,10 @@ export default function NewElevatorModal() {
             id: String(floors.length + 1),
             displaySymbol: String(floors.length + 1),
             accessCondition: { type: 'free' },
-            videoData: {
-                title: '',
-                url: '',
-            }, // No video
+            // videoData: {
+            //     title: '',
+            //     url: '',
+            // }, // No video
         };
         setFloors([...floors, newFloor]);
     }

@@ -42,13 +42,22 @@
     align-items: center;
 }
 
-.slot-info-modal__top.empty-slot {
-    background-color: #ce5f5f;
-}
-
 .slot-info-modal__top.autosave-slot {
     background-color: #dab900;
 }
+
+.slot-info-modal__top, .slot-info-modal__top.slot-data-edit-mode__delete {
+    background-color: #ce5f5f;
+}
+
+.slot-info-modal__top.with-data:not(.autosave-slot) {
+    background-color: #228d22;
+}
+
+.slot-info-modal__top.slot-data-edit-mode__title {
+    background-color: #b86c0a;
+}
+
 
 .slot-info-modal__title {
     font-size: 27px;
@@ -109,6 +118,9 @@
     position: relative;
     width: 500px;
     min-height: 300px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
     background-color: #051b3a;
 }
 
@@ -119,6 +131,11 @@
     flex-direction: column;
     justify-content: start;
     align-items: center;
+}
+
+.slot-info-modal__main-right .slot-info-modal__button {
+    width: 90%;
+    margin-top: 20px;
 }
 
 .slot-info-modal__metadata {
@@ -221,4 +238,67 @@
 
 .slot-info-modal__notification.empty-slot-notification button {
     margin-top: 20px;
+}
+
+
+.slot-info-modal__save-form {
+    width: 60%;
+    height: 499px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-evenly;
+    align-items: center;
+}
+
+.slot-info-modal__overwrite {
+    width: 60%;
+    height: 499px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-evenly;
+    align-items: center;
+}
+
+.slot-info-modal__overwrite .slot-info-modal__preview {
+    width: 400px;
+    min-height: 250px;
+}
+
+.overwrite-slot {
+    font-size: 23px;
+    margin: 0;
+    color: #4b0000;
+    font-weight: bold;
+}
+
+.slot-info-modal__block {
+    width: 100%;
+    font-size: 21px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 10px;
+}
+
+
+.slot-info-modal__input {
+    width: 600px;
+    padding: 2px;
+    outline: none;
+    border: 1px solid #000;
+    border-radius: 4px;
+}
+
+.slot-info-modal__preview.slot-edit-mode {
+    width: 400px;
+    min-height: 250px;
+}
+
+.slot-info-modal__top.autosave-slot ~ .slot-info-modal__save-form {
+    width: 90%;
+}
+
+.delete-button {
+    background-color: #c70000;
+    color: #fff;
 }

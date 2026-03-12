@@ -1,0 +1,47 @@
+.mylift-progress-container {
+  position: relative;
+  width: 75%;
+  /* margin-left: 10px; */
+  display: flex;
+  align-items: center;
+}
+
+.mylift-progress {
+  width: 50%;
+  position: relative;
+  height: 12px;
+  background: #444;
+  cursor: pointer;
+  background-color: #0084ff;
+  border-radius: 20px;
+}
+
+.mylift-progress-bar {
+  position: absolute;
+  height: 100%;
+  background: #00e1ff;
+  border-radius: 20px;
+}
+
+.mylift-progress-allowed {
+  position: absolute;
+  height: 100%;
+  background: rgba(255, 255, 255, 0.2);
+}
+
+.mylift-progress-thumb {
+  position: absolute;
+  /* top: -4px; */
+  width: 12px;
+  height: 12px;
+  background: #9dfff7;
+  border-radius: 50%;
+  transform: translateX(-50%);
+  scale: 1.3;
+}
+
+.mylift-controls__time-display {
+  color: #18e4ff;
+  font-weight: bold;
+  margin-left: 15px;
+}

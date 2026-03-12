@@ -1,0 +1,31 @@
+.mylift-context-menu {
+  position: absolute;
+  background: rgba(20, 20, 20, 0.95);
+  border-radius: 6px;
+  padding: 6px 0;
+  z-index: 9999;
+  width: 220px;
+  backdrop-filter: blur(6px);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.4);
+}
+
+.menu-item {
+  padding: 8px 14px;
+  color: white;
+  font-size: 14px;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.menu-item:hover {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.menu-item.disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+
+.menu-item.disabled:hover {
+  background: none;
+}

@@ -1,3 +1,7 @@
+body {
+    overflow: hidden;
+}
+
 .site-header {
     position: relative;
     width: 100%;

@@ -1,0 +1,40 @@
+.mylift-fullscreen-button {
+  width: 35px;
+  height: 35px;
+  background-size: contain;
+  background-repeat: no-repeat;
+  cursor: pointer;
+  scale: 0.8;
+}
+
+.mylift-fullscreen-button::after {
+  content: '';
+  position: absolute;
+  min-width: 35px;
+  height: 35px;
+  cursor: pointer;
+  background-size: contain;
+  background-repeat: no-repeat;
+  opacity: 0;
+  transition: all 0.5s ease 0s;
+}
+
+.mylift-fullscreen-button.enter {
+  background-image: url('/images/player/mylift-player/ui/controls-fullscreen-button.svg');
+}
+
+.mylift-fullscreen-button.enter::after {
+  background-image: url('/images/player/mylift-player/ui/controls-fullscreen-button-hover.svg');
+}
+
+.mylift-fullscreen-button.exit::after {
+  background-image: url('/images/player/mylift-player/ui/controls-exit-fullscreen-button-hover.svg');
+}
+
+.mylift-fullscreen-button:hover::after {
+  opacity: 1;
+}
+
+.mylift-fullscreen-button.exit {
+  background-image: url('/images/player/mylift-player/ui/controls-exit-fullscreen-button.svg');
+}
