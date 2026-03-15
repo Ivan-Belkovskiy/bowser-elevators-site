@@ -7,7 +7,7 @@ export default function LevelBotSidebar({ currentFloor, floors, onSelect, disabl
         <div className="coursebot-sidebar">
             <div className="coursebot-sidebar__floors">
                 {floors.map((floor, idx) => (
-                    <div className={`coursebot-sidebar__block ${floor.id === currentFloor ? 'current-floor' : ''}`} onClick={() => {
+                    <div key={idx} className={`coursebot-sidebar__block ${floor.id === currentFloor ? 'current-floor' : ''}`} onClick={() => {
                         if (!disabled) {
                             AudioController.playCoursebotSound("tab_button", "/audio/sound/coursebot/coursebot-tab-button-01.wav");
                             onSelect?.(floor.id);

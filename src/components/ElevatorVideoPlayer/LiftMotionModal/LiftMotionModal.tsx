@@ -235,7 +235,7 @@ export default function LiftMotionModal({
                         </div>
                     </div>
 
-                    <div className="lift-motion-modal__right">
+                    {/* <div className="lift-motion-modal__right">
                         <div className="motion-test-area">
                             <div className="motion-floor">3</div>
                             <div className="motion-floor">2</div>
@@ -243,7 +243,7 @@ export default function LiftMotionModal({
 
                             <div className="motion-cab" ref={cabRef}></div>
                         </div>
-                    </div>
+                    </div> */}
                 </div>
 
                 <div className="lift-motion-modal__footer">

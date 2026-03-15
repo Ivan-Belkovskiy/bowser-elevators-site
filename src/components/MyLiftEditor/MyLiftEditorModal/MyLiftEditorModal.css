@@ -183,3 +183,18 @@ input[type=checkbox]:disabled {
 .door-time-input {
     width: 80px;
 }
+
+.mylift-editor-modal__button.upload-image-button {
+    border: 3px solid #0400ff;
+    padding: 2px 10px;
+    cursor: pointer;
+    margin-left: 15px;
+}
+
+.mylift-editor-modal__button.upload-image-button:hover {
+    outline: 2px solid #00ffea;
+}
+
+.mylift-editor-modal__message.uploaded-image-name {
+    margin-left: 10px;
+}

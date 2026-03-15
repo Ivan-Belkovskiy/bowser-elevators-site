@@ -37,7 +37,7 @@ export default function DisplayOptionsModal({ elevator, display, onSave, onClose
             console.error('Ошибка сохранения!');
         }
     }
-    
+
     const onDisplaySelect = (type: ElevatorDisplayTypes) => {
         setEditingDisplay({
             type,
@@ -71,21 +71,30 @@ export default function DisplayOptionsModal({ elevator, display, onSave, onClose
                                 <div key={idx} className="display-options-modal__block display-parameter">
                                     <span className="display-options-modal__label display-param-label">{param.label}:</span>
                                     {param.type === 'select' ? (
-                                        <select
-                                            className="display-options-modal__select display-param-select"
-                                            value={String(editingDisplay.options[param.id]) ?? ""}
-                                            onChange={(e) => setEditingDisplay({
-                                                ...editingDisplay,
-                                                options: {
-                                                    ...editingDisplay.options,
-                                                    [param.id]: e.target.value,
-                                                }
+                                        <>
+                                            <select
+                                                className="display-options-modal__select display-param-select"
+                                                value={String(editingDisplay.options[param.id]) ?? ""}
+                                                onChange={(e) => setEditingDisplay({
+                                                    ...editingDisplay,
+                                                    options: {
+                                                        ...editingDisplay.options,
+                                                        [param.id]: e.target.value,
+                                                    }
+                                                })}
+                                            >
+                                                {param.options?.map((opt, i) => validateOptionByCondition(editingDisplay, opt.condition) && (
+                                                    <option key={i} value={String(opt.value)}>{opt.label}</option>
+                                                ))}
+                                            </select>
+                                            {param.options?.map((opt, idx) => {
+                                                if (opt.message && opt.value === editingDisplay.options[param.id]) return (
+                                                    <div key={idx} className={`display-options-modal__message-block ${opt.message.type}`}>
+                                                        {opt.message.text}
+                                                    </div>
+                                                )
                                             })}
-                                        >
-                                            {param.options?.map((opt, i) => validateOptionByCondition(editingDisplay, opt.condition) && (
-                                                <option key={i} value={String(opt.value)}>{opt.label}</option>
-                                            ))}
-                                        </select>
+                                        </>
                                     ) : (param.type === 'boolean') ? (
                                         <input
                                             type="checkbox"

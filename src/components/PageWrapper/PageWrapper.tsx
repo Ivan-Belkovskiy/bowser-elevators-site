@@ -18,6 +18,12 @@ export default function PageWrapper({ children }: { children?: ReactNode }) {
         </a>
         <div className="site-navigation">
           <div className="site-navigation__left">
+            <a className="site-navigation__item" href="/about">
+              О компании
+            </a>
+            <a className="site-navigation__item" href="/elevators">
+              Продукция
+            </a>
             <a className="site-navigation__item" href="/mylift">
               Bowser Elevators MyLift
             </a>

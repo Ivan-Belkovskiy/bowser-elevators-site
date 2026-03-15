@@ -125,7 +125,12 @@ export async function POST(req: NextRequest) {
             }
           },
           walls: {
-            url: "",
+            left: {
+              url: "",
+            },
+            right: {
+              url: "",
+            }
           },
           panel: {
             url: "",
@@ -315,10 +320,11 @@ export async function POST(req: NextRequest) {
     };
 
     const imageMap: Record<string, (lift: LiftJson, fileName: string) => void> = {
-      image_elevator_doors_left: (lift, name) => (lift.elevator.images.doors.left.url = `assets/images/elevator/${name}`),
-      image_elevator_doors_right: (lift, name) => (lift.elevator.images.doors.right.url = `assets/images/elevator/${name}`),
-      image_elevator_walls: (lift, name) => (lift.elevator.images.walls.url = `assets/images/elevator/${name}`),
-      image_elevator_panel: (lift, name) => (lift.elevator.images.panel.url = `assets/images/elevator/${name}`),
+      image_elevator_doors_left: (lift, name) => (lift.elevator.images.doors.left.url = `/Elevators/${userId}/${liftId}/assets/images/elevator/${name}`),
+      image_elevator_doors_right: (lift, name) => (lift.elevator.images.doors.right.url = `/Elevators/${userId}/${liftId}/assets/images/elevator/${name}`),
+      image_elevator_walls_left: (lift, name) => (lift.elevator.images.walls.left.url = `/Elevators/${userId}/${liftId}/assets/images/elevator/${name}`),
+      image_elevator_walls_right: (lift, name) => (lift.elevator.images.walls.right.url = `/Elevators/${userId}/${liftId}/assets/images/elevator/${name}`),
+      image_elevator_panel: (lift, name) => (lift.elevator.images.panel.url = `/Elevators/${userId}/${liftId}/assets/images/elevator/${name}`),
     };
 
     for (const [key, value] of formData.entries()) {

@@ -9,12 +9,15 @@ import ElevatorDisplay from "./ElevatorDisplay/ElevatorDisplay";
 import DisplayOptionsModal from "./DisplayOptionsModal/DisplayOptionsModal";
 import LevelBotModal, { LevelBotMode, SavePayload } from "../LevelBot/LevelBotModal";
 
-import MyLiftPlayer, { PlayerState } from "../MyLiftPlayer/MyLiftPlayer";
+import MyLiftPlayer, { MyLiftPlayerMode, PlayerState } from "../MyLiftPlayer/MyLiftPlayer";
 import { EditingSlotData } from "../LevelBot/SlotInfoModal/SlotInfoModal";
 import AudioController from "@/core/audio/AudioController";
 import { useElevatorEngine } from "@/hooks/elevator/useElevatorEngine";
 import { useElevatorMaster } from "@/hooks/elevator/useElevatorMaster";
 import { useSimpleElevator } from "@/hooks/elevator/useSimpleElevator";
+import ElevatorImagesModal, { ElevatorImagesModalType } from "./ElevatorImagesModal/ElevatorImagesModal";
+import { useElevator } from "@/hooks/elevator/useElevator";
+import PlayModeModal from "../MyLiftPlayer/PlayModeModal";
 
 export type ElevatorDoorState = "closed" | "closing" | "opened" | "opening";
 
@@ -40,6 +43,14 @@ export default function ElevatorVideoPlayer({
     const [coursebotMode, setCoursebotMode] = useState<LevelBotMode>('default');
     const [coursebotSavePayload, setSavePayload] = useState<SavePayload>();
 
+    const [isCoursebotTransit, setIsCoursebotTransit] = useState(false);
+    const [pendingSlotLoad, setPendingSlotLoad] = useState<{ slot: SlotData, floorIndex: number } | null>(null);
+
+    const [isModeSelectorOpened, setModeSelectorOpened] = useState(false);
+    const [playerMode, setPlayerMode] = useState<"full" | "free">("free");
+    const activatePlayerRef = useRef<((mode: MyLiftPlayerMode) => void) | null>(null);
+    const modeSelectorState = useRef(false);
+
     // -----------------------------
     // MyLiftPlayer integration
     // -----------------------------
@@ -49,6 +60,194 @@ export default function ElevatorVideoPlayer({
     // const onDoorCloseAttemptRef = useRef<(() => void) | null>(null);
 
     const playerStateRef = useRef<PlayerState | null>(null);
+
+    // ----------------------------
+    // Door Animations
+    // ----------------------------
+
+    const [doorState, setDoorState] = useState<ElevatorDoorState>("closed");
+    const doorStateRef = useRef<ElevatorDoorState>("closed");
+
+    const updateDoorState = (newState: ElevatorDoorState) => {
+        setDoorState(newState);
+        doorStateRef.current = newState;
+    };
+    const [doorAnimKind, setDoorAnimKind] = useState<"open" | "close" | null>(null);
+    const [doorAnimTime, setDoorAnimTime] = useState(0);
+    const doorAnimFrameRef = useRef<number | null>(null);
+
+    const openFinishTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+    const autoCloseTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+
+
+    function clearDoorTimers() {
+        if (openFinishTimeoutRef.current) {
+            clearTimeout(openFinishTimeoutRef.current);
+            openFinishTimeoutRef.current = null;
+        }
+        if (autoCloseTimeoutRef.current) {
+            clearTimeout(autoCloseTimeoutRef.current);
+            autoCloseTimeoutRef.current = null;
+        }
+    }
+
+
+    function applyCurve(t: number, curve: DoorAnimationConfig["curve"]) {
+        if (curve === "linear") return t;
+        if (curve === "ease-in") return t * t;
+        if (curve === "ease-out") return 1 - (1 - t) * (1 - t);
+        if (curve === "ease-in-out") {
+            return t < 0.5 ? 2 * t * t : 1 - Math.pow(-2 * t + 2, 2) / 2;
+        }
+        return t;
+    }
+
+    function getDoorOffsets(
+        anim: DoorAnimationConfig,
+        tNorm: number
+    ) {
+        const kfs = anim.keyframes;
+
+        if (!kfs.length) return { leftDoorX: 0, rightDoorX: 0 };
+        if (kfs.length === 1) return { leftDoorX: kfs[0].leftDoorX, rightDoorX: kfs[0].rightDoorX };
+
+        let prev = kfs[0];
+        let next = kfs[kfs.length - 1];
+
+        for (let i = 0; i < kfs.length - 1; i++) {
+            if (tNorm >= kfs[i].time && tNorm <= kfs[i + 1].time) {
+                prev = kfs[i];
+                next = kfs[i + 1];
+                break;
+            }
+        }
+
+        const rawT = (tNorm - prev.time) / (next.time - prev.time);
+        const t = applyCurve(rawT, anim.curve);
+        const lerp = (a: number, b: number) => a + (b - a) * t;
+
+        return {
+            leftDoorX: lerp(prev.leftDoorX, next.leftDoorX),
+            rightDoorX: lerp(prev.rightDoorX, next.rightDoorX),
+        };
+    }
+
+    function playDoorAnimation(kind: "open" | "close") {
+        const anim = data.elevator.doorConfig.animations[kind];
+        if (!anim) return;
+
+        setDoorAnimKind(kind);
+        setDoorAnimTime(0);
+
+        if (kind === 'open') updateDoorState('opening');
+        else updateDoorState('closing');
+
+        const soundUrl =
+            kind === "open"
+                ? data.elevator.soundEffects.doorOpen
+                : data.elevator.soundEffects.doorClose;
+
+
+        if (soundUrl) {
+            if (kind === 'open') AudioController.playDoorOpen(soundUrl);
+            else AudioController.playDoorClose(soundUrl);
+        }
+        // if (soundUrl) {
+        //     const audio = new Audio(soundUrl);
+        //     doorAudioRef.current = audio;
+        //     audio.play().catch(() => { });
+        // }
+
+        const duration = anim.durationMs;
+        const start = performance.now();
+
+        const loop = (now: number) => {
+            const elapsed = now - start;
+            const t = Math.min(1, elapsed / duration);
+            setDoorAnimTime(t);
+            // console.log(t);
+
+            if (t < 1) {
+                doorAnimFrameRef.current = requestAnimationFrame(loop);
+            } else {
+                if (kind === 'open') updateDoorState('opened');
+                else updateDoorState('closed');
+
+                // setDoorAnimKind(null);
+            }
+        };
+
+        if (doorAnimFrameRef.current) cancelAnimationFrame(doorAnimFrameRef.current);
+        doorAnimFrameRef.current = requestAnimationFrame(loop);
+    }
+
+
+    const maxOffset = 305;
+    let leftOffsetPx = 0;
+    let rightOffsetPx = 0;
+
+    const doorType = data.elevator.doorConfig.type;
+    const doorOpeningDir = data.elevator.doorConfig.direction;
+
+    if (doorAnimKind) {
+        const anim = data.elevator.doorConfig.animations[doorAnimKind];
+        const { leftDoorX, rightDoorX } = getDoorOffsets(anim, doorAnimTime);
+
+
+        if (doorType === "central") {
+            leftOffsetPx = -leftDoorX * maxOffset;
+            rightOffsetPx = rightDoorX * maxOffset;
+        } else if (doorType === "telescopic") {
+            if (doorOpeningDir === 'left') {
+                leftOffsetPx = -leftDoorX * maxOffset;
+                rightOffsetPx = -rightDoorX * (maxOffset * 2);
+            } else {
+                leftOffsetPx = leftDoorX * (maxOffset * 2);
+                rightOffsetPx = rightDoorX * maxOffset;
+            }
+        } else if (doorType === "single") {
+            if (doorOpeningDir === "left") {
+                leftOffsetPx = -leftDoorX * (maxOffset * 2);
+                rightOffsetPx = 0;
+            } else {
+                leftOffsetPx = 0;
+                rightOffsetPx = rightDoorX * (maxOffset * 2);
+            }
+        }
+    }
+
+    const openDoors = () => {
+        if (doorStateRef.current !== "closed") return;
+
+        clearDoorTimers();
+        updateDoorState("opening");
+        playDoorAnimation("open");
+
+        openFinishTimeoutRef.current = setTimeout(() => {
+            updateDoorState("opened");
+
+            autoCloseTimeoutRef.current = setTimeout(() => {
+                closeDoors();
+            }, data.elevator.doorConfig.closeDelay * 1000);
+
+        }, data.elevator.doorConfig.animations.open.durationMs);
+    };
+
+    const closeDoors = () => {
+        if (doorStateRef.current !== "opened" || playerStateRef?.current?.activated || modeSelectorState.current) return;
+
+        clearDoorTimers();
+        updateDoorState("closing");
+        playDoorAnimation("close");
+
+        openFinishTimeoutRef.current = setTimeout(() => {
+            updateDoorState("closed");
+
+            // ДВЕРИ ЗАКРЫЛИСЬ - ПРОВЕРЯЕМ, НЕ НУЖНО ЛИ ЕХАТЬ ДАЛЬШЕ
+            // tryStartMoving();
+
+        }, data.elevator.doorConfig.animations.close.durationMs);
+    };
 
     // -----------------------------
     // Button panel editing
@@ -96,6 +295,38 @@ export default function ElevatorVideoPlayer({
     const editingBlockIs = (idx: number, action: string) =>
         editingBlock?.[0] === idx && editingBlock?.[1] === action;
 
+    // ------------------------------
+    // MOVEMENT
+    // ------------------------------
+
+    const { currentY, currentFloor, callElevator, resetCalls, calls, direction, isMoving, destinationFloor, moveState } = useElevator(1, data, {
+        openDoors,
+        closeDoors,
+        doorState,
+    });
+
+    ////////////////////////
+
+    const [warningMode, setWarningMode] = useState<"strict_exit" | "free_exit" | null>(null);
+    const [showWarning, setShowWarning] = useState<boolean>(false);
+
+    const handleDoorCloseAttempt = () => {
+        if (!playerStateRef.current?.activated) {
+            closeDoors(); // Если плеер не активен, просто закрываем
+            return;
+        }
+
+        if (playerStateRef.current?.mode === 'full') {
+            // Показываем твое расширенное окно: Сохранить / Выйти / Вернуться
+            setWarningMode('strict_exit');
+            setShowWarning(true);
+        } else {
+            // Режим 'free': Выйти / Вернуться / Сменить режим
+            setWarningMode('free_exit');
+            setShowWarning(true);
+        }
+    };
+
     // -----------------------------
     // Button click logic
     // -----------------------------
@@ -105,33 +336,27 @@ export default function ElevatorVideoPlayer({
             setActiveButton([blockIdx, btnIdx, button]);
             return;
         }
+        if (isCoursebotTransit) return;
 
-        // In-elevator mode
         if (button.type === "floor") {
-            // setPlayerOpened(true);
-
-            // ДОБАВЛЯЕМ ВЫЗОВ В ДВИЖОК
-            // destinationFloor обычно хранится с 0, поэтому +1 (если у тебя так настроено)
-            setTarget(button.destinationFloor);
-            // callElevator(button.destinationFloor + 1);
-
-            // Пытаемся поехать сразу, если двери закрыты
-            if (doorStateRef.current === "closed") {
-                // tryStartMoving();
-            }
+            if (currentFloor === button.destinationFloor) openDoors();
+            else callElevator(button.destinationFloor);
             return;
         }
 
         if (button.type === "action") {
             if (button.action.element === "Elevator") {
                 if (button.action.command === "doorOpen") {
-                    openDoors();
+                    if (!isMoving) openDoors();
                 } else if (button.action.command === "doorClose") {
-                    if (isPlayerOpened) {
-                        // onDoorCloseAttemptRef.current?.();
-                    } else {
-                        closeDoors();
-                    }
+                    //!!!
+                    // if (isPlayerOpened) {
+                    //     // onDoorCloseAttemptRef.current?.();
+                    // } else {
+                    closeDoors();
+                    // }
+                } else if (button.action.command === "resetCalls") {
+                    resetCalls();
                 }
             }
 
@@ -285,202 +510,57 @@ export default function ElevatorVideoPlayer({
     const [autoSaveData, setAutoSaveData] = useState<AutosaveSlotData | null>(null); // Данные из слота "Автосохранение": больше информации, чем у обычного слота.
 
     const openSlotInMyLiftPlayer = (slot: SlotData, floorId: string) => {
-        if (floorId === "1" /* Заменить на текущий этаж */) {
-            if (doorStateRef.current === 'closed') openDoors();
-        }
+        const targetFloorIndex = data.floors.findIndex(f => f.id === floorId);
+        if (targetFloorIndex === -1) return;
+
         setCoursebotOpened(false);
-        setOpeningSlotData(slot);
-    }
 
-    // ----------------------------
-    // Door Animations
-    // ----------------------------
-
-    const [doorState, setDoorState] = useState<ElevatorDoorState>("closed");
-    const doorStateRef = useRef<ElevatorDoorState>("closed");
-
-
-    const [target, setTarget] = useState(0);
-    const { currentY, currentFloor } = useSimpleElevator(1, target);
-
-
-    const updateDoorState = (newState: ElevatorDoorState) => {
-        // updateDoorState(newState);
-        doorStateRef.current = newState;
-    };
-    const [doorAnimKind, setDoorAnimKind] = useState<"open" | "close" | null>(null);
-    const [doorAnimTime, setDoorAnimTime] = useState(0);
-    const doorAnimFrameRef = useRef<number | null>(null);
-
-    const openFinishTimeoutRef = useRef<NodeJS.Timeout | null>(null);
-    const autoCloseTimeoutRef = useRef<NodeJS.Timeout | null>(null);
-
-
-    function clearDoorTimers() {
-        if (openFinishTimeoutRef.current) {
-            clearTimeout(openFinishTimeoutRef.current);
-            openFinishTimeoutRef.current = null;
-        }
-        if (autoCloseTimeoutRef.current) {
-            clearTimeout(autoCloseTimeoutRef.current);
-            autoCloseTimeoutRef.current = null;
-        }
-    }
-
-
-    function applyCurve(t: number, curve: DoorAnimationConfig["curve"]) {
-        if (curve === "linear") return t;
-        if (curve === "ease-in") return t * t;
-        if (curve === "ease-out") return 1 - (1 - t) * (1 - t);
-        if (curve === "ease-in-out") {
-            return t < 0.5 ? 2 * t * t : 1 - Math.pow(-2 * t + 2, 2) / 2;
-        }
-        return t;
-    }
-
-    function getDoorOffsets(
-        anim: DoorAnimationConfig,
-        tNorm: number
-    ) {
-        const kfs = anim.keyframes;
-
-        if (!kfs.length) return { leftDoorX: 0, rightDoorX: 0 };
-        if (kfs.length === 1) return { leftDoorX: kfs[0].leftDoorX, rightDoorX: kfs[0].rightDoorX };
-
-        let prev = kfs[0];
-        let next = kfs[kfs.length - 1];
-
-        for (let i = 0; i < kfs.length - 1; i++) {
-            if (tNorm >= kfs[i].time && tNorm <= kfs[i + 1].time) {
-                prev = kfs[i];
-                next = kfs[i + 1];
-                break;
+        if (targetFloorIndex === currentFloor) {
+            if (doorStateRef.current === 'closed') {
+                openDoors();
             }
-        }
+            setOpeningSlotData(slot);
+        } else {
+            setIsCoursebotTransit(true);
+            setPendingSlotLoad({ slot, floorIndex: targetFloorIndex });
 
-        const rawT = (tNorm - prev.time) / (next.time - prev.time);
-        const t = applyCurve(rawT, anim.curve);
-        const lerp = (a: number, b: number) => a + (b - a) * t;
+            resetCalls();
 
-        return {
-            leftDoorX: lerp(prev.leftDoorX, next.leftDoorX),
-            rightDoorX: lerp(prev.rightDoorX, next.rightDoorX),
-        };
-    }
+            callElevator(targetFloorIndex, 'high');
 
-    function playDoorAnimation(kind: "open" | "close") {
-        const anim = data.elevator.doorConfig.animations[kind];
-        if (!anim) return;
-
-        setDoorAnimKind(kind);
-        setDoorAnimTime(0);
-
-        if (kind === 'open') updateDoorState('opening');
-        else updateDoorState('closing');
-
-        const soundUrl =
-            kind === "open"
-                ? data.elevator.soundEffects.doorOpen
-                : data.elevator.soundEffects.doorClose;
-
-
-        if (soundUrl) {
-            if (kind === 'open') AudioController.playDoorOpen(soundUrl);
-            else AudioController.playDoorClose(soundUrl);
-        }
-        // if (soundUrl) {
-        //     const audio = new Audio(soundUrl);
-        //     doorAudioRef.current = audio;
-        //     audio.play().catch(() => { });
-        // }
-
-        const duration = anim.durationMs;
-        const start = performance.now();
-
-        const loop = (now: number) => {
-            const elapsed = now - start;
-            const t = Math.min(1, elapsed / duration);
-            setDoorAnimTime(t);
-            // console.log(t);
-
-            if (t < 1) {
-                doorAnimFrameRef.current = requestAnimationFrame(loop);
-            } else {
-                if (kind === 'open') updateDoorState('opened');
-                else updateDoorState('closed');
-
-                // setDoorAnimKind(null);
-            }
-        };
-
-        if (doorAnimFrameRef.current) cancelAnimationFrame(doorAnimFrameRef.current);
-        doorAnimFrameRef.current = requestAnimationFrame(loop);
-    }
-
-
-    const maxOffset = 305;
-    let leftOffsetPx = 0;
-    let rightOffsetPx = 0;
-
-    if (doorAnimKind) {
-        const anim = data.elevator.doorConfig.animations[doorAnimKind];
-        const { leftDoorX, rightDoorX } = getDoorOffsets(anim, doorAnimTime);
-
-        const type = data.elevator.doorConfig.type;
-        const direction = data.elevator.doorConfig.direction;
-
-        if (type === "central") {
-            leftOffsetPx = -leftDoorX * maxOffset;
-            rightOffsetPx = rightDoorX * maxOffset;
-        } else if (type === "telescopic") {
-            leftOffsetPx = -leftDoorX * maxOffset;
-            rightOffsetPx = rightDoorX * maxOffset * 2;
-        } else if (type === "single") {
-            if (direction === "left") {
-                leftOffsetPx = -leftDoorX * maxOffset;
-                rightOffsetPx = 0;
-            } else {
-                leftOffsetPx = 0;
-                rightOffsetPx = rightDoorX * maxOffset;
-            }
-        }
-    }
-
-    const openDoors = () => {
-        if (doorStateRef.current !== "closed") return;
-
-        clearDoorTimers();
-        updateDoorState("opening");
-        playDoorAnimation("open");
-
-        openFinishTimeoutRef.current = setTimeout(() => {
-            updateDoorState("opened");
-
-            autoCloseTimeoutRef.current = setTimeout(() => {
+            if (doorStateRef.current !== 'closed') {
                 closeDoors();
-            }, data.elevator.doorConfig.closeDelay * 1000);
+            }
+        }
+    }
 
-        }, data.elevator.doorConfig.animations.open.durationMs);
-    };
+    // const [isModeSelectorOpened, setModeSelectorOpened] = useState(false);
 
-    const closeDoors = () => {
-        if (doorStateRef.current !== "opened" || playerStateRef?.current?.activated) return;
+    const updateModeSelectorOpened = (val: boolean) => {
+        modeSelectorState.current = val;
+        setModeSelectorOpened(val);
+    }
 
-        clearDoorTimers();
-        updateDoorState("closing");
-        playDoorAnimation("close");
+    const handleInitialPlay = () => {
+        updateModeSelectorOpened(true);
+    }
 
-        openFinishTimeoutRef.current = setTimeout(() => {
-            updateDoorState("closed");
+    const onSelectPlayMode = (mode: MyLiftPlayerMode) => {
+        activatePlayerRef.current?.(mode);
+        updateModeSelectorOpened(false);
+    }
 
-            // ДВЕРИ ЗАКРЫЛИСЬ - ПРОВЕРЯЕМ, НЕ НУЖНО ЛИ ЕХАТЬ ДАЛЬШЕ
-            // tryStartMoving();
+    useEffect(() => {
+        if (isCoursebotTransit && pendingSlotLoad) {
+            if (currentFloor === pendingSlotLoad.floorIndex && !isMoving && doorState === 'opened') {
 
-        }, data.elevator.doorConfig.animations.close.durationMs);
-    };
+                setOpeningSlotData(pendingSlotLoad.slot);
 
-
-    console.log(currentY);
+                setIsCoursebotTransit(false);
+                setPendingSlotLoad(null);
+            }
+        }
+    }, [currentFloor, isMoving, doorState, isCoursebotTransit, pendingSlotLoad]);
 
     useEffect(() => setData(liftData), [liftData]);
     // -----------------------------
@@ -488,23 +568,26 @@ export default function ElevatorVideoPlayer({
     // -----------------------------
     return (
         <>
+        <title>{`${data.title}`}</title>
             <MyLiftPlayer
                 video={data.floors[currentFloor].videoData!}
                 liftId={data.id}
                 floorId={data.floors[currentFloor].id}
-                mode="free"
+                mode={playerMode}
                 onRequestSave={(payload) => openCoursebot('save', payload)}
                 // onRequestAutosave={(payload) => console.log(payload)}
                 onRequestAutosave={(payload) => openCoursebot('autosave', payload)}
+                onInitialPlay={handleInitialPlay}
                 updateOpeningSlotData={setOpeningSlotData}
                 slotDataToOpen={openingSlotData}
                 autoSaveData={autoSaveData}
                 playerStateRef={playerStateRef}
+                activateRef={activatePlayerRef}
                 styles={{
                     position: 'absolute',
                     // top: '250px',
                     top: `${(((((currentY * 200) + 100) % 200)) - 70)}%`,
-                    left: 'calc(50% - 340px)',
+                    left: '28.5%',
                     zIndex: '1',
                 }}
 
@@ -531,34 +614,56 @@ export default function ElevatorVideoPlayer({
                 <div
                     className="elevator-video-player__wall left-wall"
                     style={{
-                        backgroundImage: `url('/images/elevators/template/MLM-2023/elevator-wall-left.png')`
+                        backgroundImage: `url('${data.elevator.images.walls.left?.url || '/images/elevators/template/MLM-2023/elevator-wall-left.png'}')`,
+                        ...data.elevator.images.walls.left?.css,
                     }}
                 ></div>
 
-                <div className="elevator-video-player__doors">
-                    <img
-                        src="/images/elevators/template/MLM-2023/elevator-door.png"
-                        className="elevator-video-player__door left-door"
-                        style={{ translate: `${leftOffsetPx}px 0` }}
-                    />
-                    <img
-                        src="/images/elevators/template/MLM-2023/elevator-door.png"
-                        className="elevator-video-player__door right-door"
-                        style={{ translate: `${rightOffsetPx}px 0` }}
-                    />
+                <div className={`elevator-video-player__doors --${doorType} --${doorOpeningDir}`}>
+                    {doorType === 'single' ? (
+                        <img
+                            src={data.elevator.images.doors.left.url || "/images/elevators/template/MLM-2023/elevator-door.png"}
+                            className={`elevator-video-player__door ${doorOpeningDir}-door`}
+                            style={{
+                                ...data.elevator.images.doors.left.css,
+                                translate: `${leftOffsetPx + rightOffsetPx}px 0`
+                            }}
+                        />
+                    ) : (
+                        <>
+                            <img
+                                src={data.elevator.images.doors.left.url || "/images/elevators/template/MLM-2023/elevator-door.png"}
+                                className={`elevator-video-player__door left-door `}
+                                style={{
+                                    ...data.elevator.images.doors.left.css,
+                                    translate: `${leftOffsetPx}px 0`
+                                }}
+                            />
+                            <img
+                                src={data.elevator.images.doors.right.url || "/images/elevators/template/MLM-2023/elevator-door.png"}
+                                className={`elevator-video-player__door right-door`}
+                                style={{
+                                    ...data.elevator.images.doors.right.css,
+                                    translate: `${rightOffsetPx}px 0`
+                                }}
+                            />
+                        </>
+                    )}
 
                 </div>
 
                 <div
                     className="elevator-video-player__wall right-wall"
                     style={{
-                        backgroundImage: `url('/images/elevators/template/MLM-2023/elevator-wall-right.png')`
+                        backgroundImage: `url('${data.elevator.images.walls.right?.url || '/images/elevators/template/MLM-2023/elevator-wall-right.png'}')`,
+                        ...data.elevator.images.walls.right?.css,
                     }}
                 >
                     <div
                         className="elevator-video-player__button-panel"
                         style={{
-                            backgroundImage: `url('/images/elevators/template/MLM-2023/elevator-buttonpanel-01.png')`
+                            backgroundImage: `url('${data.elevator.images.panel.url || '/images/elevators/template/MLM-2023/elevator-buttonpanel-01.png'}')`,
+                            ...data.elevator.images.panel.css,
                         }}
                     >
                         {/* Floor buttons */}
@@ -571,12 +676,23 @@ export default function ElevatorVideoPlayer({
                             onMouseUp={onMouseUpBlock}
                         >
                             {data.elevator.buttonPanel.blocks[0].buttons.map((button, index) => {
-                                const styles =
+                                const defaultStyles =
                                     button.type !== "empty"
                                         ? typeof button.styles?.default === "string"
                                             ? { backgroundImage: `url('${button.styles.default}')` }
                                             : button.styles.default
                                         : { backgroundImage: undefined };
+
+                                const activeStyles = (button.type !== "empty" && calls.some(call => (button.type === 'floor' && !call.hidden) && call.floor === button.destinationFloor))
+                                    ? typeof button.styles?.active === "string"
+                                        ? { backgroundImage: `url('${button.styles.active}')` }
+                                        : button.styles.active
+                                    : {};
+
+                                const styles = {
+                                    ...defaultStyles,
+                                    ...activeStyles,
+                                };
 
                                 return (
                                     <button
@@ -641,7 +757,7 @@ export default function ElevatorVideoPlayer({
                         <ElevatorDisplay
                             type={data.elevator.display.type}
                             floor={currentFloor + 1}
-                            direction={"NONE" as ElevatorDirections}
+                            direction={direction}
                             data={data.elevator.display}
                             styles={{ top: "85.5px" }}
                             inElevator
@@ -649,6 +765,9 @@ export default function ElevatorVideoPlayer({
                             isEditing={selectedDisplay !== null}
                             onClick={() => editMode && setSelectedDisplay(data.elevator.display)}
                             options={data.elevator.display.options}
+                            doorState={doorState}
+                            targetFloor={destinationFloor !== null ? destinationFloor + 1 : null}
+                            moveState={moveState}
                         />
                     </div>
 
@@ -670,22 +789,30 @@ export default function ElevatorVideoPlayer({
                         </>
                     ) : (
                         <>
+                            <PlayModeModal
+                                visible={isModeSelectorOpened}
+                                onSelect={onSelectPlayMode}
+                                onClose={() => updateModeSelectorOpened(false)}
+                            />
                             {/* Coursebot */}
                             {isCoursebotOpened && (
-                                <LevelBotModal
-                                    elevator={data}
-                                    activeFloorId={data.floors[currentFloor].id}
-                                    mode={coursebotMode}
-                                    onClose={() => setCoursebotOpened(false)}
-                                    onSaveFragment={saveFragmentData}
-                                    onAutoSave={(payload) => autoSaveToCoursebot(payload)}
-                                    onClearAutosave={clearCoursebotAutosave}
-                                    onEditFragment={editFragmentData}
-                                    onDeleteFragment={deleteFragmentData}
-                                    onOpenInCoursebotPlayer={() => true}
-                                    onOpenInMyLiftPlayer={openSlotInMyLiftPlayer}
-                                    savePayload={coursebotSavePayload}
-                                />
+                                <>
+                                    <LevelBotModal
+                                        elevator={data}
+                                        activeFloorId={data.floors[currentFloor].id}
+                                        mode={coursebotMode}
+                                        onClose={() => setCoursebotOpened(false)}
+                                        onSaveFragment={saveFragmentData}
+                                        onAutoSave={(payload) => autoSaveToCoursebot(payload)}
+                                        onClearAutosave={clearCoursebotAutosave}
+                                        onEditFragment={editFragmentData}
+                                        onDeleteFragment={deleteFragmentData}
+                                        onOpenInCoursebotPlayer={() => true}
+                                        onOpenInMyLiftPlayer={openSlotInMyLiftPlayer}
+                                        savePayload={coursebotSavePayload}
+                                    />
+                                </>
+
                             )}
                         </>
                     )}

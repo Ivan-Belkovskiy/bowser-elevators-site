@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import "./LevelBotBase.css";
 import { CoursebotFloorSlotConfig, SlotData } from "@/types/elevator";
 import { LevelBotMode, LevelBotTransitionState, SavePayload } from "../LevelBotModal";
@@ -12,40 +12,32 @@ export default function LevelbotBase({
     coursebotMode,
     transitionState,
     savePayload,
-
     onSlotModalOpened,
     onSlotModalClosed,
-
     onOpenInMyLiftPlayer,
     onOpenInCoursebotPlayer,
-
     onSaveFragment,
     onAutoSave,
     onClearAutosave,
     onOverwriteFragment,
     onDeleteFragment,
     onEditFragment,
-
     closeModal,
 }: {
     slotData?: CoursebotFloorSlotConfig;
     coursebotMode: LevelBotMode;
     transitionState: LevelBotTransitionState;
     savePayload?: SavePayload;
-
     onSlotModalOpened?: () => void;
     onSlotModalClosed?: () => void;
-
     onOpenInMyLiftPlayer?: (slot: SlotData) => void;
     onOpenInCoursebotPlayer?: (slot: SlotData) => void;
-
     onSaveFragment?: (title: string, slotIndex: number) => void;
     onAutoSave?: () => void;
     onClearAutosave?: () => void;
     onOverwriteFragment?: (title: string, slotIndex: number) => void;
     onDeleteFragment?: (slotIndex: number) => void;
     onEditFragment?: (data: EditingSlotData, slotIndex: number) => void;
-
     closeModal?: () => void;
 }) {
     const [selectedSlot, setSelectedSlot] = useState<{
@@ -56,15 +48,19 @@ export default function LevelbotBase({
 
     const [bouncingSlotIndex, setBouncingSlotIndex] = useState<number | null>(null);
     const [fillingSlotIndex, setFillingSlotIndex] = useState<number | null>(null);
+    const [savingIndex, setSavingIndex] = useState<number | null>(null); // КТО именно сохраняется
     const [isSaving, setIsSaving] = useState(false);
+    const [saveComplete, setSaveComplete] = useState(false);
+
+    // Используем реф для очистки таймеров
+    const timers = useRef<NodeJS.Timeout[]>([]);
+    const addTimer = (tm: NodeJS.Timeout) => timers.current.push(tm);
 
     const isClosed = transitionState === "closing" || transitionState === "closed";
 
     const openSlot = (isAutosave: boolean, index: number, data?: SlotData) => {
         if (coursebotMode === "autosave" || isSaving) return;
-
         AudioController.playCoursebotSound("slot_click", "/audio/sound/coursebot/coursebot-slot-click-02.wav");
-        
         if (coursebotMode === "save" && isAutosave) return;
         if (coursebotMode === "load" && !data) return;
 
@@ -79,55 +75,60 @@ export default function LevelbotBase({
 
     const triggerSlotAnimation = (slotIndex: number) => {
         setIsSaving(true);
-        setTimeout(() => {
+        setSavingIndex(slotIndex); // Фиксируем индекс сохраняемого слота
+        
+        addTimer(setTimeout(() => {
             AudioController.playCoursebotSound("save_data", "/audio/sound/coursebot/coursebot-save-data.wav");
             setFillingSlotIndex(slotIndex);
 
-            setTimeout(() => {
+            addTimer(setTimeout(() => {
                 setFillingSlotIndex(null);
                 setBouncingSlotIndex(slotIndex);
 
-                setTimeout(() => {
+                addTimer(setTimeout(() => {
                     setBouncingSlotIndex(null);
-                    setTimeout(() => {
+                    addTimer(setTimeout(() => {
                         setIsSaving(false);
+                        setSaveComplete(true);
+                        setSavingIndex(null);
                         closeModal?.();
-                    }, 1200);
-                }, 800);
-            }, 1300);
-        }, 550);
-        // setBouncingSlotIndex(slotIndex);
-
-        // setTimeout(() => {
-        //     setBouncingSlotIndex(null);
-        // }, 1200);
+                    }, 1200));
+                }, 800));
+            }, 1300));
+        }, 550));
     };
-
-    const formatSlotTitle = (title: string = "") => {
-        let result = title;
-        if (title.length > 10) result = title.slice(0, 11) + '...';
-        return result;
-    }
 
     useEffect(() => {
         if (coursebotMode === 'autosave') {
-            setTimeout(() => {
+            const tm = setTimeout(() => {
                 onAutoSave?.();
                 triggerSlotAnimation(0);
             }, 300);
+            return () => clearTimeout(tm);
         }
     }, [coursebotMode]);
 
+    // Очистка при размонтировании
+    useEffect(() => {
+        return () => timers.current.forEach(clearTimeout);
+    }, []);
+
+    // Универсальная функция для получения URL картинки в слоте
+    const getSlotImage = (idx: number, currentDataUrl?: string) => {
+        // Если этот конкретный слот сейчас анимирует сохранение
+        if ((isSaving || saveComplete) && savingIndex === idx) {
+            return savePayload?.thumbnailUrl || currentDataUrl;
+        }
+        return currentDataUrl;
+    };
+
     return (
         <div className="coursebot-base" data-mode={coursebotMode}>
+            {/* ... Шапка и декорации остаются прежними ... */}
             <div className="coursebot-base__top">
                 <div className="coursebot-base__buttons">
-                    <button className="coursebot-base__button tab-button active-tab">
-                        Сохраненные фрагменты
-                    </button>
-                    <button className="coursebot-base__button tab-button" disabled>
-                        MyLift AI Editor
-                    </button>
+                    <button className="coursebot-base__button tab-button active-tab">Сохраненные фрагменты</button>
+                    <button className="coursebot-base__button tab-button" disabled>MyLift AI Editor</button>
                 </div>
                 <div className="coursebot-base__buttons-decoration"></div>
             </div>
@@ -139,15 +140,8 @@ export default function LevelbotBase({
                 slotData={selectedSlot}
                 savePayload={savePayload}
                 onClose={closeSlot}
-
-                onOpenInMyLiftPlayer={() => {
-                    if (selectedSlot?.data) onOpenInMyLiftPlayer?.(selectedSlot.data);
-                }}
-
-                onOpenInCoursebotPlayer={() => {
-                    if (selectedSlot?.data) onOpenInCoursebotPlayer?.(selectedSlot.data);
-                }}
-
+                onOpenInMyLiftPlayer={() => selectedSlot?.data && onOpenInMyLiftPlayer?.(selectedSlot.data)}
+                onOpenInCoursebotPlayer={() => selectedSlot?.data && onOpenInCoursebotPlayer?.(selectedSlot.data)}
                 onSave={(title) => {
                     if (selectedSlot) {
                         onSaveFragment?.(title, selectedSlot.index);
@@ -155,7 +149,6 @@ export default function LevelbotBase({
                         closeSlot();
                     }
                 }}
-
                 onOverwrite={(title) => {
                     if (selectedSlot) {
                         onOverwriteFragment?.(title, selectedSlot.index);
@@ -163,61 +156,50 @@ export default function LevelbotBase({
                         closeSlot();
                     }
                 }}
-
                 onEdit={(data) => {
                     if (selectedSlot) {
-                        onEditFragment?.({
-                            ...data
-                        }, selectedSlot.index);
+                        onEditFragment?.({...data}, selectedSlot.index);
                         closeSlot();
                     }
                 }}
-
-                onDelete={() => {
-                    closeSlot();
-                    if (selectedSlot) onDeleteFragment?.(selectedSlot.index);
-                }}
-
-                onClearAutosave={() => {
-                    closeSlot();
-                    if (selectedSlot) onClearAutosave?.();
-                }}
+                onDelete={() => { closeSlot(); selectedSlot && onDeleteFragment?.(selectedSlot.index); }}
+                onClearAutosave={() => { closeSlot(); onClearAutosave?.(); }}
             />
 
             <div className="coursebot-base__content">
-
+                {/* АВТОСОХРАНЕНИЕ (Индекс 0) */}
                 <div
-                    className={
-                        `coursebot-base__slot autosave 
+                    className={`coursebot-base__slot autosave 
                         ${coursebotMode === "save" ? "locked" : ""}
-                        ${bouncingSlotIndex === 0 ? "bouncing" : ""}`
-                    }
+                        ${bouncingSlotIndex === 0 ? "bouncing" : ""}`}
                     onClick={() => openSlot(true, 0, slotData?.autosave)}
                 >
-                    <div className={`coursebot-slot__preview ${(slotData?.autosave?.thumbnailUrl && (!fillingSlotIndex || coursebotMode !== 'autosave')) ? `with-data` : ``} ${(fillingSlotIndex === 0 && coursebotMode === 'autosave') ? "filling" : ""}`}>
-                        {slotData?.autosave && <img src={slotData.autosave.thumbnailUrl} />}
+                    <div className={`coursebot-slot__preview 
+                        ${(getSlotImage(0, slotData?.autosave?.thumbnailUrl)) ? 'with-data' : ''} 
+                        ${fillingSlotIndex === 0 ? "filling" : ""}`}>
+                        {getSlotImage(0, slotData?.autosave?.thumbnailUrl) && (
+                            <img src={getSlotImage(0, slotData?.autosave?.thumbnailUrl)} alt="autosave" />
+                        )}
                     </div>
                     <span className="coursebot-slot__title">Автосохранение</span>
                 </div>
 
+                {/* ФРАГМЕНТЫ (Индексы 1+) */}
                 {slotData?.fragments.map((slot, idx) => {
                     const slotIndex = idx + 1;
+                    const thumb = getSlotImage(slotIndex, slot.thumbnailUrl);
 
                     return (
                         <div
                             key={idx}
-                            className={
-                                `coursebot-base__slot 
-                                ${bouncingSlotIndex === slotIndex ? "bouncing" : ""}`
-                            }
+                            className={`coursebot-base__slot ${bouncingSlotIndex === slotIndex ? "bouncing" : ""}`}
                             onClick={() => openSlot(false, slotIndex, slot)}
                         >
-                            <div className={`coursebot-slot__preview ${(slot.thumbnailUrl && !fillingSlotIndex) ? `with-data` : ``} ${fillingSlotIndex === slotIndex ? "filling" : ""}`}>
-                                {slot.thumbnailUrl && <img src={slot.thumbnailUrl} />}
+                            <div className={`coursebot-slot__preview ${thumb ? 'with-data' : ''} ${fillingSlotIndex === slotIndex ? "filling" : ""}`}>
+                                {thumb && <img src={thumb} alt={slot.title} />}
                             </div>
-
                             <span className="coursebot-slot__title">
-                                {formatSlotTitle(slot.title)}
+                                {slot.title ? (slot.title.length > 10 ? slot.title.slice(0, 11) + '...' : slot.title) : ""}
                             </span>
                         </div>
                     );

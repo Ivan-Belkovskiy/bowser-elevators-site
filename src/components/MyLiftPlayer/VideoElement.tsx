@@ -14,77 +14,13 @@ interface VideoElementProps {
 
 const VideoElement = forwardRef<HTMLVideoElement, VideoElementProps>(
   ({ video, playerState, setPlayerState }, ref) => {
-
     const videoRef = useRef<HTMLVideoElement | null>(null);
-
-    // -----------------------------------
-    // Expose <video> to parent via ref
-    // -----------------------------------
     useImperativeHandle(ref, () => videoRef.current as HTMLVideoElement);
 
-    // -----------------------------------
-    // Load metadata (duration)
-    // -----------------------------------
+    // Синхронизация Play/Pause
     useEffect(() => {
       const el = videoRef.current;
       if (!el) return;
-
-      const onLoaded = () => {
-        setPlayerState((s: any) => ({
-          ...s,
-          duration: el.duration,
-          loading: false
-        }));
-      };
-
-      el.addEventListener("loadedmetadata", onLoaded);
-      return () => el.removeEventListener("loadedmetadata", onLoaded);
-    }, []);
-
-    // -----------------------------------
-    // Update currentTime
-    // -----------------------------------
-    useEffect(() => {
-      const el = videoRef.current;
-      if (!el) return;
-
-      const onTime = () => {
-        setPlayerState((s: any) => ({
-          ...s,
-          currentTime: el.currentTime
-        }));
-      };
-
-      el.addEventListener("timeupdate", onTime);
-      return () => el.removeEventListener("timeupdate", onTime);
-    }, []);
-
-    // -----------------------------------
-    // Handle ended
-    // -----------------------------------
-    useEffect(() => {
-      const el = videoRef.current;
-      if (!el) return;
-
-      const onEnded = () => {
-        setPlayerState((s: any) => ({
-          ...s,
-          playing: false,
-          ended: true
-        }));
-      };
-
-      el.addEventListener("ended", onEnded);
-      return () => el.removeEventListener("ended", onEnded);
-    }, []);
-
-    // -----------------------------------
-    // Sync play/pause with state
-    // -----------------------------------
-    useEffect(() => {
-      const el = videoRef.current;
-      if (!el) return;
-
       if (playerState.playing) {
         el.play().catch(() => {});
       } else {
@@ -92,45 +28,56 @@ const VideoElement = forwardRef<HTMLVideoElement, VideoElementProps>(
       }
     }, [playerState.playing]);
 
-    // -----------------------------------
-    // Sync volume
-    // -----------------------------------
+    // Синхронизация Громкости
     useEffect(() => {
-      const el = videoRef.current;
-      if (!el) return;
-
-      el.volume = playerState.volume;
+      if (videoRef.current) videoRef.current.volume = playerState.volume;
     }, [playerState.volume]);
 
-    // -----------------------------------
-    // Sync currentTime (external seek)
-    // -----------------------------------
+    // Синхронизация currentTime (внешняя перемотка)
     useEffect(() => {
       const el = videoRef.current;
-      if (!el) return;
-
-      if (Math.abs(el.currentTime - playerState.currentTime) > 0.1) {
+      if (!el || !playerState.activated) return;
+      if (Math.abs(el.currentTime - playerState.currentTime) > 0.5) {
         el.currentTime = playerState.currentTime;
       }
     }, [playerState.currentTime]);
 
-    // -----------------------------------
-    // Render
-    // -----------------------------------
     return (
       <video
-        style={{ width: '100%' }}
         ref={videoRef}
+        style={{ width: '100%' }}
         src={`/api/video?path=${encodeURIComponent(video.url)}`}
         poster={video.image as string}
         className="mylift-video"
         playsInline
         preload="auto"
         onContextMenu={(e) => e.preventDefault()}
-        onTimeUpdate={(e) => setPlayerState({
-          ...playerState,
-          currentTime: e.currentTarget.currentTime,
-        })}
+        
+        // ГЛАВНОЕ ИСПРАВЛЕНИЕ ТУТ: Используем функциональный setState
+        onLoadedMetadata={(e) => {
+          const el = e.currentTarget;
+          setPlayerState((prev: any) => ({
+            ...prev,
+            duration: el.duration,
+            loading: false
+          }));
+        }}
+        
+        onTimeUpdate={(e) => {
+          const time = e.currentTarget.currentTime;
+          setPlayerState((prev: any) => ({
+            ...prev,
+            currentTime: time
+          }));
+        }}
+        
+        onEnded={() => {
+          setPlayerState((prev: any) => ({
+            ...prev,
+            playing: false,
+            ended: true
+          }));
+        }}
       />
     );
   }

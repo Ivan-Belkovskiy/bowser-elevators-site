@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import PlayPauseButton from "./PlayPauseButton";
 import SeekButton from "./SeekButton";
 import ProgressBar from "./ProgressBar";
@@ -47,6 +47,10 @@ export default function Controls({
   const closeContextMenu = () => {
     setContextMenuPos(null);
   };
+
+  // useEffect(() => {
+  //   alert(playerState.duration);
+  // }, [playerState]);
 
   // const switchFullscreen = (value: boolean) => {
   //   setIsFullscreen(value);

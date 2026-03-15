@@ -8,7 +8,11 @@ export interface DisplayParamOptCondition {
 export interface DisplayParamOption {
     value: string | number | boolean;
     label: string;
-    condition?: DisplayParamOptCondition,
+    condition?: DisplayParamOptCondition;
+    message?: {
+        type: "info" | "warning" | "error";
+        text: string;
+    };
 }
 
 export interface DisplayParam {
@@ -75,6 +79,10 @@ export const DISPLAYS: DisplayDefinition[] = [
                     {
                         value: "atDoorOpen",
                         label: "При открытии/закрытии дверей",
+                        message: {
+                            type: "warning",
+                            text: "Проверьте звуки лифта на наличие сигнала прибытия — возможно наслоение звуков!!!"
+                        }
                     }
                 ]
             },
@@ -155,7 +163,11 @@ export const DISPLAYS: DisplayDefinition[] = [
                     },
                     {
                         value: "atDoorOpenClose",
-                        label: "При открытии/закрытии дверей"
+                        label: "При открытии/закрытии дверей",
+                        message: {
+                            type: "warning",
+                            text: "Проверьте звуки лифта на наличие сигнала прибытия — возможно наслоение звуков!!!"
+                        }
                     },
                 ]
             }
@@ -193,6 +205,10 @@ export const DISPLAYS: DisplayDefinition[] = [
                     {
                         value: "atDoorOpenClose",
                         label: "При открытии/закрытии дверей",
+                        message: {
+                            type: "warning",
+                            text: "Проверьте звуки лифта на наличие сигнала прибытия — возможно наслоение звуков!!!"
+                        }
                     },
                     {
                         value: "atEndMove",

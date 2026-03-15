@@ -49,7 +49,8 @@
 
 /* LEFT PANEL */
 .lift-motion-modal__left {
-    width: 55%;
+    width: 100%;
+    /* width: 55%; */
     height: 100%;
     padding: 16px;
     display: flex;

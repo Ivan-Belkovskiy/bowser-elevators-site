@@ -143,7 +143,10 @@ export interface LiftJson {
         left: { url: string | null; css?: CSSProperties };
         right: { url: string | null; css?: CSSProperties };
       };
-      walls: { url: string | null; css?: CSSProperties };
+      walls: { 
+        left: { url: string | null; css?: CSSProperties };
+        right: { url: string | null; css?: CSSProperties };
+       };
       panel: { url: string | null; css?: CSSProperties };
     };
 

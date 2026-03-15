@@ -6,7 +6,7 @@ export default function HomePage() {
   return (
     <main className="flex flex-col items-center justify-center h-screen bg-gray-900 text-white">
       <img src='/images/logo.png' alt="" className="logo" />
-      <button onClick={() => setCount(count + 1)}>Меня нажали {count} раз!</button>
+      {/* <button onClick={() => setCount(count + 1)}>Меня нажали {count} раз!</button> */}
     </main>
   );
 }

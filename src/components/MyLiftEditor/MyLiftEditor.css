@@ -23,7 +23,7 @@
     z-index: 150;
 }
 
-.mylift-editor__toolbar:hover {
+.mylift-editor__toolbar:hover, .mylift-editor__toolbar.active {
     left: 0;
     border-radius: 0;
     border-color: #9900ff;
@@ -98,4 +98,13 @@
 
 .mylift-editor__button.preview-btn .mylift-editor__button-tooltip {
     margin-top: -45px;
+}
+
+.mylift-editor__button.active-button:not(:disabled) {
+    outline: 4px solid #00ffea;
+    background-color: #00b7ff;
+}
+
+.mylift-editor__button.active-button:not(:disabled) .mylift-editor__button-tooltip {
+    background-color: #00b7ff;
 }

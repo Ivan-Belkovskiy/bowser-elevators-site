@@ -155,9 +155,9 @@ export default function ProgressBar({
       </div>
 
       <span className="mylift-controls__time-display">{
-        (formatTime(videoRef.current?.currentTime) || "0:00:00") +
+        (formatTime(playerState.currentTime) || "0:00:00") +
         " / " +
-        formatTime(videoRef.current?.duration)
+        formatTime(playerState.duration)
       }</span>
 
       <PreviewThumbnail

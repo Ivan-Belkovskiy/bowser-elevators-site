@@ -252,8 +252,13 @@ export default function DoorAnimationModal({
         leftOffsetPx = -leftDoorX * maxOffset;
         rightOffsetPx = rightDoorX * maxOffset;
     } else if (type === "telescopic") {
-        leftOffsetPx = -leftDoorX * maxOffset;
-        rightOffsetPx = rightDoorX * maxOffset * 2;
+        if (direction === "left") {
+            leftOffsetPx = -leftDoorX * maxOffset;
+            rightOffsetPx = -rightDoorX * maxOffset * 2;
+        } else {
+            leftOffsetPx = leftDoorX * maxOffset * 2;
+            rightOffsetPx = rightDoorX * maxOffset;
+        }
     } else if (type === "single") {
         if (direction === "left") {
             leftOffsetPx = -leftDoorX * maxOffset;

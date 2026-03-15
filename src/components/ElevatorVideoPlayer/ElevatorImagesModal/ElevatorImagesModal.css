@@ -1,0 +1,16 @@
+.elevator-images-modal__overlay {
+    position: fixed;
+    width: 100%;
+    height: 100%;
+    top: 0;
+    left: 0;
+    background-color: #00000010;
+}
+
+.elevator-images-modal {
+    position: fixed;
+    width: 700px;
+    height: 600px;
+    background-color: #fff;
+    border: 6px solid #0022ff;
+}

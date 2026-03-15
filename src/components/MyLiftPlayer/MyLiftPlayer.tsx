@@ -12,21 +12,27 @@ import WarningModal from './WarningModal';
 import AutoSaveManager from './AutoSaveManager';
 import StatsManager from './StatsManager';
 import { AutosaveSlotData, LiftJson, SlotData } from '@/types/elevator';
+import PlayModeModal from './PlayModeModal';
+
+export type MyLiftPlayerMode = "full" | "free";
 
 export interface MyLiftPlayerProps {
   video: VideoData;
   liftId: string;
   floorId: string;
-  mode: 'free' | 'full';
+  mode: MyLiftPlayerMode;
   initialTime?: number;
   styles?: CSSProperties;
   slotDataToOpen?: SlotData | null;
   autoSaveData?: AutosaveSlotData | null;
   coursebotOptions?: LiftJson['coursebot'];
-  playerStateRef?: RefObject<PlayerState | null> // Для передачи данных в ElevatorVideoPlayer
+  playerStateRef?: RefObject<PlayerState | null>; // Для передачи данных в ElevatorVideoPlayer
+  activateRef?: RefObject<((mode: MyLiftPlayerMode) => void) | null>;
+
   updateOpeningSlotData?: Dispatch<SetStateAction<SlotData | null>>;
   onRequestSave: (payload: SavePayload) => void;
   onRequestAutosave: (payload: SavePayload) => void;
+  onInitialPlay?: () => void;
 }
 
 export interface PlayerState {
@@ -39,7 +45,7 @@ export interface PlayerState {
   fullscreen: boolean,
   loading: boolean,
   ended: boolean,
-  mode: "full" | "free";
+  mode: MyLiftPlayerMode;
 }
 
 export default function MyLiftPlayer({
@@ -53,15 +59,38 @@ export default function MyLiftPlayer({
   autoSaveData,
   coursebotOptions,
   playerStateRef,
+  activateRef,
   updateOpeningSlotData,
   onRequestSave,
-  onRequestAutosave
+  onRequestAutosave,
+  onInitialPlay,
 }: MyLiftPlayerProps) {
 
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const containerRef = useRef<HTMLDivElement | null>(null);
 
   const [isFullscreen, setIsFullscreen] = useState(false);
+
+  useEffect(() => {
+    if (activateRef) activateRef.current = activatePlayer;
+  }, [activateRef]);
+
+  const [showModeSelection, setShowModeSelection] = useState(false);
+
+  const handleInitialPlay = () => {
+    if (!playerState.activated) {
+      setShowModeSelection(true);
+    }
+  };
+
+  const activatePlayer = (selectedMode: MyLiftPlayerMode) => {
+    setPlayerState(prev => ({
+      ...prev,
+      mode: selectedMode,
+      activated: true,
+      playing: true,
+    }));
+  };
 
   const [playerState, setPlayerState] = useState<PlayerState>({
     activated: false,
@@ -108,41 +137,61 @@ export default function MyLiftPlayer({
   //   }
   // }, [playerState.playing]);
 
+  const autosaveTimerRef = useRef<NodeJS.Timeout | null>(null);
 
   useEffect(() => {
     const autosaveInterval = coursebotOptions?.autosaveDelaySec || 10;
-    let autosaveTimeoutId = null;
-    // alert(playerState.currentTime)
-    // alert(`playing: ${playerState.playing}\nisAutosaved: ${isAutosaved}\nactivated: ${playerState.activated}`);
-    if ((!playerState.playing && (((Number(videoRef.current?.currentTime)) > Number(autoSaveData?.playerState.currentTime)) || !autoSaveData)) && playerState.activated) {
-      if (autosaveTimeoutId) clearTimeout(autosaveTimeoutId);
-      autosaveTimeoutId = setTimeout(async () => {
-        if (playerState.playing) return;
-        await document.exitFullscreen();
-        setIsFullscreen(false);
-        setPlayerState({
-          ...playerState,
-          fullscreen: false,
-        });
-        const preview = captureFrame();
-        onRequestAutosave({
-          createdAt: new Date().toLocaleString(),
-          floorId,
-          videoId: video.id,
-          thumbnailUrl: preview ?? "",
-          timecode: videoRef.current?.currentTime || 0
-        });
 
-      }, (autosaveInterval * 1000));
-    } else {
-      if (autosaveTimeoutId) clearTimeout(autosaveTimeoutId);
-      // AutoSaveManager.stopAutoSave();
+    const shouldStartTimeout = !playerState.playing && playerState.activated && !playerState.ended;
+
+    if (shouldStartTimeout) {
+      if (autosaveTimerRef.current) clearTimeout(autosaveTimerRef.current);
+
+      autosaveTimerRef.current = setTimeout(async () => {
+        if (playerState.playing) return;
+
+        if (document.fullscreenElement) {
+          try {
+            await document.exitFullscreen();
+            setIsFullscreen(false);
+            setPlayerState(prev => ({ ...prev, fullscreen: false }));
+          } catch (err) {
+            console.warn("Не удалось выйти из Fullscreen (вкладка не активна):", err);
+          }
+        }
+
+        const preview = captureFrame();
+        if (preview) {
+          onRequestAutosave({
+            createdAt: new Date().toLocaleString(),
+            floorId,
+            videoId: video.id,
+            thumbnailUrl: preview,
+            timecode: videoRef.current?.currentTime || 0
+          });
+        }
+      }, autosaveInterval * 1000);
     }
-  }, [playerState.playing]);
+
+    return () => {
+      if (autosaveTimerRef.current) clearTimeout(autosaveTimerRef.current);
+    };
+  }, [playerState.playing, playerState.activated]);
 
   useEffect(() => {
     AutoSaveManager.reset();
   }, [video.id]);
+
+  useEffect(() => {
+    const handleFsChange = () => {
+      const isActuallyFull = !!document.fullscreenElement;
+      setIsFullscreen(isActuallyFull);
+      setPlayerState(prev => ({ ...prev, fullscreen: isActuallyFull }));
+    };
+
+    document.addEventListener('fullscreenchange', handleFsChange);
+    return () => document.removeEventListener('fullscreenchange', handleFsChange);
+  }, []);
 
   useEffect(() => {
     StatsManager.checkAndReport(
@@ -158,8 +207,16 @@ export default function MyLiftPlayer({
   }, [video.id]);
 
   const loadCoursebotSlotData = (data?: SlotData | null) => {
-    if (data?.timecode && videoRef.current) {
+    if (data?.timecode !== undefined && videoRef.current) {
       videoRef.current.currentTime = data.timecode;
+
+      setPlayerState(prev => ({
+        ...prev,
+        mode: "free",
+        activated: true,
+        // playing: true 
+      }));
+
       updateOpeningSlotData?.(null);
     }
   }
@@ -250,19 +307,12 @@ export default function MyLiftPlayer({
     if (!document.fullscreenElement) {
       await container.requestFullscreen();
       setIsFullscreen(true);
-      setPlayerState({
-        ...playerState,
-        fullscreen: true,
-      });
+      setPlayerState(prev => ({ ...prev, fullscreen: true })); // Используем prev!
     } else {
       await document.exitFullscreen();
       setIsFullscreen(false);
-      setPlayerState({
-        ...playerState,
-        fullscreen: false,
-      });
+      setPlayerState(prev => ({ ...prev, fullscreen: false })); // Используем prev!
     }
-
   };
 
 
@@ -275,8 +325,32 @@ export default function MyLiftPlayer({
   };
 
 
+  const resetPlayer = () => {
+    setPlayerState({
+      activated: false,
+      playing: false,
+      currentTime: 0,
+      duration: 0,
+      maxWatchedTime: 0,
+      volume: 1,
+      fullscreen: false,
+      loading: false,
+      ended: false,
+      mode: 'free'
+    });
+
+    if (videoRef.current) {
+      videoRef.current.pause();
+      videoRef.current.currentTime = 0;
+    }
+
+    setShowWarning(false);
+  };
+
+
   useEffect(() => {
     if (playerStateRef) playerStateRef.current = playerState;
+    // alert(playerState.duration);
   }, [playerState]);
 
   // -----------------------------
@@ -301,7 +375,7 @@ export default function MyLiftPlayer({
           videoRef={videoRef}
           playerState={playerState}
           setPlayerState={setPlayerState}
-          mode={mode}
+          mode={playerState.mode}
           allowedMin={allowedMin}
           allowedMax={allowedMax}
           containerRef={containerRef}
@@ -311,19 +385,19 @@ export default function MyLiftPlayer({
           onOpenCoursebot={onOpenCoursebot}
         />
       ) : (
-        <button className="mylift-player__play-btn" onClick={() => setPlayerState({
-          ...playerState,
-          activated: true,
-          playing: true,
-        })}></button>
+        <>
+          <button className="mylift-player__play-btn" onClick={onInitialPlay}></button>
+        </>
       )}
 
       <WarningModal
         visible={showWarning}
         saving={saving}
+        mode={playerState.mode}
         onSave={saveAndExit}
         onExitWithoutSave={exitWithoutSave}
         onCancel={cancelWarning}
+        onSwitchMode={() => setShowModeSelection(true)}
       />
 
     </div>

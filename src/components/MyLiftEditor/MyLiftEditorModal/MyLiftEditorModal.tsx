@@ -32,6 +32,32 @@ export default function MyLiftEditorModal({ activeCondition, category, elevator,
     } | null>(null);
     const [liftData, setLiftData] = useState<LiftJson>(elevator);
     const [editingSoundEffects, setEditingSoundEffects] = useState<EVPSoundEffects>();
+    const [elevatorImages, setElevatorImages] = useState<Record<string, any>>({
+        doors: {
+            left: {
+                file: null,
+                css: null,
+            },
+            right: {
+                file: null,
+                css: null,
+            },
+        },
+        walls: {
+            left: {
+                file: null,
+                css: null,
+            },
+            right: {
+                file: null,
+                css: null,
+            }
+        },
+        panel: {
+            file: null,
+            css: null,
+        }
+    });
 
     const initSoundEffects = () => setEditingSoundEffects({
         buttonClick: (typeof liftData.elevator.soundEffects.buttonClick === 'string') ? liftData.elevator.soundEffects.buttonClick : undefined,
@@ -346,6 +372,7 @@ export default function MyLiftEditorModal({ activeCondition, category, elevator,
                                         onUpload={(e) => setEditingSoundEffects({
                                             ...editingSoundEffects,
                                             movement: {
+                                                ...editingSoundEffects?.movement,
                                                 start: e.target.files?.[0]
                                             }
                                         })}
@@ -363,6 +390,7 @@ export default function MyLiftEditorModal({ activeCondition, category, elevator,
                                         onUpload={(e) => setEditingSoundEffects({
                                             ...editingSoundEffects,
                                             movement: {
+                                                ...editingSoundEffects?.movement,
                                                 move: e.target.files?.[0]
                                             }
                                         })}
@@ -380,6 +408,7 @@ export default function MyLiftEditorModal({ activeCondition, category, elevator,
                                         onUpload={(e) => setEditingSoundEffects({
                                             ...editingSoundEffects,
                                             movement: {
+                                                ...editingSoundEffects?.movement,
                                                 end: e.target.files?.[0]
                                             }
                                         })}
@@ -394,6 +423,29 @@ export default function MyLiftEditorModal({ activeCondition, category, elevator,
                         <>
                             <section className="mylift-editor-modal__section">
                                 <h2 className="mylift-editor-modal__subtitle">Внешний вид</h2>
+                                <div className="mylift-editor-modal__property elevator-image">
+                                    <p>Данный раздел находится в процессе разработки...</p>
+                                    {/* <span className="mylift-editor-modal__label">Левая стена лифта:</span>
+                                    <button className="mylift-editor-modal__button upload-image-button">Настроить...</button> */}
+                                    {/* <FileUploader
+                                        btnClass="mylift-editor-modal__button upload-image-button"
+                                        label="Загрузить файл..."
+                                        onUpload={(e) => setElevatorImages({
+                                            ...elevatorImages,
+                                            walls: {
+                                                ...elevatorImages.walls,
+                                                left: {
+                                                    ...elevatorImages.walls?.left,
+                                                    file: e.target.files?.[0] || null,
+                                                }
+                                            }
+                                        })}
+                                        file={elevatorImages.walls.left.file || null}
+                                        msgClass="mylift-editor-modal__message uploaded-image-name"
+                                        accept="image/*"
+                                    /> */}
+                                    {/* ТРЕБУЕТСЯ ДОРАБОТАТЬ! */}
+                                </div>
                             </section>
                             <section className="mylift-editor-modal__section">
                                 <h2 className="mylift-editor-modal__subtitle">Кнопочная панель</h2>

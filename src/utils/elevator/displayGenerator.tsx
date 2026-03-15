@@ -5,6 +5,7 @@ export interface DisplayRenderData {
     floor: number;
     direction: "UP" | "DOWN" | "NONE";
     indicationColor?: string;
+    offset?: number;
     [key: string]: any;
 }
 
@@ -79,14 +80,18 @@ function renderMLMLCD(preset: any, data: DisplayRenderData): string {
 
 
 function renderTIM2(preset: any, data: DisplayRenderData): string {
-    const { floor, direction } = data;
+    const { floor, direction, offset = 1 } = data;
 
-    const digits = String(floor).padStart(2, " ");
-    const left = digits[0];
-    const right = digits[1];
+    const current = String(floor).padStart(2, " ");
+    const next = String((direction === "DOWN") ? floor - 1 : floor + 1).padStart(2, " ");
+    const left = current[0];
+    const right = current[1];
 
-    const leftSvg = preset.showFloor(left, 7, 1);
-    const rightSvg = preset.showFloor(right, 12, 1);
+    const leftSvg = preset.showFloor(left, 7, offset);
+    const rightSvg = preset.showFloor(right, 12, offset);
+
+    const nextLeftSvg = preset.showFloor(next[0], 7, (direction === "DOWN" ? (offset + 8) : (offset - 8)));
+    const nextRightSvg = preset.showFloor(next[1], 12, (direction === "DOWN" ? (offset + 8) : (offset - 8)));
 
     const arrowUp = direction !== "DOWN"
         ? `
@@ -127,6 +132,8 @@ function renderTIM2(preset: any, data: DisplayRenderData): string {
                 ${arrowUp}
                 ${arrowBase}
                 ${arrowDown}
+                ${nextLeftSvg}
+                ${nextRightSvg}
                 ${leftSvg}
                 ${rightSvg}
             </g>

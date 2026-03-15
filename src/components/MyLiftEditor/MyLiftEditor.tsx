@@ -6,11 +6,13 @@ import CustomButton from "../CustomButton/CustomButton";
 import MyLiftEditorModal from "./MyLiftEditorModal/MyLiftEditorModal";
 import { CATEGORIES, CategoryDefinition } from "@/constants/elevatorPanel";
 import { LiftJson } from "@/types/elevator";
+import ElevatorImagesModal, { ElevatorImagesModalType } from "../ElevatorVideoPlayer/ElevatorImagesModal/ElevatorImagesModal";
 
 export default function MyLiftEditor({ elevator }: { elevator: LiftJson }) {
     const [modalCategory, setModalCategory] = useState<CategoryDefinition | null>(null);
     const [previewMode, setPreviewMode] = useState<boolean>(false);
     const [editingLiftData, setEditingLiftData] = useState<LiftJson>(elevator);
+    const [imageEditor, setImageEditor] = useState<ElevatorImagesModalType | null>(null);
 
     const switchCategory = (category: CategoryDefinition | null) => {
         if (modalCategory === category) return setModalCategory(null);
@@ -29,7 +31,7 @@ export default function MyLiftEditor({ elevator }: { elevator: LiftJson }) {
             <title>{`${elevator.title} | MyLift Editor` || `MyLift Editor`}</title>
             <div className="mylift-editor__elevator-container">
                 <ElevatorVideoPlayer liftData={editingLiftData} editMode={!previewMode} />
-                <div className="mylift-editor__toolbar">
+                <div className={`mylift-editor__toolbar ${(modalCategory !== null && !previewMode) ? 'active' : ''}`}>
                     <CustomButton
                         text={previewMode ? "↩" : "▶"}
                         className={`mylift-editor__button preview-btn ${previewMode ? 'preview-mode' : ''}`}
@@ -40,7 +42,7 @@ export default function MyLiftEditor({ elevator }: { elevator: LiftJson }) {
                     {CATEGORIES.map((category, idx) => (
                         <CustomButton
                             key={idx}
-                            className="mylift-editor__button"
+                            className={`mylift-editor__button ${(modalCategory === category) ? `active-button` : ``}`}
                             tooltipClassName="mylift-editor__button-tooltip"
                             image={category.buttonData?.image}
                             text={category.buttonData?.text}
@@ -56,6 +58,12 @@ export default function MyLiftEditor({ elevator }: { elevator: LiftJson }) {
                 category={modalCategory}
                 elevator={editingLiftData}
                 onSave={onSaveData}
+            />
+            <ElevatorImagesModal
+                elevator={editingLiftData}
+                type={imageEditor}
+                onSave={() => true}
+                onClose={() => setImageEditor(null)}
             />
         </div>
     );

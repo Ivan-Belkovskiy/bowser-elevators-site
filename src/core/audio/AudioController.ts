@@ -1,3 +1,5 @@
+import { ElevatorDisplayTypes } from "@/types/elevator";
+
 class AudioController {
     private static instance: AudioController;
 
@@ -12,9 +14,9 @@ class AudioController {
     // -----------------------------
     // Movement sounds
     // -----------------------------
-    private movementStart: HTMLAudioElement | null = null;
-    private movementLoop: HTMLAudioElement | null = null;
-    private movementEnd: HTMLAudioElement | null = null;
+    public movementStart: HTMLAudioElement | null = null;
+    public movementLoop: HTMLAudioElement | null = null;
+    public movementEnd: HTMLAudioElement | null = null;
 
     // -----------------------------
     // Door sounds
@@ -27,6 +29,7 @@ class AudioController {
     // -----------------------------
     private floorAnnouncement: HTMLAudioElement | null = null;
     private directionAnnouncement: HTMLAudioElement | null = null;
+    private endMoveBeep: HTMLAudioElement | null = null;
 
     // -----------------------------
     // Elevator UI sounds (button click)
@@ -50,7 +53,7 @@ class AudioController {
             on: true,
         },
         music: {
-            volume: 0.1,
+            volume: 0.04,
             on: true,
         },
         coursebot: {
@@ -139,17 +142,17 @@ class AudioController {
 
     playMovementStart(url: string) {
         if (this.globalMuted) return;
-        this.movementStart = new Audio(url);
+        if (!this.movementStart) this.movementStart = new Audio(url);
         this.movementStart.volume = this.volume.elevator.on ? this.volume.elevator.volume : 0;
-        this.movementStart.play().catch(() => { });
+        return this.movementStart.play().catch(() => { });
     }
 
     playMovementLoop(url: string) {
         if (this.globalMuted) return;
-        this.movementLoop = new Audio(url);
+        if (!this.movementLoop) this.movementLoop = new Audio(url);
         this.movementLoop.volume = this.volume.elevator.on ? this.volume.elevator.volume : 0;
         this.movementLoop.loop = true;
-        this.movementLoop.play().catch(() => { });
+        return this.movementLoop.play().catch(() => { });
     }
 
     stopMovementLoop() {
@@ -161,9 +164,9 @@ class AudioController {
 
     playMovementEnd(url: string) {
         if (this.globalMuted) return;
-        this.movementEnd = new Audio(url);
+        if (!this.movementEnd) this.movementEnd = new Audio(url);
         this.movementEnd.volume = this.volume.elevator.on ? this.volume.elevator.volume : 0;
-        this.movementEnd.play().catch(() => { });
+        return this.movementEnd.play().catch(() => { });
     }
 
     // ============================================================
@@ -188,28 +191,51 @@ class AudioController {
     // VOICE ANNOUNCEMENTS
     // ============================================================
 
-    playFloorAnnouncement(floor: number) {
+    playFloorNotification(floor: number) {
         if (this.globalMuted) return;
 
         this.floorAnnouncement = new Audio(
-            `/audio/announcements/floors/floor-${floor}.mp3`
+            `/audio/notifications/mlm-lcd/floors/floor-${floor}${floor === 7 ? '.mp3' : '.m4a'}`
         );
         this.floorAnnouncement.volume = this.volume.elevator.on ? this.volume.elevator.volume : 0;
 
         this.floorAnnouncement.play().catch(() => { });
     }
 
-    playDirectionAnnouncement(direction: "UP" | "DOWN") {
+    playDirectionNotification(direction: "UP" | "DOWN") {
         if (this.globalMuted) return;
 
 
         this.directionAnnouncement = new Audio(
-            `/audio/announcements/direction/${direction.toLowerCase()}.mp3`
+            `/audio/notifications/mlm-lcd/direction/${direction.toLowerCase()}.m4a`
         );
 
         this.directionAnnouncement.volume = this.volume.elevator.on ? this.volume.elevator.volume : 0;
 
         this.directionAnnouncement.play().catch(() => { });
+    }
+
+    playEndMoveBeep(displayType: ElevatorDisplayTypes = "MLMLCD") {
+        if (this.globalMuted) return;
+
+
+        this.endMoveBeep = new Audio(
+            (displayType === "MLMLCD") ? `/audio/notifications/mlm-lcd/end-move-beep.mp3`
+            : `/audio/notifications/tim-2/end-move-beep.m4a`
+        );
+
+        this.endMoveBeep.volume = this.volume.elevator.on ? this.volume.elevator.volume : 0;
+        this.endMoveBeep.play().catch((error) => { });
+
+        // return new Promise((resolve, reject) => {
+        //     this.endMoveBeep?.play().catch((error) => { reject(error) });
+
+        //     const endHandler = () => {
+        //         this.endMoveBeep?.removeEventListener('ended', endHandler);
+        //         resolve(true);
+        //     }
+        //     this.endMoveBeep?.addEventListener('ended', endHandler);
+        // });
     }
 
     // ============================================================
@@ -291,7 +317,7 @@ class AudioController {
         if (this.floorAnnouncement) this.floorAnnouncement.volume = (this.volume.elevator.on) ? this.volume.elevator.volume : 0;
         if (this.directionAnnouncement) this.directionAnnouncement.volume = (this.volume.elevator.on) ? this.volume.elevator.volume : 0;
         if (this.elevatorButtonClick) this.elevatorButtonClick.volume = (this.volume.elevator.on) ? this.volume.elevator.volume : 0;
-        if (this.coursebotMusic) this.coursebotMusic.volume = ( this.volume.coursebot.music.on) ? this.volume.coursebot.music.volume : 0;
+        if (this.coursebotMusic) this.coursebotMusic.volume = (this.volume.coursebot.music.on) ? this.volume.coursebot.music.volume : 0;
         for (const key in this.coursebotSounds) {
             this.coursebotSounds[key].volume = (this.volume.coursebot.ui.on) ? this.volume.coursebot.ui.volume : 0;
         }
