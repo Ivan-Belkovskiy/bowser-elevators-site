@@ -1,7 +1,7 @@
 import "./PlayPauseButton.css";
 import AudioController from "@/core/audio/AudioController";
 
-export default function PlayPauseButton({ videoRef, playerState, setPlayerState }: any) {
+export default function PlayPauseButton({ videoRef, playerState, setPlayerState, onClick }: any) {
   const toggle = () => {
     const video = videoRef.current;
     if (!video) return;
@@ -18,6 +18,7 @@ export default function PlayPauseButton({ videoRef, playerState, setPlayerState 
 
       AudioController.muteElevatorMusic();
     }
+    onClick?.();
   };
 
   return (

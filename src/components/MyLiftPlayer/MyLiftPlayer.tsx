@@ -28,11 +28,14 @@ export interface MyLiftPlayerProps {
   coursebotOptions?: LiftJson['coursebot'];
   playerStateRef?: RefObject<PlayerState | null>; // Для передачи данных в ElevatorVideoPlayer
   activateRef?: RefObject<((mode: MyLiftPlayerMode) => void) | null>;
+  resetRef?: RefObject<(() => void) | null>;
+  requestAutosaveRef?: RefObject<(() => void) | null>;
 
   updateOpeningSlotData?: Dispatch<SetStateAction<SlotData | null>>;
   onRequestSave: (payload: SavePayload) => void;
   onRequestAutosave: (payload: SavePayload) => void;
   onInitialPlay?: () => void;
+  onVideoEnded?: (playerMode: MyLiftPlayerMode, videoId: string) => void;
 }
 
 export interface PlayerState {
@@ -60,10 +63,13 @@ export default function MyLiftPlayer({
   coursebotOptions,
   playerStateRef,
   activateRef,
+  resetRef,
+  requestAutosaveRef,
   updateOpeningSlotData,
   onRequestSave,
   onRequestAutosave,
   onInitialPlay,
+  onVideoEnded,
 }: MyLiftPlayerProps) {
 
   const videoRef = useRef<HTMLVideoElement | null>(null);
@@ -74,6 +80,14 @@ export default function MyLiftPlayer({
   useEffect(() => {
     if (activateRef) activateRef.current = activatePlayer;
   }, [activateRef]);
+
+  useEffect(() => {
+    if (resetRef) resetRef.current = resetPlayer;
+  }, [resetRef]);
+
+  useEffect(() => {
+    if (requestAutosaveRef) requestAutosaveRef.current = requestAutoSave;
+  }, [requestAutosaveRef]);
 
   const [showModeSelection, setShowModeSelection] = useState(false);
 
@@ -139,11 +153,24 @@ export default function MyLiftPlayer({
 
   const autosaveTimerRef = useRef<NodeJS.Timeout | null>(null);
 
+  const requestAutoSave = () => {
+    const preview = captureFrame();
+    if (preview) {
+      onRequestAutosave({
+        createdAt: new Date().toLocaleString(),
+        floorId,
+        videoId: video.id,
+        thumbnailUrl: preview,
+        timecode: videoRef.current?.currentTime || 0
+      });
+    }
+  }
+
   useEffect(() => {
     const autosaveInterval = coursebotOptions?.autosaveDelaySec || 10;
 
     const shouldStartTimeout = !playerState.playing && playerState.activated && !playerState.ended;
-
+    // alert(autosaveInterval);
     if (shouldStartTimeout) {
       if (autosaveTimerRef.current) clearTimeout(autosaveTimerRef.current);
 
@@ -160,16 +187,17 @@ export default function MyLiftPlayer({
           }
         }
 
-        const preview = captureFrame();
-        if (preview) {
-          onRequestAutosave({
-            createdAt: new Date().toLocaleString(),
-            floorId,
-            videoId: video.id,
-            thumbnailUrl: preview,
-            timecode: videoRef.current?.currentTime || 0
-          });
-        }
+        requestAutoSave();
+        // const preview = captureFrame();
+        // if (preview) {
+        //   onRequestAutosave({
+        //     createdAt: new Date().toLocaleString(),
+        //     floorId,
+        //     videoId: video.id,
+        //     thumbnailUrl: preview,
+        //     timecode: videoRef.current?.currentTime || 0
+        //   });
+        // }
       }, autosaveInterval * 1000);
     }
 
@@ -225,6 +253,12 @@ export default function MyLiftPlayer({
     loadCoursebotSlotData(slotDataToOpen);
   }, [slotDataToOpen])
 
+  useEffect(() => {
+    if (playerState.ended) {
+      onVideoEnded?.(playerState.mode, video.id);
+    }
+  }, [playerState.ended]);
+
   const [showWarning, setShowWarning] = useState(false);
   const [saving, setSaving] = useState(false);
 
@@ -232,7 +266,7 @@ export default function MyLiftPlayer({
     if (playerState.playing || playerState.currentTime > 0) {
       setShowWarning(true);
     } else {
-      closeDoorsNormally();
+      // closeDoorsNormally();
     }
   };
 
@@ -248,13 +282,13 @@ export default function MyLiftPlayer({
     setShowWarning(false);
 
     closePlayer();
-    closeDoorsNormally();
+    // closeDoorsNormally();
   };
 
   const exitWithoutSave = () => {
     setShowWarning(false);
     closePlayer();
-    closeDoorsNormally();
+    // closeDoorsNormally();
   };
 
   const cancelWarning = () => {
@@ -307,21 +341,12 @@ export default function MyLiftPlayer({
     if (!document.fullscreenElement) {
       await container.requestFullscreen();
       setIsFullscreen(true);
-      setPlayerState(prev => ({ ...prev, fullscreen: true })); // Используем prev!
+      setPlayerState(prev => ({ ...prev, fullscreen: true }));
     } else {
       await document.exitFullscreen();
       setIsFullscreen(false);
-      setPlayerState(prev => ({ ...prev, fullscreen: false })); // Используем prev!
+      setPlayerState(prev => ({ ...prev, fullscreen: false }));
     }
-  };
-
-
-  // -----------------------------
-  // Close elevator doors (stub)
-  // -----------------------------
-  const closeDoorsNormally = () => {
-    // Здесь будет логика закрытия дверей в ElevatorVideoPlayer
-    console.log("Doors closing...");
   };
 
 
@@ -340,11 +365,12 @@ export default function MyLiftPlayer({
     });
 
     if (videoRef.current) {
-      videoRef.current.pause();
+      videoRef.current.load();
       videoRef.current.currentTime = 0;
+      if (typeof video.image === 'string') videoRef.current.poster = video.image;
     }
 
-    setShowWarning(false);
+    // setShowWarning(false);
   };
 
 
@@ -383,6 +409,9 @@ export default function MyLiftPlayer({
           toggleFullscreen={toggleFullscreen}
           // onFullscreenChange={(val) => setIsFullscreen(val)}
           onOpenCoursebot={onOpenCoursebot}
+          onButtonClick={() => {
+            if (autosaveTimerRef.current) clearTimeout(autosaveTimerRef.current);
+          }}
         />
       ) : (
         <>

@@ -95,7 +95,7 @@ export default function LevelbotBase({
                     }, 1200));
                 }, 800));
             }, 1300));
-        }, 550));
+        }, 1000));
     };
 
     useEffect(() => {

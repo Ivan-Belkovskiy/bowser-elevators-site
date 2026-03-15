@@ -82,7 +82,18 @@ export async function PUT(
       image_elevator_panel: (lift, name) => (lift.elevator.images.panel.url = `/Elevators/${userId}/${liftData.id}/assets/images/elevator/${name}`),
     };
 
-    if (formData.has('coursebot__autosave')) {
+    if (formData.has('completed_video_id')) {
+      const videoId = formData.get('completed_video_id')
+      if (typeof videoId === 'string') {
+        if (!liftData.videoStats[videoId]) {
+          liftData.videoStats[videoId] = {
+            views: 1,
+          }
+        } else {
+          liftData.videoStats[videoId].views += 1;
+        }
+      }
+    } else if (formData.has('coursebot__autosave')) {
       const data = formData.get('coursebot__autosave');
       if (data && typeof data === 'string') {
         const slotData = JSON.parse(data);

@@ -47,3 +47,9 @@
 .mylift-player__play-btn:hover {
     scale: 1.5;
 }
+
+.mylift-player:hover .mylift-controls {
+    translate: 0 0;
+    pointer-events: all;
+    opacity: 1;
+}

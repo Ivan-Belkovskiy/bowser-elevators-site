@@ -18,6 +18,7 @@ interface ControlsProps {
   containerRef: React.RefObject<HTMLDivElement | null>;
   isFullscreen: boolean;
   onOpenCoursebot?: () => void;
+  onButtonClick?: () => void;
   toggleFullscreen: () => void;
   // onFullscreenChange?: (isFullscreen: boolean) => void;
 }
@@ -33,6 +34,7 @@ export default function Controls({
   isFullscreen,
   onOpenCoursebot,
   toggleFullscreen,
+  onButtonClick
   // onFullscreenChange
 }: ControlsProps) {
 
@@ -79,11 +81,13 @@ export default function Controls({
           direction="left"
           maxWatchedTime={playerState.maxWatchedTime}
           rewindWindow={20}
+          onClick={onButtonClick}
         />
         <PlayPauseButton
           videoRef={videoRef}
           playerState={playerState}
           setPlayerState={setPlayerState}
+          onClick={onButtonClick}
         />
         <SeekButton
           videoRef={videoRef}
@@ -91,6 +95,7 @@ export default function Controls({
           direction="right"
           maxWatchedTime={playerState.maxWatchedTime}
           rewindWindow={20}
+          onClick={onButtonClick}
         />
 
         <ProgressBar
@@ -105,6 +110,7 @@ export default function Controls({
         {isFullscreen && (
           <>
             <button className="mylift-controls__coursebot-button" onClick={async () => {
+              onButtonClick?.();
               if (isFullscreen) await toggleFullscreen();
               onOpenCoursebot?.();
             }}></button>

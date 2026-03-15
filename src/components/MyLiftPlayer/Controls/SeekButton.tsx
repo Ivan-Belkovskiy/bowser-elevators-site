@@ -7,15 +7,17 @@ export default function SeekButton({
   maxWatchedTime,
   rewindWindow = 60,
   direction = "left",
+  onClick,
 }: {
   videoRef: RefObject<HTMLVideoElement | null>;
   mode: string;
   maxWatchedTime: number;
   rewindWindow: number;
   direction: "left" | "right";
+  onClick?: () => void;
 }) {
 
-  const seek = (offset: number) => {
+  const handleClick = (offset: number) => {
     const video = videoRef.current;
     if (!video) return;
 
@@ -31,10 +33,11 @@ export default function SeekButton({
     }
 
     video.currentTime = newTime;
+    onClick?.();
   };
 
   return direction === "left" ? (
-    <button className="mylift-seek-button left" onClick={() => seek(-10)} />
+    <button className="mylift-seek-button left" onClick={() => handleClick(-10)} />
   ) : (
     <button
       className={
@@ -42,8 +45,8 @@ export default function SeekButton({
         (mode === "full" ? "disabled" : "")
       }
       onClick={() => {
-        if (mode === "free") seek(10);
-        if (mode === "full") seek(10);
+        if (mode === "free") handleClick(10);
+        if (mode === "full") handleClick(10);
       }}
     />
   );

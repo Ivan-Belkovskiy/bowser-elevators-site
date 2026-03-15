@@ -18,6 +18,7 @@ import { useSimpleElevator } from "@/hooks/elevator/useSimpleElevator";
 import ElevatorImagesModal, { ElevatorImagesModalType } from "./ElevatorImagesModal/ElevatorImagesModal";
 import { useElevator } from "@/hooks/elevator/useElevator";
 import PlayModeModal from "../MyLiftPlayer/PlayModeModal";
+import ConfirmExitModal from "../MyLiftPlayer/ConfirmExitModal/ConfirmExitModal";
 
 export type ElevatorDoorState = "closed" | "closing" | "opened" | "opening";
 
@@ -47,9 +48,13 @@ export default function ElevatorVideoPlayer({
     const [pendingSlotLoad, setPendingSlotLoad] = useState<{ slot: SlotData, floorIndex: number } | null>(null);
 
     const [isModeSelectorOpened, setModeSelectorOpened] = useState(false);
+    const [isExitPlayerModalOpened, setExitPlayerModalOpened] = useState(false);
     const [playerMode, setPlayerMode] = useState<"full" | "free">("free");
     const activatePlayerRef = useRef<((mode: MyLiftPlayerMode) => void) | null>(null);
+    const resetPlayerRef = useRef<(() => void) | null>(null);
+    const requestAutosaveRef = useRef<(() => void) | null>(null);
     const modeSelectorState = useRef(false);
+    const exitPlayerModalOpened = useRef(false);
 
     // -----------------------------
     // MyLiftPlayer integration
@@ -312,16 +317,14 @@ export default function ElevatorVideoPlayer({
 
     const handleDoorCloseAttempt = () => {
         if (!playerStateRef.current?.activated) {
-            closeDoors(); // Если плеер не активен, просто закрываем
+            closeDoors();
             return;
         }
 
         if (playerStateRef.current?.mode === 'full') {
-            // Показываем твое расширенное окно: Сохранить / Выйти / Вернуться
             setWarningMode('strict_exit');
             setShowWarning(true);
         } else {
-            // Режим 'free': Выйти / Вернуться / Сменить режим
             setWarningMode('free_exit');
             setShowWarning(true);
         }
@@ -330,7 +333,8 @@ export default function ElevatorVideoPlayer({
     // -----------------------------
     // Button click logic
     // -----------------------------
-    const onButtonClick = (button: ElevatorButton, btnIdx: number, blockIdx: number) => {
+    const onButtonClick = async (button: ElevatorButton, btnIdx: number, blockIdx: number) => {
+        await AudioController.playElevatorButtonClick(data.elevator.soundEffects.buttonClick || "");
         if (editMode) {
             if (button.type === "empty") return;
             setActiveButton([blockIdx, btnIdx, button]);
@@ -349,12 +353,11 @@ export default function ElevatorVideoPlayer({
                 if (button.action.command === "doorOpen") {
                     if (!isMoving) openDoors();
                 } else if (button.action.command === "doorClose") {
-                    //!!!
-                    // if (isPlayerOpened) {
-                    //     // onDoorCloseAttemptRef.current?.();
-                    // } else {
-                    closeDoors();
-                    // }
+                    if (playerStateRef.current?.activated) {
+                        setExitPlayerModalOpened(true);
+                    } else {
+                        closeDoors();
+                    }
                 } else if (button.action.command === "resetCalls") {
                     resetCalls();
                 }
@@ -487,6 +490,28 @@ export default function ElevatorVideoPlayer({
         }
     }
 
+    const onVideoEnded = async (mode: MyLiftPlayerMode, id: string) => {
+        if (mode === 'full') {
+            const formData = new FormData();
+            formData.append('completed_video_id', id);
+
+            try {
+                const res = await fetch(`/api/elevators/${data.id}`, {
+                    method: "PUT",
+                    body: formData,
+                });
+
+                const json = await res.json();
+                if (json.success) {
+                    setData(json.lift);
+                }
+            } catch (error) {
+                console.error('ОШИБКА ЗАГРУЗКИ: ', error);
+            }
+            onConfirmExitMyLiftPlayer();
+        }
+    }
+
     const clearCoursebotAutosave = async (floorId: string) => {
         const formData = new FormData();
         formData.append('coursebot__autosave_clear', floorId);
@@ -541,6 +566,21 @@ export default function ElevatorVideoPlayer({
         setModeSelectorOpened(val);
     }
 
+    const updateExitPlayerModalOpened = (val: boolean) => {
+        exitPlayerModalOpened.current = val;
+        setExitPlayerModalOpened(val);
+    }
+
+    const onConfirmExitMyLiftPlayer = () => {
+        resetPlayerRef.current?.();
+        updateExitPlayerModalOpened(false);
+        closeDoors();
+    };
+
+    const onSaveAndExitMyLiftPlayer = () => {
+        requestAutosaveRef.current?.();
+    }
+
     const handleInitialPlay = () => {
         updateModeSelectorOpened(true);
     }
@@ -568,7 +608,7 @@ export default function ElevatorVideoPlayer({
     // -----------------------------
     return (
         <>
-        <title>{`${data.title}`}</title>
+            <title>{`${data.title}`}</title>
             <MyLiftPlayer
                 video={data.floors[currentFloor].videoData!}
                 liftId={data.id}
@@ -577,12 +617,16 @@ export default function ElevatorVideoPlayer({
                 onRequestSave={(payload) => openCoursebot('save', payload)}
                 // onRequestAutosave={(payload) => console.log(payload)}
                 onRequestAutosave={(payload) => openCoursebot('autosave', payload)}
+                coursebotOptions={data.coursebot}
                 onInitialPlay={handleInitialPlay}
                 updateOpeningSlotData={setOpeningSlotData}
+                onVideoEnded={onVideoEnded}
                 slotDataToOpen={openingSlotData}
                 autoSaveData={autoSaveData}
                 playerStateRef={playerStateRef}
                 activateRef={activatePlayerRef}
+                resetRef={resetPlayerRef}
+                requestAutosaveRef={requestAutosaveRef}
                 styles={{
                     position: 'absolute',
                     // top: '250px',
@@ -794,6 +838,14 @@ export default function ElevatorVideoPlayer({
                                 onSelect={onSelectPlayMode}
                                 onClose={() => updateModeSelectorOpened(false)}
                             />
+
+                            <ConfirmExitModal
+                                playerMode={playerStateRef.current?.mode || "free"}
+                                visible={isExitPlayerModalOpened}
+                                onConfirm={onConfirmExitMyLiftPlayer}
+                                onSaveAndExit={onSaveAndExitMyLiftPlayer}
+                                onClose={() => updateExitPlayerModalOpened(false)}
+                            />
                             {/* Coursebot */}
                             {isCoursebotOpened && (
                                 <>
@@ -803,7 +855,12 @@ export default function ElevatorVideoPlayer({
                                         mode={coursebotMode}
                                         onClose={() => setCoursebotOpened(false)}
                                         onSaveFragment={saveFragmentData}
-                                        onAutoSave={(payload) => autoSaveToCoursebot(payload)}
+                                        onAutoSave={(payload) => {
+                                            autoSaveToCoursebot(payload);
+                                            if (isExitPlayerModalOpened && playerStateRef.current?.mode === 'full') {
+                                                onConfirmExitMyLiftPlayer();
+                                            }
+                                        }}
                                         onClearAutosave={clearCoursebotAutosave}
                                         onEditFragment={editFragmentData}
                                         onDeleteFragment={deleteFragmentData}
