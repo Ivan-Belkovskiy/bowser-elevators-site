@@ -334,12 +334,12 @@ export default function ElevatorVideoPlayer({
     // Button click logic
     // -----------------------------
     const onButtonClick = async (button: ElevatorButton, btnIdx: number, blockIdx: number) => {
-        await AudioController.playElevatorButtonClick(data.elevator.soundEffects.buttonClick || "");
         if (editMode) {
             if (button.type === "empty") return;
             setActiveButton([blockIdx, btnIdx, button]);
             return;
         }
+        await AudioController.playElevatorButtonClick(data.elevator.soundEffects.buttonClick || "");
         if (isCoursebotTransit) return;
 
         if (button.type === "floor") {

@@ -7,12 +7,14 @@ import MyLiftEditorModal from "./MyLiftEditorModal/MyLiftEditorModal";
 import { CATEGORIES, CategoryDefinition } from "@/constants/elevatorPanel";
 import { LiftJson } from "@/types/elevator";
 import ElevatorImagesModal, { ElevatorImagesModalType } from "../ElevatorVideoPlayer/ElevatorImagesModal/ElevatorImagesModal";
+import { useRouter } from "next/navigation";
 
 export default function MyLiftEditor({ elevator }: { elevator: LiftJson }) {
     const [modalCategory, setModalCategory] = useState<CategoryDefinition | null>(null);
     const [previewMode, setPreviewMode] = useState<boolean>(false);
     const [editingLiftData, setEditingLiftData] = useState<LiftJson>(elevator);
     const [imageEditor, setImageEditor] = useState<ElevatorImagesModalType | null>(null);
+    const router = useRouter();
 
     const switchCategory = (category: CategoryDefinition | null) => {
         if (modalCategory === category) return setModalCategory(null);
@@ -51,6 +53,14 @@ export default function MyLiftEditor({ elevator }: { elevator: LiftJson }) {
                             onClick={() => switchCategory(category)}
                         />
                     ))}
+                    <CustomButton
+                        text="↵"
+                        className={`mylift-editor__button exit-button`}
+                        tooltipClassName="mylift-editor__button-tooltip"
+                        onClick={() => router.push('/elevator-video-player')}
+                        disabled={previewMode}
+                        tooltip={"Назад к списку лифтов"}
+                    />
                 </div>
             </div>
             <MyLiftEditorModal

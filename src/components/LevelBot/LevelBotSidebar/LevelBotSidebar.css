@@ -17,9 +17,11 @@
     margin-top: 18px;
     margin-left: 137px;
     padding: 10px;
-    display: flex;
+    /* display: flex;
     flex-direction: column;
-    align-items: center;
+    align-items: center; */
+    overflow-y: auto;
+    max-height: 630px;
 }
 
 .coursebot-sidebar__block {

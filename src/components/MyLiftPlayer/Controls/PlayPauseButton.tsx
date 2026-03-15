@@ -10,13 +10,25 @@ export default function PlayPauseButton({ videoRef, playerState, setPlayerState,
       video.pause();
       setPlayerState((s: any) => ({ ...s, playing: false }));
 
-      AudioController.unmuteElevatorMusic();
+      AudioController.setVolume({
+        music: {
+          ...AudioController.volume.music,
+          on: true,
+        }
+      });
+      // AudioController.unmuteElevatorMusic();
 
     } else {
       video.play();
       setPlayerState((s: any) => ({ ...s, playing: true }));
 
-      AudioController.muteElevatorMusic();
+      AudioController.setVolume({
+        music: {
+          ...AudioController.volume.music,
+          on: false,
+        }
+      });
+      // AudioController.muteElevatorMusic();
     }
     onClick?.();
   };

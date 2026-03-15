@@ -13,6 +13,7 @@ import AutoSaveManager from './AutoSaveManager';
 import StatsManager from './StatsManager';
 import { AutosaveSlotData, LiftJson, SlotData } from '@/types/elevator';
 import PlayModeModal from './PlayModeModal';
+import AudioController from '@/core/audio/AudioController';
 
 export type MyLiftPlayerMode = "full" | "free";
 
@@ -92,9 +93,13 @@ export default function MyLiftPlayer({
   const [showModeSelection, setShowModeSelection] = useState(false);
 
   const handleInitialPlay = () => {
-    if (!playerState.activated) {
-      setShowModeSelection(true);
-    }
+    AudioController.setVolume({
+      music: {
+        ...AudioController.volume.music,
+        on: false,
+      }
+    });
+    onInitialPlay?.();
   };
 
   const activatePlayer = (selectedMode: MyLiftPlayerMode) => {
@@ -170,6 +175,15 @@ export default function MyLiftPlayer({
     const autosaveInterval = coursebotOptions?.autosaveDelaySec || 10;
 
     const shouldStartTimeout = !playerState.playing && playerState.activated && !playerState.ended;
+
+    // if (playerState.activated) { // Раскомментировать, если нужно отключить музыку на все время просмотра
+    //   AudioController.setVolume({
+    //     music: {
+    //       ...AudioController.volume.music,
+    //       on: false,
+    //     }
+    //   });
+    // }
     // alert(autosaveInterval);
     if (shouldStartTimeout) {
       if (autosaveTimerRef.current) clearTimeout(autosaveTimerRef.current);
@@ -204,7 +218,7 @@ export default function MyLiftPlayer({
     return () => {
       if (autosaveTimerRef.current) clearTimeout(autosaveTimerRef.current);
     };
-  }, [playerState.playing, playerState.activated]);
+  }, [playerState.playing, playerState.activated, playerState.ended]);
 
   useEffect(() => {
     AutoSaveManager.reset();
@@ -374,6 +388,7 @@ export default function MyLiftPlayer({
   };
 
 
+
   useEffect(() => {
     if (playerStateRef) playerStateRef.current = playerState;
     // alert(playerState.duration);
@@ -415,7 +430,7 @@ export default function MyLiftPlayer({
         />
       ) : (
         <>
-          <button className="mylift-player__play-btn" onClick={onInitialPlay}></button>
+          <button className="mylift-player__play-btn" onClick={handleInitialPlay}></button>
         </>
       )}
 

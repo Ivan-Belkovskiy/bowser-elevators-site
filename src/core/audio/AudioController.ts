@@ -49,20 +49,20 @@ class AudioController {
     private globalMuted = false;
     public volume = {
         elevator: {
-            volume: 0.12,
+            volume: 0.10,
             on: true,
         },
         music: {
-            volume: 0.04,
+            volume: 0.03,
             on: true,
         },
         coursebot: {
             ui: {
-                volume: 0.3,
+                volume: 0.22,
                 on: true,
             },
             music: {
-                volume: 0.12,
+                volume: 0.06,
                 on: true,
             },
         },
@@ -92,7 +92,8 @@ class AudioController {
     }
 
     private startMusicCycle() {
-        if (!this.elevatorMusicEnabled || this.globalMuted || this.elevatorMusicMuted) return;
+        if (!this.elevatorMusicEnabled || this.globalMuted || this.elevatorMusicMuted || this.elevatorMusic) return;
+
 
         const trackNumber = ((this.currentTrack - 1) % 5) + 1;
 
@@ -199,7 +200,16 @@ class AudioController {
         );
         this.floorAnnouncement.volume = this.volume.elevator.on ? this.volume.elevator.volume : 0;
 
-        this.floorAnnouncement.play().catch(() => { });
+        // this.floorAnnouncement.play().catch(() => { });
+
+        return new Promise((resolve, reject) => {
+            if (this.floorAnnouncement) this.floorAnnouncement.play().catch((error) => { reject(error) });
+            const handleEnded = () => {
+                resolve(true);
+                this.floorAnnouncement?.removeEventListener('ended', handleEnded);
+            }
+            this.floorAnnouncement?.addEventListener('ended', handleEnded);
+        });
     }
 
     playDirectionNotification(direction: "UP" | "DOWN") {

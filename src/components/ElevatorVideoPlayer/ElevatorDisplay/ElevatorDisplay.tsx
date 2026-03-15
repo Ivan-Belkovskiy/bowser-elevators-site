@@ -6,6 +6,7 @@ import { generateDisplaySVG } from "@/utils/elevator/displayGenerator";
 import { CSSProperties, useEffect, useRef, useState } from "react";
 import AudioController from "@/core/audio/AudioController";
 import { ElevatorDoorState } from "../ElevatorVideoPlayer";
+import { PlayerState } from "@/components/MyLiftPlayer/MyLiftPlayer";
 
 export default function ElevatorDisplay({
     inElevator,
@@ -20,7 +21,7 @@ export default function ElevatorDisplay({
     onClick,
     editMode,
     isEditing,
-    options
+    options,
 }: {
     inElevator?: boolean,
     type: ElevatorDisplayTypes,
@@ -97,9 +98,27 @@ export default function ElevatorDisplay({
                     if (
                         (options?.endMoveBeep === 'beforeFloorNotification' && isCorrectOption) ||
                         options?.endMoveBeep === 'atEndMove'
-                    ) await AudioController.playEndMoveBeep(type);
+                    ) {
+                        await AudioController.playEndMoveBeep(type);
+                        AudioController.setVolume({
+                            music: {
+                                ...AudioController.volume.music,
+                                on: false,
+                            }
+                        });
+                    }
                     if (isCorrectOption) setTimeout(() => {
-                        AudioController.playFloorNotification(floor);
+                        AudioController.playFloorNotification(floor)?.then(() => {
+                            AudioController.setVolume({
+                                music: {
+                                    ...AudioController.volume.music,
+                                    on: true,
+                                }
+                            });
+                        });
+                        // setTimeout(() => {
+
+                        // }, 1000);
                     }, 2700);
                     // } else {
                     // AudioController.playFloorNotification(floor);
@@ -176,7 +195,7 @@ export default function ElevatorDisplay({
 
     useEffect(() => {
         if (editMode) return;
-        if (direction !== "NONE" && direction !== prevDirection.current) {
+        if (direction !== "NONE") {
             const voiceEnabled = options?.voiceNotifications && (options.voiceNotifications !== 'off');
 
             if (voiceEnabled) {

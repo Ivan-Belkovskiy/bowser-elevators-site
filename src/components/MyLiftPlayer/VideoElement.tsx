@@ -17,7 +17,6 @@ const VideoElement = forwardRef<HTMLVideoElement, VideoElementProps>(
     const videoRef = useRef<HTMLVideoElement | null>(null);
     useImperativeHandle(ref, () => videoRef.current as HTMLVideoElement);
 
-    // Синхронизация Play/Pause
     useEffect(() => {
       const el = videoRef.current;
       if (!el) return;
@@ -28,12 +27,10 @@ const VideoElement = forwardRef<HTMLVideoElement, VideoElementProps>(
       }
     }, [playerState.playing]);
 
-    // Синхронизация Громкости
     useEffect(() => {
       if (videoRef.current) videoRef.current.volume = playerState.volume;
     }, [playerState.volume]);
 
-    // Синхронизация currentTime (внешняя перемотка)
     useEffect(() => {
       const el = videoRef.current;
       if (!el || !playerState.activated) return;
