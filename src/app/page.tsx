@@ -2,7 +2,7 @@
 import { useState } from "react";
 
 export default function HomePage() {
-  const [count, setCount] = useState(0);
+  // const [count, setCount] = useState(0);
   return (
     <main className="flex flex-col items-center justify-center h-screen bg-gray-900 text-white">
       <img src='/images/logo.png' alt="" className="logo" />

@@ -24,3 +24,42 @@ body {
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
 }
+
+.service-unavailable-notification {
+  position: relative;
+  width: 100vw;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+
+.service-unavailable-notification h1 {
+  font-size: 45px;
+  /* margin: 15px 0; */
+}
+
+.service-unavailable-notification hr {
+  width: 100%;
+  border: 1px solid #000 !important;
+  height: 1px !important;
+  margin: 20px 0;
+}
+
+.service-unavailable-notification span {
+  font-size: 20px;
+}
+
+.service-unavailable-notification__button {
+  padding: 5px 15px;
+  background-color: #0099ff;
+  border-radius: 10px;
+  color: #fff;
+  outline: 3px solid transparent;
+  margin-top: 20px;
+}
+
+.service-unavailable-notification__button:hover {
+  outline-color: #9cd9ff;
+}

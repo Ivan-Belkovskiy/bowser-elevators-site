@@ -3,6 +3,7 @@ import fs from "fs";
 import path from "path";
 import { LiftJson, Floor, ElevatorButton, ButtonBlock, ElevatorButtonStyles, ElevatorDisplayConfig } from "@/types/elevator";
 import { SavePayload } from "@/components/LevelBot/LevelBotModal";
+import { PlayerState } from "@/components/MyLiftPlayer/MyLiftPlayer";
 
 export async function GET(
   req: NextRequest,
@@ -88,9 +89,24 @@ export async function PUT(
         if (!liftData.videoStats[videoId]) {
           liftData.videoStats[videoId] = {
             views: 1,
+            watchHistory: [],
           }
         } else {
           liftData.videoStats[videoId].views += 1;
+        }
+
+        if (!liftData.videoStats[videoId].watchHistory) liftData.videoStats[videoId].watchHistory = [];
+
+        const data = formData.get('video_player_state');
+
+        if (typeof data === 'string') {
+          const playerState: PlayerState = JSON.parse(data);
+          if (playerState.watchInfo?.startDate && playerState.watchInfo?.endDate) liftData.videoStats[videoId].watchHistory.push({
+            start: playerState.watchInfo.startDate,
+            end: playerState.watchInfo.endDate,
+            watchTime: playerState.duration,
+            completed: true,
+          });
         }
       }
     } else if (formData.has('coursebot__autosave')) {
@@ -287,7 +303,6 @@ export async function PUT(
         } else if (key.startsWith("image_floor")) {
           targetDir = path.join(assetsPath, "assets", "images", "floors");
         } else if (key.startsWith("button_image_")) {
-          // например: button_image_block0_btn3_default
           const parts = key.split("_");
           // ["button","image","block0","btn3","default"]
           const blockIdx = parseInt(parts[2].replace("block", ""));
@@ -300,7 +315,6 @@ export async function PUT(
           const filePath = path.join(targetDir, value.name);
           fs.writeFileSync(filePath, buffer);
 
-          // обновляем конкретную кнопку в lift.json
           const button = liftData.elevator.buttonPanel.blocks[blockIdx].buttons[btnIdx];
           if (button.type !== "empty") {
             button.styles[mode as "default" | "active"] = `/Elevators/${userId}/${id}/assets/images/elevator/buttons/${value.name}`;

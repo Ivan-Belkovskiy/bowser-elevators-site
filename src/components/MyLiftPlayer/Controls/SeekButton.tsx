@@ -5,7 +5,7 @@ export default function SeekButton({
   videoRef,
   mode,
   maxWatchedTime,
-  rewindWindow = 60,
+  rewindWindow = 600,
   direction = "left",
   onClick,
 }: {

@@ -80,7 +80,7 @@ export default function Controls({
           mode={mode}
           direction="left"
           maxWatchedTime={playerState.maxWatchedTime}
-          rewindWindow={20}
+          rewindWindow={900}
           onClick={onButtonClick}
         />
         <PlayPauseButton
@@ -94,7 +94,7 @@ export default function Controls({
           mode={mode}
           direction="right"
           maxWatchedTime={playerState.maxWatchedTime}
-          rewindWindow={20}
+          rewindWindow={900}
           onClick={onButtonClick}
         />
 

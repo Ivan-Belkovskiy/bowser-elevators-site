@@ -1,0 +1,113 @@
+.watch-list-modal__container {
+    position: absolute;
+    width: calc(100% - 40px);
+    margin-left: -93px;
+    margin-top: -36px;
+    background-size: 100% 25px;
+    height: 569px;
+    z-index: 50;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    clip-path: polygon(100% 0%, 100% 570px, 0% 570px, 0% 0%);
+    pointer-events: none;
+}
+
+.watch-list-modal {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    background-color: #cecde9;
+    transition: all 0.25s ease-in-out 0s;
+    translate: 0 101%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.watch-list-modal__main {
+    width: 100%;
+    height: 80%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.watch-list-modal__buttons {
+    width: 100%;
+    height: 20%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.watch-list-modal__title {
+    font-size: 20px;
+    margin: 15px 0;
+    font-size: 25px;
+    color: #384f75;
+}
+
+.watch-list-modal__list {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 20px;
+}
+
+.watch-list-modal__container.opened {
+    pointer-events: all;
+}
+
+.watch-list-modal__container.opened .watch-list-modal {
+    translate: 0 0;
+}
+
+.watch-list-modal__block {
+    width: 95%;
+    height: 70px;
+    background-color: #eae9fc;
+    border: 3px solid #384f75;
+    /* margin-top: 25px; */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.watch-list-modal__block-left {
+    width: 15%;
+    height: 100%;
+    font-size: 30px;
+    color: #384f75;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.watch-list-modal__block-right {
+    width: 85%;
+    height: 100%;
+    font-size: 20px;
+    color: #384f75;
+    display: flex;
+    justify-content: start;
+    align-items: center;
+}
+
+.watch-list-modal__button {
+    width: 90%;
+    border-radius: 10px;
+    padding: 10px 0;
+    background-color: #384f75;
+    color: #fff;
+    font-size: 20px;
+    cursor: pointer;
+    transition: all 0.15s ease 0s;
+}
+
+.watch-list-modal__button:hover {
+    color: #384f75;
+    background-color: #fff;
+}

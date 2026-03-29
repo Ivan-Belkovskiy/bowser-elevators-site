@@ -72,7 +72,7 @@ export default function ProgressBar({
     const time = getTimeFromEvent(e);
     if (time === null) return;
 
-    videoRef.current!.currentTime = time;
+    // videoRef.current!.currentTime = time;
   };
 
   const onThumbDown = (e: React.MouseEvent<HTMLDivElement>) => {

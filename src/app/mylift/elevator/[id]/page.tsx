@@ -1,7 +1,6 @@
 "use client";
 import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
-import MyLiftEditor from "@/components/MyLiftEditor/MyLiftEditor";
 import { LiftJson } from "@/types/elevator";
 import ElevatorVideoPlayer from "@/components/ElevatorVideoPlayer/ElevatorVideoPlayer";
 

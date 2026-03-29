@@ -46,6 +46,10 @@ hr {
     transition: all 0.4s ease 0s;
 }
 
+.elevators-list__item:not(:last-child) {
+    border-bottom: 5px solid #00b7ff;
+}
+
 h3 {
     font-size: 25px;
     color: #0059ff;

@@ -19,6 +19,7 @@ import ElevatorImagesModal, { ElevatorImagesModalType } from "./ElevatorImagesMo
 import { useElevator } from "@/hooks/elevator/useElevator";
 import PlayModeModal from "../MyLiftPlayer/PlayModeModal";
 import ConfirmExitModal from "../MyLiftPlayer/ConfirmExitModal/ConfirmExitModal";
+import { usePathname } from "next/navigation";
 
 export type ElevatorDoorState = "closed" | "closing" | "opened" | "opening";
 
@@ -29,6 +30,8 @@ export default function ElevatorVideoPlayer({
     liftData: LiftJson;
     editMode?: boolean;
 }) {
+    const url = usePathname();
+
     const [data, setData] = useState(liftData);
     const [editingBlock, setEditingBlock] = useState<[number, string] | null>(null);
     const [dragInfo, setDragInfo] = useState<{
@@ -45,7 +48,7 @@ export default function ElevatorVideoPlayer({
     const [coursebotSavePayload, setSavePayload] = useState<SavePayload>();
 
     const [isCoursebotTransit, setIsCoursebotTransit] = useState(false);
-    const [pendingSlotLoad, setPendingSlotLoad] = useState<{ slot: SlotData, floorIndex: number } | null>(null);
+    const [pendingSlotLoad, setPendingSlotLoad] = useState<{ slot: SlotData, floorIndex: number, isAutosave: boolean } | null>(null);
 
     const [isModeSelectorOpened, setModeSelectorOpened] = useState(false);
     const [isExitPlayerModalOpened, setExitPlayerModalOpened] = useState(false);
@@ -330,9 +333,6 @@ export default function ElevatorVideoPlayer({
         }
     };
 
-    // -----------------------------
-    // Button click logic
-    // -----------------------------
     const onButtonClick = async (button: ElevatorButton, btnIdx: number, blockIdx: number) => {
         if (editMode) {
             if (button.type === "empty") return;
@@ -367,6 +367,8 @@ export default function ElevatorVideoPlayer({
                 if (button.action.command === "openDefaultMode") {
                     setCoursebotMode('default');
                     setCoursebotOpened(true);
+                } else if (button.action.command === "requestAutosave") {
+                    requestAutosaveRef.current?.();
                 }
             }
         }
@@ -490,11 +492,18 @@ export default function ElevatorVideoPlayer({
         }
     }
 
-    const onVideoEnded = async (mode: MyLiftPlayerMode, id: string) => {
-        if (mode === 'full') {
+    const onVideoEnded = async (playerState: PlayerState, id: string) => {
+        if (playerState.mode === 'full') {
             const formData = new FormData();
+            // const watchData = playerState.watchInfo;
             formData.append('completed_video_id', id);
-
+            formData.append('video_player_state', JSON.stringify({
+                ...playerState,
+                watchInfo: {
+                    ...playerState.watchInfo,
+                    endDate: new Date().toLocaleString().replace(',', ''),
+                }
+            }));
             try {
                 const res = await fetch(`/api/elevators/${data.id}`, {
                     method: "PUT",
@@ -531,10 +540,13 @@ export default function ElevatorVideoPlayer({
         }
     }
 
-    const [openingSlotData, setOpeningSlotData] = useState<SlotData | null>(null);
+    const [openingSlotData, setOpeningSlotData] = useState<{
+        main: SlotData;
+        mode?: MyLiftPlayerMode;
+    } | null>(null);
     const [autoSaveData, setAutoSaveData] = useState<AutosaveSlotData | null>(null); // Данные из слота "Автосохранение": больше информации, чем у обычного слота.
 
-    const openSlotInMyLiftPlayer = (slot: SlotData, floorId: string) => {
+    const openSlotInMyLiftPlayer = (slot: SlotData, floorId: string, isAutosave?: boolean) => {
         const targetFloorIndex = data.floors.findIndex(f => f.id === floorId);
         if (targetFloorIndex === -1) return;
 
@@ -544,10 +556,13 @@ export default function ElevatorVideoPlayer({
             if (doorStateRef.current === 'closed') {
                 openDoors();
             }
-            setOpeningSlotData(slot);
+            setOpeningSlotData({
+                main: slot,
+                mode: isAutosave ? "full" : "free",
+            });
         } else {
             setIsCoursebotTransit(true);
-            setPendingSlotLoad({ slot, floorIndex: targetFloorIndex });
+            setPendingSlotLoad({ slot, floorIndex: targetFloorIndex, isAutosave: (isAutosave || false) });
 
             resetCalls();
 
@@ -594,7 +609,11 @@ export default function ElevatorVideoPlayer({
         if (isCoursebotTransit && pendingSlotLoad) {
             if (currentFloor === pendingSlotLoad.floorIndex && !isMoving && doorState === 'opened') {
 
-                setOpeningSlotData(pendingSlotLoad.slot);
+                setOpeningSlotData({
+                    main: pendingSlotLoad.slot,
+                    mode: pendingSlotLoad.isAutosave ? 'full' : 'free',
+                });
+                setPlayerMode(pendingSlotLoad.isAutosave ? 'full' : 'free');
 
                 setIsCoursebotTransit(false);
                 setPendingSlotLoad(null);
@@ -603,39 +622,49 @@ export default function ElevatorVideoPlayer({
     }, [currentFloor, isMoving, doorState, isCoursebotTransit, pendingSlotLoad]);
 
     useEffect(() => setData(liftData), [liftData]);
+
+    const videoData = data.floors[currentFloor].videoData;
+
     // -----------------------------
     // Render
     // -----------------------------
     return (
         <>
-            <title>{`${data.title}`}</title>
-            <MyLiftPlayer
-                video={data.floors[currentFloor].videoData!}
-                liftId={data.id}
-                floorId={data.floors[currentFloor].id}
-                mode={playerMode}
-                onRequestSave={(payload) => openCoursebot('save', payload)}
-                // onRequestAutosave={(payload) => console.log(payload)}
-                onRequestAutosave={(payload) => openCoursebot('autosave', payload)}
-                coursebotOptions={data.coursebot}
-                onInitialPlay={handleInitialPlay}
-                updateOpeningSlotData={setOpeningSlotData}
-                onVideoEnded={onVideoEnded}
-                slotDataToOpen={openingSlotData}
-                autoSaveData={autoSaveData}
-                playerStateRef={playerStateRef}
-                activateRef={activatePlayerRef}
-                resetRef={resetPlayerRef}
-                requestAutosaveRef={requestAutosaveRef}
-                styles={{
-                    position: 'absolute',
-                    // top: '250px',
-                    top: `${(((((currentY * 200) + 100) % 200)) - 70)}%`,
-                    left: '28.5%',
-                    zIndex: '1',
-                }}
+            {(url.startsWith('/mylift/elevator')) && <title>{`${data.title}`}</title>}
+            {videoData && (
+                <MyLiftPlayer
+                    video={videoData}
+                    liftId={data.id}
+                    floorId={data.floors[currentFloor].id}
+                    mode={playerMode}
+                    onRequestSave={(payload) => openCoursebot('save', payload)}
+                    // onRequestAutosave={(payload) => console.log(payload)}
+                    onlyFullModeAutosave={(data.coursebot.autosaveInFullModeOnly)}
+                    onRequestAutosave={(payload) => {
+                        if (data.coursebot.hiddenAutosave) {
+                            autoSaveToCoursebot(payload);
+                        } else openCoursebot('autosave', payload);
+                    }}
+                    coursebotOptions={data.coursebot}
+                    onInitialPlay={handleInitialPlay}
+                    updateOpeningSlotData={setOpeningSlotData}
+                    onVideoEnded={onVideoEnded}
+                    slotDataToOpen={openingSlotData}
+                    autoSaveData={autoSaveData}
+                    playerStateRef={playerStateRef}
+                    activateRef={activatePlayerRef}
+                    resetRef={resetPlayerRef}
+                    requestAutosaveRef={requestAutosaveRef}
+                    styles={{
+                        position: 'absolute',
+                        // top: '250px',
+                        top: `${(((((currentY * 200) + 100) % 200)) - 70)}%`,
+                        left: '28.5%',
+                        zIndex: '1',
+                    }}
 
-            />
+                />
+            )}
             {/* <MyLiftPlayer
                 video={data.floors[0].videoData!}
                 liftId={data.id}

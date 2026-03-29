@@ -1,0 +1,105 @@
+@keyframes container-show {
+    0% {
+        opacity: 0;
+        scale: 0;
+    }
+
+    100% {
+        opacity: 1;
+        scale: 1;
+    }
+}
+
+.mylift-editor__loading {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    animation: container-show 0.2s ease 0s 1;
+}
+
+@keyframes loading {
+    0% {
+        rotate: 0deg;
+        /* border-top-width: 5px;
+        border-right-width: 2px;
+        border-bottom-width: 0px;
+        border-left-width: 0px; */
+    }
+
+    100% {
+        rotate: 360deg;
+        /* border-top-width: 2px;
+        border-right-width: 5px;
+        border-bottom-width: 2px;
+        border-left-width: 0px; */
+    }
+}
+
+.mylift-editor__loader {
+    width: 100px;
+    height: 100px;
+    border-top: 5px dashed #00ccff;
+    border-right: 2px dashed #0066ff;
+    border-radius: 200px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    /* background-color: #3700ff; */
+    
+
+    animation: loading 2s linear 0s infinite;
+
+    /* border-top-width: 2px;
+    border-right-width: 0px;
+    border-bottom-width: 0px;
+    border-left-width: 5px; */
+}
+
+.mylift-editor__loader::after {
+    content: "";
+    position: absolute;
+    
+    width: 80%;
+    height: 80%;
+    border-bottom: 1px dashed #cc00ff;
+    border-left: 3px dashed #6200ff;
+    border-radius: 100px;
+    animation: loading 2s linear 0s infinite;
+}
+
+.mylift-editor__loader::before {
+    content: "";
+    position: absolute;
+    
+    width: 85%;
+    height: 85%;
+    border-bottom: 1px dashed #cc00ff;
+    border-left: 3px dashed #6200ff;
+    border-radius: 100px;
+    animation: loading 2s linear 0s infinite;
+}
+
+@keyframes text-animation {
+    0% {
+        background-position-x: 0px;
+    }
+
+    100% {
+        background-position-x: 170px;
+    }
+}
+
+.mylift-editor__label {
+    background: linear-gradient(90deg, #db00f8 0%, #00e8f8 50%, #db00f8 100%);
+    background-clip: text;
+    color: transparent;
+    margin-top: 30px;
+    font-size: 30px;
+    animation: text-animation 1.5s linear 0s infinite;
+}

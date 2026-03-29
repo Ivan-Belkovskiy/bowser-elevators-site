@@ -53,7 +53,11 @@ export const ELEMENTS: ElementDefinition[] = [
         actions: [
             {
                 id: "openDefaultMode",
-                label: "Открыть Уровнебот"
+                label: "Открыть Уровнебот",
+            },
+            {
+                id: "requestAutosave",
+                label: "Выполнить Автосохранение"
             }
         ]
     }

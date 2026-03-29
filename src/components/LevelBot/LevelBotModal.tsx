@@ -44,8 +44,8 @@ export interface LevelBotModalProps {
 
     onClose: () => void;
 
-    onOpenInMyLiftPlayer: (slot: SlotData, floorId: string) => void;
-    onOpenInCoursebotPlayer: (slot: SlotData, floorId: string) => void;
+    onOpenInMyLiftPlayer: (slot: SlotData, floorId: string, isAutosave?: boolean) => void;
+    onOpenInCoursebotPlayer: (slot: SlotData, floorId: string, isAutosave?: boolean) => void;
 
     onSaveFragment?: (payload: SavePayload & { title: string; slotIndex: number }) => void;
     onAutoSave?: (payload?: SavePayload) => void;
@@ -77,6 +77,7 @@ export default function LevelBotModal({
     const [pendingFloorId, setPendingFloorId] = useState(activeFloorId);
     const [isAnimating, setAnimating] = useState(false);
     const [isSidebarDisabled, setSidebarDisabled] = useState(false);
+    const [watchListOpened, setWatchListOpened] = useState(false);
 
     const [transitionState, setTransitionState] = useState<LevelBotTransitionConfig>({
         state: "idle",
@@ -180,8 +181,12 @@ export default function LevelBotModal({
             />
 
             <LevelbotBase
+                currentVideo={currentFloor.videoData}
+                videoStats={elevator.videoStats}
                 slotData={floorSlots}
                 coursebotMode={mode}
+                watchListOpened={watchListOpened}
+                setWatchListOpened={setWatchListOpened}
                 savePayload={savePayload}
                 transitionState={
                     transitionState.options?.onlyHead
@@ -199,8 +204,8 @@ export default function LevelBotModal({
                     setSidebarDisabled(false);
                 }}
 
-                onOpenInMyLiftPlayer={(slot) => onOpenInMyLiftPlayer(slot, currentFloorId)}
-                onOpenInCoursebotPlayer={(slot) => onOpenInCoursebotPlayer(slot, currentFloorId)}
+                onOpenInMyLiftPlayer={(slot, isAutosave) => onOpenInMyLiftPlayer(slot, currentFloorId, isAutosave)}
+                onOpenInCoursebotPlayer={(slot, isAutosave) => onOpenInCoursebotPlayer(slot, currentFloorId, isAutosave)}
 
                 onSaveFragment={(title, slotIndex) => {
                     if (!savePayload) return;
@@ -231,7 +236,7 @@ export default function LevelBotModal({
                 currentFloor={pendingFloorId}
                 floors={floors}
                 onSelect={onFloorSelect}
-                disabled={isSidebarDisabled || mode === "save" || mode === "autosave"}
+                disabled={(isSidebarDisabled || mode === "save" || mode === "autosave") || watchListOpened}
             />
 
         </div>

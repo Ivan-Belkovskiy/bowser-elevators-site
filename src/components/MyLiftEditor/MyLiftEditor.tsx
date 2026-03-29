@@ -33,7 +33,7 @@ export default function MyLiftEditor({ elevator }: { elevator: LiftJson }) {
             <title>{`${elevator.title} | MyLift Editor` || `MyLift Editor`}</title>
             <div className="mylift-editor__elevator-container">
                 <ElevatorVideoPlayer liftData={editingLiftData} editMode={!previewMode} />
-                <div className={`mylift-editor__toolbar ${(modalCategory !== null && !previewMode) ? 'active' : ''}`}>
+                <div className={`mylift-editor__toolbar ${(modalCategory !== null && !previewMode && !imageEditor) ? 'active' : ''}`}>
                     <CustomButton
                         text={previewMode ? "↩" : "▶"}
                         className={`mylift-editor__button preview-btn ${previewMode ? 'preview-mode' : ''}`}
@@ -64,13 +64,15 @@ export default function MyLiftEditor({ elevator }: { elevator: LiftJson }) {
                 </div>
             </div>
             <MyLiftEditorModal
-                activeCondition={modalCategory !== null && !previewMode}
+                activeCondition={(modalCategory !== null && !previewMode) && !imageEditor}
                 category={modalCategory}
                 elevator={editingLiftData}
                 onSave={onSaveData}
+                setImageEditorType={setImageEditor}
             />
             <ElevatorImagesModal
                 elevator={editingLiftData}
+                setElevatorData={setEditingLiftData}
                 type={imageEditor}
                 onSave={() => true}
                 onClose={() => setImageEditor(null)}

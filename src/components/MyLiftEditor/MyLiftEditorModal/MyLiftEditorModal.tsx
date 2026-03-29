@@ -1,7 +1,7 @@
 import { CategoryDefinition } from "@/constants/elevatorPanel";
 import "./MyLiftEditorModal.css";
 import { ElevatorDisplayConfig, ElevatorDoorOpenDirections, ElevatorDoorTypes, Floor, LiftJson } from "@/types/elevator";
-import { ChangeEvent, useEffect, useState } from "react";
+import { ChangeEvent, Dispatch, SetStateAction, useEffect, useState } from "react";
 import { AccessCondition, FloorConfig } from "@/types/data/FloorTypes";
 import { VideoData } from "@/types/data/VideoData";
 import { VideoSettingsModalProps } from "@/types/components/VideoSettingsModal/VideoSettingsModal";
@@ -14,11 +14,14 @@ import DoorAnimationModal, { DoorAnimationModalProps } from "@/components/Elevat
 import LiftMotionModal from "@/components/ElevatorVideoPlayer/LiftMotionModal/LiftMotionModal";
 import ElevatorDisplay from "@/components/ElevatorVideoPlayer/ElevatorDisplay/ElevatorDisplay";
 import DisplayOptionsModal from "@/components/ElevatorVideoPlayer/DisplayOptionsModal/DisplayOptionsModal";
+import { ElevatorImagesModalType } from "@/components/ElevatorVideoPlayer/ElevatorImagesModal/ElevatorImagesModal";
+import { v4 } from "uuid";
 
-export default function MyLiftEditorModal({ activeCondition, category, elevator, onSave }: {
+export default function MyLiftEditorModal({ activeCondition, category, elevator, setImageEditorType, onSave }: {
     activeCondition?: boolean;
     category: CategoryDefinition | null;
     elevator: LiftJson;
+    setImageEditorType: Dispatch<SetStateAction<ElevatorImagesModalType | null>>;
     onSave: (newData: LiftJson) => any
 }) {
     const [openedModal, setOpenedModal] = useState<{
@@ -112,7 +115,6 @@ export default function MyLiftEditorModal({ activeCondition, category, elevator,
 
     const updateVideoData = (floorIdx: number, value: Partial<VideoData>) => {
         const current = liftData.floors[floorIdx].videoData;
-        // alert(JSON.stringify(current, null, 3));
         updateFloor('videoData', {
             ...current,
             ...value,
@@ -423,29 +425,42 @@ export default function MyLiftEditorModal({ activeCondition, category, elevator,
                         <>
                             <section className="mylift-editor-modal__section">
                                 <h2 className="mylift-editor-modal__subtitle">Внешний вид</h2>
-                                <div className="mylift-editor-modal__property elevator-image">
-                                    <p>Данный раздел находится в процессе разработки...</p>
-                                    {/* <span className="mylift-editor-modal__label">Левая стена лифта:</span>
-                                    <button className="mylift-editor-modal__button upload-image-button">Настроить...</button> */}
-                                    {/* <FileUploader
-                                        btnClass="mylift-editor-modal__button upload-image-button"
-                                        label="Загрузить файл..."
-                                        onUpload={(e) => setElevatorImages({
-                                            ...elevatorImages,
-                                            walls: {
-                                                ...elevatorImages.walls,
-                                                left: {
-                                                    ...elevatorImages.walls?.left,
-                                                    file: e.target.files?.[0] || null,
-                                                }
-                                            }
-                                        })}
-                                        file={elevatorImages.walls.left.file || null}
-                                        msgClass="mylift-editor-modal__message uploaded-image-name"
-                                        accept="image/*"
-                                    /> */}
-                                    {/* ТРЕБУЕТСЯ ДОРАБОТАТЬ! */}
+                                <p>Данный раздел находится в процессе разработки...</p>
+                                {/* <div className="mylift-editor-modal__property elevator-image">
+                                    <span className="mylift-editor-modal__label">Левая стена лифта:</span>
+                                    <button
+                                        className="mylift-editor-modal__button upload-image-button"
+                                        onClick={() => setImageEditorType('leftWall')}
+                                    >Настроить...</button>
                                 </div>
+                                <div className="mylift-editor-modal__property elevator-image">
+                                    <span className="mylift-editor-modal__label">Правая стена лифта:</span>
+                                    <button
+                                        className="mylift-editor-modal__button upload-image-button"
+                                        onClick={() => setImageEditorType('rightWall')}
+                                    >Настроить...</button>
+                                </div>
+                                <div className="mylift-editor-modal__property elevator-image">
+                                    <span className="mylift-editor-modal__label">Кнопочная панель лифта:</span>
+                                    <button
+                                        className="mylift-editor-modal__button upload-image-button"
+                                        onClick={() => setImageEditorType('buttonPanel')}
+                                    >Настроить...</button>
+                                </div>
+                                <div className="mylift-editor-modal__property elevator-image">
+                                    <span className="mylift-editor-modal__label">Левая дверь лифта:</span>
+                                    <button
+                                        className="mylift-editor-modal__button upload-image-button"
+                                        onClick={() => setImageEditorType('leftDoor')}
+                                    >Настроить...</button>
+                                </div>
+                                <div className="mylift-editor-modal__property elevator-image">
+                                    <span className="mylift-editor-modal__label">Правая дверь лифта:</span>
+                                    <button
+                                        className="mylift-editor-modal__button upload-image-button"
+                                        onClick={() => setImageEditorType('rightDoor')}
+                                    >Настроить...</button>
+                                </div> */}
                             </section>
                             <section className="mylift-editor-modal__section">
                                 <h2 className="mylift-editor-modal__subtitle">Кнопочная панель</h2>
@@ -602,6 +617,20 @@ export default function MyLiftEditorModal({ activeCondition, category, elevator,
                                                 coursebot: {
                                                     ...liftData.coursebot,
                                                     autosaveDelaySec: Number(e.target.value)
+                                                }
+                                            })}
+                                        />
+                                    </div>
+                                    <div className="mylift-editor-modal__property">
+                                        <span className="mylift-editor-modal__label">Выполнять автосохранение ТОЛЬКО в режиме "Полноценный просмотр":</span>
+                                        <input
+                                            type="checkbox"
+                                            checked={liftData.coursebot.autosaveInFullModeOnly || false}
+                                            onChange={(e) => setLiftData({
+                                                ...liftData,
+                                                coursebot: {
+                                                    ...liftData.coursebot,
+                                                    autosaveInFullModeOnly: e.target.checked,
                                                 }
                                             })}
                                         />

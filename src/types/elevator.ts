@@ -103,8 +103,9 @@ export interface VideoStats {
   progress?: number; // 0–1
   completed?: boolean;
   watchHistory?: {
-    timestamp: string;
-    watchTime: number; // в секундах
+    start: string; // Дата+время начала просмотра
+    end: string; // Дата+время завершения просмотра
+    watchTime: number; // Просмотренное время в секундах
     completed: boolean;
   }[];
 }
@@ -120,6 +121,7 @@ export interface LiftJson {
   coursebot: {
     enabled: boolean;
     autosaveDelaySec: number;
+    autosaveInFullModeOnly: boolean;
     hiddenAutosave: boolean;
     slots: {
       [floorId: string]: CoursebotFloorSlotConfig;

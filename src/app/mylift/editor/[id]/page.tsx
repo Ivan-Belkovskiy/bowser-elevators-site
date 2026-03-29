@@ -1,4 +1,5 @@
 "use client";
+import "./page.css";
 import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 import MyLiftEditor from "@/components/MyLiftEditor/MyLiftEditor";
@@ -25,7 +26,10 @@ export default function EditorPage() {
   }, [id]);
 
   if (error) return <div>Ошибка: {error}</div>;
-  if (!lift) return <div>Загрузка...</div>;
+  if (!lift) return <div className="mylift-editor__loading">
+    <span className="mylift-editor__loader"></span>
+    <span className="mylift-editor__label">MyLift Editor</span>
+  </div>;
 
   return <MyLiftEditor elevator={lift} />;
 }
