@@ -8,6 +8,7 @@ import LevelBotHead from "./LevelBotHead/LevelBotHead";
 import LevelbotBase from "./LevelBotBase/LevelBotBase";
 import LevelBotSidebar from "./LevelBotSidebar/LevelBotSidebar";
 import { EditingSlotData } from "./SlotInfoModal/SlotInfoModal";
+import { MyLiftPlayerMode } from "../MyLiftPlayer/MyLiftPlayer";
 
 export type LevelBotMode = "default" | "load" | "save" | "autosave";
 
@@ -44,7 +45,7 @@ export interface LevelBotModalProps {
 
     onClose: () => void;
 
-    onOpenInMyLiftPlayer: (slot: SlotData, floorId: string, isAutosave?: boolean) => void;
+    onOpenInMyLiftPlayer: (slot: SlotData, floorId: string, isAutosave?: boolean, playerMode?: MyLiftPlayerMode) => void;
     onOpenInCoursebotPlayer: (slot: SlotData, floorId: string, isAutosave?: boolean) => void;
 
     onSaveFragment?: (payload: SavePayload & { title: string; slotIndex: number }) => void;
@@ -204,7 +205,7 @@ export default function LevelBotModal({
                     setSidebarDisabled(false);
                 }}
 
-                onOpenInMyLiftPlayer={(slot, isAutosave) => onOpenInMyLiftPlayer(slot, currentFloorId, isAutosave)}
+                onOpenInMyLiftPlayer={(slot, isAutosave, mode) => onOpenInMyLiftPlayer(slot, currentFloorId, isAutosave, mode)}
                 onOpenInCoursebotPlayer={(slot, isAutosave) => onOpenInCoursebotPlayer(slot, currentFloorId, isAutosave)}
 
                 onSaveFragment={(title, slotIndex) => {

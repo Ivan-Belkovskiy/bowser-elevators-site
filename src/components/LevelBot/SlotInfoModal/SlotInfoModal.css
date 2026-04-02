@@ -46,7 +46,8 @@
     background-color: #dab900;
 }
 
-.slot-info-modal__top, .slot-info-modal__top.slot-data-edit-mode__delete {
+.slot-info-modal__top,
+.slot-info-modal__top.slot-data-edit-mode__delete {
     background-color: #ce5f5f;
 }
 
@@ -294,11 +295,39 @@
     min-height: 250px;
 }
 
-.slot-info-modal__top.autosave-slot ~ .slot-info-modal__save-form {
+.slot-info-modal__top.autosave-slot~.slot-info-modal__save-form {
     width: 90%;
 }
 
 .delete-button {
     background-color: #c70000;
     color: #fff;
+}
+
+.slot-info-modal__autosave-details {
+    width: 100%;
+    margin-top: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.slot-info-modal__autosave-details-item {
+    display: flex;
+    align-items: center;
+}
+
+.slot-info-modal__autosave-details-item span {
+    font-size: 19px;
+    margin-left: 15px;
+    color: #051b3a;
+}
+
+
+.slot-info-modal__label.open-completed-autosave {
+    font-size: 23px;
+    text-align: center;
+    margin: 0;
+    color: #5c4600;
+    font-weight: 700;
 }

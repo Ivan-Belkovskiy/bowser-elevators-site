@@ -11,7 +11,7 @@ import WarningModal from './WarningModal';
 
 import AutoSaveManager from './AutoSaveManager';
 import StatsManager from './StatsManager';
-import { AutosaveSlotData, LiftJson, SlotData } from '@/types/elevator';
+import { AutosaveSlotData, LiftJson, SlotData, VideoStats } from '@/types/elevator';
 import PlayModeModal from './PlayModeModal';
 import AudioController from '@/core/audio/AudioController';
 
@@ -35,18 +35,20 @@ export interface MyLiftPlayerProps {
   resetRef?: RefObject<(() => void) | null>;
   requestAutosaveRef?: RefObject<(() => void) | null>;
   onlyFullModeAutosave?: boolean;
+  videoStats: VideoStats;
 
   updateOpeningSlotData?: Dispatch<SetStateAction<{
     main: SlotData,
     mode?: MyLiftPlayerMode,
   } | null>>;
   onRequestSave: (payload: SavePayload) => void;
-  onRequestAutosave: (payload: SavePayload) => void;
+  onRequestAutosave: (payload: SavePayload, playerState: PlayerState) => void;
   onInitialPlay?: () => void;
   onVideoEnded?: (playerState: PlayerState, videoId: string) => void;
 }
 
 export interface MyLiftPlayerWatchData {
+  watchNumber?: number;
   startDate?: string;
   endDate?: string;
 }
@@ -80,6 +82,7 @@ export default function MyLiftPlayer({
   resetRef,
   requestAutosaveRef,
   onlyFullModeAutosave,
+  videoStats,
   updateOpeningSlotData,
   onRequestSave,
   onRequestAutosave,
@@ -119,8 +122,11 @@ export default function MyLiftPlayer({
   };
 
   const activatePlayer = (selectedMode: MyLiftPlayerMode) => {
+    // const watchCount = video.id
+    // alert(videoStats?.views);
     const watchInfo = (selectedMode === 'full') ? {
       startDate: new Date().toLocaleString().replace(',', ''),
+      watchNumber: (videoStats?.views + 1),
     } : {};
     setPlayerState(prev => ({
       ...prev,
@@ -193,15 +199,15 @@ export default function MyLiftPlayer({
         videoId: video.id,
         thumbnailUrl: preview,
         timecode: videoRef.current?.currentTime || 0
-      });
+      }, playerState);
     }
   }
 
   useEffect(() => {
     const autosaveInterval = coursebotOptions?.autosaveDelaySec || 10;
 
-    const shouldStartTimeout = (!playerState.playing && playerState.activated && !playerState.ended) && 
-    (playerState.mode === 'free' ? !onlyFullModeAutosave : true);
+    const shouldStartTimeout = (!playerState.playing && playerState.activated && !playerState.ended) &&
+      (playerState.mode === 'free' ? !onlyFullModeAutosave : true);
 
     // if (playerState.activated) { // Раскомментировать, если нужно отключить музыку на все время просмотра
     //   AudioController.setVolume({
@@ -246,7 +252,7 @@ export default function MyLiftPlayer({
       if (autosaveTimerRef.current) clearTimeout(autosaveTimerRef.current);
     };
   }, [playerState.playing, playerState.activated, playerState.ended]);
-  
+
   // !!! ВАЖНО: Исправить ошибку, которая возникает из-за отсутствия видео на этаже !!! //
 
   useEffect(() => {
@@ -278,15 +284,26 @@ export default function MyLiftPlayer({
   }, [video.id]);
 
   const loadCoursebotSlotData = (data?: SlotData | null, playerMode?: MyLiftPlayerMode) => {
-    if (data?.timecode !== undefined && videoRef.current) {
-      videoRef.current.currentTime = data.timecode;
+    const commonData = (data?.isAutosave) ? data?.data.main : data?.data;
+    if (commonData?.timecode !== undefined && videoRef.current) {
+      videoRef.current.currentTime = commonData.timecode;
 
-      setPlayerState(prev => ({
-        ...prev,
-        mode: playerMode || "free",
-        activated: true,
-        // playing: true 
-      }));
+      if (data?.isAutosave && data?.data?.playerState) {
+        // alert(playerMode);
+        setPlayerState(prev => ({
+          ...data.data.playerState,
+          fullscreen: prev.fullscreen,
+          // mode: 'free'
+          mode: playerMode ? playerMode : data.data.playerState.mode,
+        }));
+      } else {
+        setPlayerState(prev => ({
+          ...prev,
+          mode: "free",
+          activated: true,
+          // playing: true 
+        }));
+      }
 
       updateOpeningSlotData?.(null);
     }
@@ -305,6 +322,7 @@ export default function MyLiftPlayer({
       //     endDate: new Date().toLocaleString().replace(',', ''),
       //   }
       // }));
+      // alert(playerState.mode)
       onVideoEnded?.({
         ...playerState,
         watchInfo: {
@@ -332,7 +350,7 @@ export default function MyLiftPlayer({
 
     await AutoSaveManager.saveProgress(
       playerState,
-      async (payload) => onRequestAutosave(payload)
+      async (payload) => onRequestAutosave(payload, playerState)
     );
 
     setSaving(false);
@@ -434,7 +452,7 @@ export default function MyLiftPlayer({
 
   useEffect(() => {
     if (playerStateRef) playerStateRef.current = playerState;
-    // alert(playerState.duration);
+    // alert(playerState.mode);
   }, [playerState]);
 
   // -----------------------------
@@ -477,7 +495,7 @@ export default function MyLiftPlayer({
         </>
       )}
 
-      <WarningModal
+      {/* <WarningModal
         visible={showWarning}
         saving={saving}
         mode={playerState.mode}
@@ -485,7 +503,7 @@ export default function MyLiftPlayer({
         onExitWithoutSave={exitWithoutSave}
         onCancel={cancelWarning}
         onSwitchMode={() => setShowModeSelection(true)}
-      />
+      /> */}
 
     </div>
   );

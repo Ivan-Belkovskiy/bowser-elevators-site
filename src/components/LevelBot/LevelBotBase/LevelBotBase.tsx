@@ -41,7 +41,7 @@ export default function LevelbotBase({
     setWatchListOpened?: Dispatch<SetStateAction<boolean>>;
     onSlotModalOpened?: () => void;
     onSlotModalClosed?: () => void;
-    onOpenInMyLiftPlayer?: (slot: SlotData, isAutosave?: boolean) => void;
+    onOpenInMyLiftPlayer?: (slot: SlotData, isAutosave?: boolean, playerMode?: MyLiftPlayerMode) => void;
     onOpenInCoursebotPlayer?: (slot: SlotData, isAutosave?: boolean) => void;
     onSaveFragment?: (title: string, slotIndex: number) => void;
     onAutoSave?: () => void;
@@ -162,8 +162,9 @@ export default function LevelbotBase({
                 mode={coursebotMode}
                 slotData={selectedSlot}
                 savePayload={savePayload}
+                videoStats={videoStats?.[videoData?.id || ""]}
                 onClose={closeSlot}
-                onOpenInMyLiftPlayer={() => selectedSlot?.data && onOpenInMyLiftPlayer?.(selectedSlot.data, selectedSlot.isAutosave)}
+                onOpenInMyLiftPlayer={(mode) => selectedSlot?.data && onOpenInMyLiftPlayer?.(selectedSlot.data, selectedSlot.isAutosave, mode)}
                 onOpenInCoursebotPlayer={() => selectedSlot?.data && onOpenInCoursebotPlayer?.(selectedSlot.data, selectedSlot.isAutosave)}
                 onSave={(title) => {
                     if (selectedSlot) {
@@ -198,10 +199,10 @@ export default function LevelbotBase({
                     onClick={() => openSlot(true, 0, slotData?.autosave)}
                 >
                     <div className={`coursebot-slot__preview 
-                        ${(getSlotImage(0, slotData?.autosave?.thumbnailUrl)) ? 'with-data' : ''} 
+                        ${(slotData?.autosave?.isAutosave) && (getSlotImage(0, slotData.autosave.data?.main?.thumbnailUrl)) ? 'with-data' : ''} 
                         ${fillingSlotIndex === 0 ? "filling" : ""}`}>
-                        {getSlotImage(0, slotData?.autosave?.thumbnailUrl) && (
-                            <img src={getSlotImage(0, slotData?.autosave?.thumbnailUrl)} alt="autosave" />
+                        {(slotData?.autosave?.isAutosave) && getSlotImage(0, slotData.autosave.data?.main?.thumbnailUrl) && (
+                            <img src={getSlotImage(0, slotData.autosave.data.main.thumbnailUrl)} alt="autosave" />
                         )}
                     </div>
                     <span className="coursebot-slot__title">Автосохранение</span>
@@ -209,22 +210,24 @@ export default function LevelbotBase({
 
                 {slotData?.fragments.map((slot, idx) => {
                     const slotIndex = idx + 1;
-                    const thumb = getSlotImage(slotIndex, slot.thumbnailUrl);
+                    if (!slot.isAutosave) {
+                        const thumb = getSlotImage(slotIndex, slot.data?.thumbnailUrl);
 
-                    return (
-                        <div
-                            key={idx}
-                            className={`coursebot-base__slot ${bouncingSlotIndex === slotIndex ? "bouncing" : ""}`}
-                            onClick={() => openSlot(false, slotIndex, slot)}
-                        >
-                            <div className={`coursebot-slot__preview ${thumb ? 'with-data' : ''} ${fillingSlotIndex === slotIndex ? "filling" : ""}`}>
-                                {thumb && <img src={thumb} alt={slot.title} />}
+                        return (
+                            <div
+                                key={idx}
+                                className={`coursebot-base__slot ${bouncingSlotIndex === slotIndex ? "bouncing" : ""}`}
+                                onClick={() => openSlot(false, slotIndex, slot)}
+                            >
+                                <div className={`coursebot-slot__preview ${thumb ? 'with-data' : ''} ${fillingSlotIndex === slotIndex ? "filling" : ""}`}>
+                                    {thumb && <img src={thumb} alt={slot.data?.title} />}
+                                </div>
+                                <span className="coursebot-slot__title">
+                                    {slot.data?.title ? (slot.data?.title.length > 10 ? slot.data?.title.slice(0, 11) + '...' : slot.data?.title) : ""}
+                                </span>
                             </div>
-                            <span className="coursebot-slot__title">
-                                {slot.title ? (slot.title.length > 10 ? slot.title.slice(0, 11) + '...' : slot.title) : ""}
-                            </span>
-                        </div>
-                    );
+                        );
+                    }
                 })}
             </div>
         </div>

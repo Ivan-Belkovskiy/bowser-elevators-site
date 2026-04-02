@@ -1,8 +1,9 @@
-import { SlotData } from "@/types/elevator";
+import { CommonSlotData, SlotData, VideoStats } from "@/types/elevator";
 import { LevelBotMode, SavePayload } from "../LevelBotModal";
 import "./SlotInfoModal.css";
 import { MouseEvent, useEffect, useState } from "react";
 import AudioController from "@/core/audio/AudioController";
+import { MyLiftPlayerMode } from "@/components/MyLiftPlayer/MyLiftPlayer";
 
 export interface EditingSlotData {
     title?: string;
@@ -11,6 +12,7 @@ export interface EditingSlotData {
 export default function SlotInfoModal({
     mode,
     slotData,
+    videoStats,
     savePayload,
     onClose,
     onSave,
@@ -22,7 +24,12 @@ export default function SlotInfoModal({
     onOpenInCoursebotPlayer
 }: {
     mode: LevelBotMode;
-    slotData?: { isAutosave: boolean; data?: SlotData } | null;
+    videoStats?: VideoStats;
+    slotData?: {
+        isAutosave: boolean;
+        index: number;
+        data?: SlotData | null;
+    } | null;
     savePayload?: SavePayload;
     onClose?: () => void;
 
@@ -32,19 +39,22 @@ export default function SlotInfoModal({
     onOverwrite?: (title: string) => void;
     onEdit?: (data: EditingSlotData) => void;
 
-    onOpenInMyLiftPlayer?: () => void;
+    onOpenInMyLiftPlayer?: (mode?: MyLiftPlayerMode) => void;
     onOpenInCoursebotPlayer?: () => void;
 }) {
     const [data, setData] = useState(slotData);
     const [titleInput, setTitleInput] = useState("");
     const [slotDataEditMode, setSlotDataEditMode] = useState<"title" | "delete" | null>(null);
+    const [openCompletedWatchAutosave, setOpenCompletedWatchAutosave] = useState(false);
 
-    const isEmpty = data?.data?.empty;
+    const currentData = (data?.data?.isAutosave) ? data?.data.data.main : data?.data?.data as CommonSlotData;
+
+    const isEmpty = currentData?.empty;
     const isAutosave = data?.isAutosave ?? false;
 
     useEffect(() => {
         setData(slotData);
-        if (slotData?.data?.title) setTitleInput(slotData.data.title);
+        if (currentData?.title) setTitleInput(currentData.title);
     }, [slotData]);
 
     if (!data) {
@@ -58,7 +68,7 @@ export default function SlotInfoModal({
             ? "Сохранить фрагмент"
             : isAutosave
                 ? "Автосохранение"
-                : data.data?.title || "Нет данных";
+                : (currentData?.title) || "Нет данных";
 
     const isReadOnly = mode === "load";
     const isEditMode = mode === "default";
@@ -79,11 +89,11 @@ export default function SlotInfoModal({
         onClose?.();
     }
 
-    const openInMyLiftPlayer = (e: MouseEvent<HTMLButtonElement>) => {
+    const openInMyLiftPlayer = (e: MouseEvent<HTMLButtonElement>, playerMode?: MyLiftPlayerMode) => {
         AudioController.playCoursebotSound("select", "/audio/sound/coursebot/coursebot-select-button.wav");
         // if (e.target instanceof HTMLButtonElement) e.target.style.scale = "1.1";
         setTimeout(() => {
-            onOpenInMyLiftPlayer?.();
+            onOpenInMyLiftPlayer?.(playerMode);
         }, 400);
     }
 
@@ -95,6 +105,11 @@ export default function SlotInfoModal({
         }, 400);
     }
 
+    const currentWatchInfo = (data.data?.isAutosave && data?.data?.data && data.data.data.playerState.watchInfo?.watchNumber) ? videoStats?.watchHistory?.[
+        data.data.data.playerState.watchInfo.watchNumber - 1
+    ] : undefined;
+
+    // alert(JSON.stringify(videoStats))
 
     return (
         <div className={`slot-info-modal ${slotData ? "opened" : "closed"}`}>
@@ -140,6 +155,7 @@ export default function SlotInfoModal({
                     )}
                 </div>
             )}
+
 
             {isSaveMode && isEmpty && (
                 <div className="slot-info-modal__save-form">
@@ -230,27 +246,52 @@ export default function SlotInfoModal({
                 </div>
             )}
 
-            {(((!isEmpty && !isSaveMode && !isAutosaveMode) && data.data) && !slotDataEditMode) && (
+            {(((!isEmpty && !isSaveMode && !isAutosaveMode) && currentData) && !slotDataEditMode && !openCompletedWatchAutosave) && (
                 <>
                     <div className="slot-info-modal__main">
                         <div className="slot-info-modal__main-left">
                             <div className="slot-info-modal__preview">
-                                {data.data?.thumbnailUrl && (
-                                    <img src={data.data.thumbnailUrl} />
+                                {currentData?.thumbnailUrl && (
+                                    <img src={currentData.thumbnailUrl} />
                                 )}
                                 <div className="slot-info-modal__metadata">
                                     <span className="slot-info-modal__label metadata-createdAt">
-                                        {data.data?.createdAt ?? "??.??.????"}
+                                        {currentData?.createdAt ?? "??.??.????"}
                                     </span>
                                     <span className="slot-info-modal__label metadata-currentTime">
-                                        {formatTimecode(data.data?.timecode) ?? "0:00:00"}
+                                        {formatTimecode(currentData?.timecode) ?? "0:00:00"}
                                     </span>
                                 </div>
                             </div>
                         </div>
 
                         <div className="slot-info-modal__main-right">
-                            {(isEditMode && !isAutosave) && (
+                            {(isEditMode) && (isAutosave && data.data?.isAutosave && data.data.data.playerState) ? (
+                                <div className="slot-info-modal__autosave-details">
+                                    <div className="slot-info-modal__autosave-details-item">
+                                        <img src="/images/coursebot/slotinfo-modal/autosave-details/player-mode.svg" />
+                                        <span>{data.data.data.playerState.mode === 'free' ? 'Выборочный просмотр' : 'Полноценный просмотр'}</span>
+                                    </div>
+                                    {data.data.data.playerState.watchInfo?.watchNumber && (
+                                        <div className="slot-info-modal__autosave-details-item">
+                                            <img src="/images/coursebot/slotinfo-modal/autosave-details/view-number.svg" />
+                                            <span>{data.data.data.playerState.watchInfo.watchNumber}-й просмотр</span>
+                                        </div>
+                                    )}
+                                    {data.data.data.playerState.watchInfo?.startDate && (
+                                        <div className="slot-info-modal__autosave-details-item">
+                                            <img src="/images/coursebot/slotinfo-modal/autosave-details/start-date.svg" />
+                                            <span>Начало просмотра: {data.data.data.playerState.watchInfo?.startDate}</span>
+                                        </div>
+                                    )}
+                                    {currentWatchInfo && (
+                                        <div className="slot-info-modal__autosave-details-item">
+                                            <img src="/images/coursebot/slotinfo-modal/autosave-details/end-date.svg" />
+                                            <span>Окончание просмотра: {currentWatchInfo.end}</span>
+                                        </div>
+                                    )}
+                                </div>
+                            ) : (
                                 <>
                                     <button
                                         className="slot-info-modal__button"
@@ -283,12 +324,17 @@ export default function SlotInfoModal({
                         </div>
                     </div>
 
-                    {(!data.data) ? (<></>) : (isAutosave) ? (
+                    {(!data.data || openCompletedWatchAutosave) ? (<></>) : (isAutosave) ? (
                         <div className="slot-info-modal__buttons">
                             <div className="slot-info-modal__button-group">
                                 <button
                                     className="slot-info-modal__button mylift-player-button"
-                                    onClick={openInMyLiftPlayer}
+                                    onClick={(e) => {
+                                        if (currentWatchInfo?.completed || currentWatchInfo?.end) {
+                                            AudioController.playCoursebotSound("select", "/audio/sound/coursebot/coursebot-select-button.wav");
+                                            setOpenCompletedWatchAutosave(true);
+                                        } else openInMyLiftPlayer(e);
+                                    }}
                                 >
                                     Открыть в <span className="mylift">MyLift Player</span>
                                 </button>
@@ -338,15 +384,15 @@ export default function SlotInfoModal({
                         Редактировать данные:
                     </span> */}
                     <div className="slot-info-modal__preview slot-edit-mode">
-                        {data.data?.thumbnailUrl && (
-                            <img src={data.data.thumbnailUrl} />
+                        {currentData?.thumbnailUrl && (
+                            <img src={currentData.thumbnailUrl} />
                         )}
                         <div className="slot-info-modal__metadata">
                             <span className="slot-info-modal__label metadata-createdAt">
-                                {data.data?.createdAt ?? "??.??.????"}
+                                {currentData?.createdAt ?? "??.??.????"}
                             </span>
                             <span className="slot-info-modal__label metadata-currentTime">
-                                {formatTimecode(data.data?.timecode) ?? "0:00:00"}
+                                {formatTimecode(currentData?.timecode) ?? "0:00:00"}
                             </span>
                         </div>
                     </div>
@@ -386,20 +432,20 @@ export default function SlotInfoModal({
             {(slotDataEditMode === 'delete' && (!isEmpty)) && (
                 <div className="slot-info-modal__save-form">
                     <span className="slot-info-modal__label overwrite-slot">
-                       {isAutosave ? 
-                       "Очистить Автосохранение? Данные будут удалены безвозвратно!" : 
-                       "Удалить данные без возможности восстановления?"}
+                        {isAutosave ?
+                            "Очистить Автосохранение? Данные будут удалены безвозвратно!" :
+                            "Удалить данные без возможности восстановления?"}
                     </span>
                     <div className="slot-info-modal__preview slot-edit-mode">
-                        {data.data?.thumbnailUrl && (
-                            <img src={data.data.thumbnailUrl} />
+                        {currentData?.thumbnailUrl && (
+                            <img src={currentData.thumbnailUrl} />
                         )}
                         <div className="slot-info-modal__metadata">
                             <span className="slot-info-modal__label metadata-createdAt">
-                                {data.data?.createdAt ?? "??.??.????"}
+                                {currentData?.createdAt ?? "??.??.????"}
                             </span>
                             <span className="slot-info-modal__label metadata-currentTime">
-                                {formatTimecode(data.data?.timecode) ?? "0:00:00"}
+                                {formatTimecode(currentData?.timecode) ?? "0:00:00"}
                             </span>
                         </div>
                     </div>
@@ -419,6 +465,49 @@ export default function SlotInfoModal({
                         onClick={() => {
                             AudioController.playCoursebotSound("close");
                             setSlotDataEditMode(null)
+                        }}
+                    >
+                        Назад
+                    </button>
+                </div>
+            )}
+
+            {(openCompletedWatchAutosave && (!isEmpty) && isAutosave) && (
+                <div className="slot-info-modal__save-form">
+                    <span className="slot-info-modal__label open-completed-autosave">
+                        Просмотр, в котором было выполнено данное автосохранение, уже завершён!
+                        Открыть автосохранение в режиме «Выборочный просмотр»?
+                    </span>
+                    <div className="slot-info-modal__preview slot-edit-mode">
+                        {currentData?.thumbnailUrl && (
+                            <img src={currentData.thumbnailUrl} />
+                        )}
+                        <div className="slot-info-modal__metadata">
+                            <span className="slot-info-modal__label metadata-createdAt">
+                                {currentData?.createdAt ?? "??.??.????"}
+                            </span>
+                            <span className="slot-info-modal__label metadata-currentTime">
+                                {formatTimecode(currentData?.timecode) ?? "0:00:00"}
+                            </span>
+                        </div>
+                    </div>
+                    <button
+                        className="slot-info-modal__button mylift-player-button"
+                        onClick={(e) => {
+                            AudioController.playCoursebotSound("select");
+                            openInMyLiftPlayer(e, 'free');
+                            // setSlotDataEditMode(null);
+                            // if (isAutosave) onClearAutosave?.();
+                            // else onDelete?.();
+                        }}
+                    >
+                        Открыть в <span className="mylift">MyLift Player</span> [Выборочный просмотр]
+                    </button>
+                    <button
+                        className="slot-info-modal__button save-button"
+                        onClick={() => {
+                            AudioController.playCoursebotSound("close");
+                            setOpenCompletedWatchAutosave(false);
                         }}
                     >
                         Назад

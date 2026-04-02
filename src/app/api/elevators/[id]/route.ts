@@ -111,29 +111,39 @@ export async function PUT(
       }
     } else if (formData.has('coursebot__autosave')) {
       const data = formData.get('coursebot__autosave');
-      if (data && typeof data === 'string') {
+      const state = formData.get('coursebot__autosave--player_state');
+      if ((data && typeof data === 'string') && (state && typeof state === 'string')) {
         const slotData = JSON.parse(data);
+        const playerState = JSON.parse(state);
 
-        const base64 = slotData.thumbnailUrl.replace(/^data:image\/png;base64,/, "");
-        const targetPath = path.join(
-          assetsPath,
-          "assets",
-          "images",
-          "coursebot",
-          slotData.videoId,
-          `AUTOSAVE.png`
-        );
+        if (playerState satisfies PlayerState) {
+          const base64 = slotData.thumbnailUrl.replace(/^data:image\/png;base64,/, "");
+          const targetPath = path.join(
+            assetsPath,
+            "assets",
+            "images",
+            "coursebot",
+            slotData.videoId,
+            `AUTOSAVE.png`
+          );
 
-        fs.mkdirSync(path.dirname(targetPath), { recursive: true });
+          fs.mkdirSync(path.dirname(targetPath), { recursive: true });
 
-        fs.writeFileSync(targetPath, Buffer.from(base64, "base64"));
+          fs.writeFileSync(targetPath, Buffer.from(base64, "base64"));
 
-        liftData.coursebot.slots[slotData.floorId].autosave = {
-          id: 0,
-          empty: false,
-          ...slotData,
-          thumbnailUrl: `/Elevators/${userId}/${liftData.id}/assets/images/coursebot/${slotData.videoId}/AUTOSAVE.png`,
-          createdAt: new Date().toLocaleString().replace(',', ''),
+          liftData.coursebot.slots[slotData.floorId].autosave = {
+            isAutosave: true,
+            data: {
+              main: {
+                id: 0,
+                empty: false,
+                ...slotData,
+                thumbnailUrl: `/Elevators/${userId}/${liftData.id}/assets/images/coursebot/${slotData.videoId}/AUTOSAVE.png`,
+                createdAt: new Date().toLocaleString().replace(',', ''),
+              },
+              playerState: playerState,
+            }
+          }
         }
       }
     } else if (formData.has('coursebot__edit_fragment')) {
@@ -151,10 +161,11 @@ export async function PUT(
       if (data && typeof data === 'string') {
         const floorId: string = data;
 
-        liftData.coursebot.slots[floorId].autosave = {
-          id: 0,
-          empty: true,
-        }
+        // liftData.coursebot.slots[floorId].autosave = {
+        //   // id: 0,
+        //   empty: true,
+        // }
+        liftData.coursebot.slots[floorId].autosave = undefined;
       }
     } else if (formData.has('coursebot__delete_fragment')) {
       const data = formData.get('coursebot__delete_fragment');
@@ -162,8 +173,11 @@ export async function PUT(
         const slotData = JSON.parse(data);
 
         liftData.coursebot.slots[slotData.floorId].fragments[slotData.slotId] = {
-          id: slotData.slotId,
-          empty: true
+          isAutosave: false,
+          data: {
+            id: slotData.slotId,
+            empty: true
+          }
         }
       }
     } else if (formData.has('coursebot__save_fragment')) {
@@ -186,13 +200,15 @@ export async function PUT(
 
 
         liftData.coursebot.slots[payload.floorId].fragments[payload.slotIndex] = {
-          id: payload.slotIndex,
-          title: payload.title,
-          empty: false,
-          createdAt: new Date().toLocaleString().replace(',', ''),
-          thumbnailUrl: `/Elevators/${userId}/${liftData.id}/assets/images/coursebot/${payload.videoId}/slot_${payload.slotIndex}.png`,
-          timecode: payload.timecode,
-
+          isAutosave: false,
+          data: {
+            id: payload.slotIndex,
+            title: payload.title,
+            empty: false,
+            createdAt: new Date().toLocaleString().replace(',', ''),
+            thumbnailUrl: `/Elevators/${userId}/${liftData.id}/assets/images/coursebot/${payload.videoId}/slot_${payload.slotIndex}.png`,
+            timecode: payload.timecode,
+          }
         }
       }
     } else if (formData.has('updated_lift_json')) {

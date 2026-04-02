@@ -46,9 +46,10 @@ export default function ElevatorVideoPlayer({
     const [isCoursebotOpened, setCoursebotOpened] = useState<boolean>(false);
     const [coursebotMode, setCoursebotMode] = useState<LevelBotMode>('default');
     const [coursebotSavePayload, setSavePayload] = useState<SavePayload>();
+    const [playerStateToSave, setSavePlayerState] = useState<PlayerState>();
 
     const [isCoursebotTransit, setIsCoursebotTransit] = useState(false);
-    const [pendingSlotLoad, setPendingSlotLoad] = useState<{ slot: SlotData, floorIndex: number, isAutosave: boolean } | null>(null);
+    const [pendingSlotLoad, setPendingSlotLoad] = useState<{ slot: SlotData, floorIndex: number, isAutosave: boolean, playerMode?: MyLiftPlayerMode } | null>(null);
 
     const [isModeSelectorOpened, setModeSelectorOpened] = useState(false);
     const [isExitPlayerModalOpened, setExitPlayerModalOpened] = useState(false);
@@ -395,9 +396,10 @@ export default function ElevatorVideoPlayer({
         setSelectedDisplay(null);
     };
 
-    const openCoursebot = (mode: LevelBotMode, payload?: SavePayload) => {
+    const openCoursebot = (mode: LevelBotMode, payload?: SavePayload, videoPlayerState?: PlayerState) => {
         setCoursebotMode(mode);
         setSavePayload(payload);
+        setSavePlayerState(videoPlayerState);
         setCoursebotOpened(true);
     }
 
@@ -424,11 +426,12 @@ export default function ElevatorVideoPlayer({
         }
     }
 
-    const autoSaveToCoursebot = async (payload?: SavePayload) => {
-        if (!payload) return;
+    const autoSaveToCoursebot = async (payload?: SavePayload, playerState?: PlayerState) => {
+        if (!payload || !playerState) return;
         const formData = new FormData();
 
         formData.append('coursebot__autosave', JSON.stringify(payload));
+        formData.append('coursebot__autosave--player_state', JSON.stringify(playerState));
 
         try {
             const res = await fetch(`/api/elevators/${data.id}`, {
@@ -496,6 +499,13 @@ export default function ElevatorVideoPlayer({
         if (playerState.mode === 'full') {
             const formData = new FormData();
             // const watchData = playerState.watchInfo;
+            alert(JSON.stringify({
+                ...playerState,
+                watchInfo: {
+                    ...playerState.watchInfo,
+                    endDate: new Date().toLocaleString().replace(',', ''),
+                }
+            }));
             formData.append('completed_video_id', id);
             formData.append('video_player_state', JSON.stringify({
                 ...playerState,
@@ -546,23 +556,30 @@ export default function ElevatorVideoPlayer({
     } | null>(null);
     const [autoSaveData, setAutoSaveData] = useState<AutosaveSlotData | null>(null); // Данные из слота "Автосохранение": больше информации, чем у обычного слота.
 
-    const openSlotInMyLiftPlayer = (slot: SlotData, floorId: string, isAutosave?: boolean) => {
+    const openSlotInMyLiftPlayer = (slot: SlotData, floorId: string, isAutosave?: boolean, playerMode?: MyLiftPlayerMode) => {
         const targetFloorIndex = data.floors.findIndex(f => f.id === floorId);
         if (targetFloorIndex === -1) return;
 
         setCoursebotOpened(false);
-
+        // alert(playerMode);
+        // if (slot.isAutosave) alert(slot.data.playerState.mode);
         if (targetFloorIndex === currentFloor) {
             if (doorStateRef.current === 'closed') {
                 openDoors();
             }
             setOpeningSlotData({
                 main: slot,
-                mode: isAutosave ? "full" : "free",
+                mode: playerMode || undefined,
+                // mode: playerMode ? playerMode : isAutosave ? "full" : "free",
             });
         } else {
             setIsCoursebotTransit(true);
-            setPendingSlotLoad({ slot, floorIndex: targetFloorIndex, isAutosave: (isAutosave || false) });
+            setPendingSlotLoad({
+                slot,
+                floorIndex: targetFloorIndex,
+                isAutosave: (isAutosave || false),
+                playerMode,
+            });
 
             resetCalls();
 
@@ -609,11 +626,14 @@ export default function ElevatorVideoPlayer({
         if (isCoursebotTransit && pendingSlotLoad) {
             if (currentFloor === pendingSlotLoad.floorIndex && !isMoving && doorState === 'opened') {
 
+                // const mode = pendingSlotLoad.playerMode ? pendingSlotLoad.playerMode : pendingSlotLoad.isAutosave ? 'full' : 'free';
+                const mode = pendingSlotLoad.playerMode ? pendingSlotLoad.playerMode : 'free';
+                // alert(pendingSlotLoad.playerMode);
                 setOpeningSlotData({
                     main: pendingSlotLoad.slot,
-                    mode: pendingSlotLoad.isAutosave ? 'full' : 'free',
+                    mode,
                 });
-                setPlayerMode(pendingSlotLoad.isAutosave ? 'full' : 'free');
+                setPlayerMode(mode);
 
                 setIsCoursebotTransit(false);
                 setPendingSlotLoad(null);
@@ -634,16 +654,17 @@ export default function ElevatorVideoPlayer({
             {videoData && (
                 <MyLiftPlayer
                     video={videoData}
+                    videoStats={data.videoStats[videoData.id]}
                     liftId={data.id}
                     floorId={data.floors[currentFloor].id}
                     mode={playerMode}
                     onRequestSave={(payload) => openCoursebot('save', payload)}
                     // onRequestAutosave={(payload) => console.log(payload)}
                     onlyFullModeAutosave={(data.coursebot.autosaveInFullModeOnly)}
-                    onRequestAutosave={(payload) => {
+                    onRequestAutosave={(payload, playerState) => {
                         if (data.coursebot.hiddenAutosave) {
-                            autoSaveToCoursebot(payload);
-                        } else openCoursebot('autosave', payload);
+                            autoSaveToCoursebot(payload, playerState);
+                        } else openCoursebot('autosave', payload, playerState);
                     }}
                     coursebotOptions={data.coursebot}
                     onInitialPlay={handleInitialPlay}
@@ -885,7 +906,7 @@ export default function ElevatorVideoPlayer({
                                         onClose={() => setCoursebotOpened(false)}
                                         onSaveFragment={saveFragmentData}
                                         onAutoSave={(payload) => {
-                                            autoSaveToCoursebot(payload);
+                                            autoSaveToCoursebot(payload, playerStateToSave);
                                             if (isExitPlayerModalOpened && playerStateRef.current?.mode === 'full') {
                                                 onConfirmExitMyLiftPlayer();
                                             }

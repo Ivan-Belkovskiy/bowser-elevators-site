@@ -58,7 +58,15 @@ export interface ElevatorDisplayConfig { // Настройки табло инд
   options: Record<string, string | number | boolean>; // Настраиваемые параметры табло //
 }
 
-export interface SlotData {
+export type SlotData = {
+  isAutosave: true;
+  data: AutosaveSlotData,
+} | {
+  isAutosave?: false;
+  data: CommonSlotData;
+}
+
+export interface CommonSlotData {
   id: number;
   empty: boolean;
   title?: string;
@@ -69,13 +77,13 @@ export interface SlotData {
 }
 
 export interface AutosaveSlotData {
-  main: SlotData;
+  main: CommonSlotData;
   playerState: PlayerState;
-  video: {
-    id: string;
-    progress: number;
-    viewCount: number;
-  }
+  // video: {
+  //   id: string;
+  //   progress: number;
+  //   viewCount: number;
+  // }
 }
 
 export interface DoorKeyframe {
@@ -145,10 +153,10 @@ export interface LiftJson {
         left: { url: string | null; css?: CSSProperties };
         right: { url: string | null; css?: CSSProperties };
       };
-      walls: { 
+      walls: {
         left: { url: string | null; css?: CSSProperties };
         right: { url: string | null; css?: CSSProperties };
-       };
+      };
       panel: { url: string | null; css?: CSSProperties };
     };
 

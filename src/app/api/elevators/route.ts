@@ -90,8 +90,11 @@ export async function POST(req: NextRequest) {
 
       for (let i = 0; i < 51; i++) {
         coursebotSlotConfig[floor.id].fragments.push({
-          id: i,
-          empty: true,
+          isAutosave: false,
+          data: {
+            id: i,
+            empty: true,
+          }
         });
       }
     })
@@ -104,6 +107,7 @@ export async function POST(req: NextRequest) {
       coursebot: {
         enabled: coursebotEnabled,
         autosaveDelaySec: 30,
+        autosaveInFullModeOnly: true, // По умолчанию = TRUE
         hiddenAutosave: false,
         slots: coursebotSlotConfig
       },
