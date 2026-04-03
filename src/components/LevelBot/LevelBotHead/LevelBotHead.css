@@ -1,4 +1,3 @@
-/* Анимации головы */
 @keyframes levelbot-head-lines {
     0% { background-position-y: 0px; }
     100% { background-position-y: 9px; }
@@ -72,7 +71,6 @@
     83% { scale: 0.95; }
 }
 
-/* Контейнер головы */
 .levelbot-head__container {
     position: absolute;
     top: 0;
@@ -84,7 +82,6 @@
     left: 345px;
 }
 
-/* Основная часть головы */
 .levelbot-head {
     pointer-events: none;
     user-select: none;
@@ -103,7 +100,6 @@
     animation: levelbot-head-lines 0.7s linear infinite reverse;
 }
 
-/* Глаза */
 .levelbot-head::before,
 .levelbot-head::after {
     content: "";
@@ -121,14 +117,12 @@
 .levelbot-head::before { left: 242px; }
 .levelbot-head::after { left: 344px; }
 
-/* Текст */
 .levelbot-head__text {
     color: #a7ff6d;
     font-size: 23px;
     animation: levelbot-head-text-anim 2s linear infinite;
 }
 
-/* Боковые части */
 .levelbot-head__side-part {
     position: absolute;
     width: 105px;
@@ -150,7 +144,6 @@
     animation: levelbot-head-part-right-anim 2s linear infinite;
 }
 
-/* Переходные полосы */
 .levelbot-head__transition {
     position: absolute;
     width: 100%;
@@ -180,5 +173,9 @@
 }
 
 .levelbot-head__container[data-mode="autosave"] .levelbot-head__text {
+    color: #44e9ff;
+}
+
+.levelbot-head__container[data-mode="load"] .levelbot-head__text {
     color: #44e9ff;
 }

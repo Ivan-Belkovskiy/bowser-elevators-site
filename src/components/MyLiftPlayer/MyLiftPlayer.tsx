@@ -2,7 +2,7 @@
 
 import React, { useState, useRef, useEffect, CSSProperties, Dispatch, SetStateAction, RefObject } from 'react';
 import { VideoData } from '@/types/data/VideoData';
-import { SavePayload } from '@/components/LevelBot/LevelBotModal';
+import { LevelBotMode, SavePayload } from '@/components/LevelBot/LevelBotModal';
 import "./MyLiftPlayer.css";
 
 import VideoElement from './VideoElement';
@@ -43,6 +43,7 @@ export interface MyLiftPlayerProps {
   } | null>>;
   onRequestSave: (payload: SavePayload) => void;
   onRequestAutosave: (payload: SavePayload, playerState: PlayerState) => void;
+  onRequestLoad: () => void;
   onInitialPlay?: () => void;
   onVideoEnded?: (playerState: PlayerState, videoId: string) => void;
 }
@@ -84,6 +85,7 @@ export default function MyLiftPlayer({
   onlyFullModeAutosave,
   videoStats,
   updateOpeningSlotData,
+  onRequestLoad,
   onRequestSave,
   onRequestAutosave,
   onInitialPlay,
@@ -99,15 +101,15 @@ export default function MyLiftPlayer({
 
   useEffect(() => {
     if (activateRef) activateRef.current = activatePlayer;
-  }, [activateRef]);
+  });
 
   useEffect(() => {
     if (resetRef) resetRef.current = resetPlayer;
-  }, [resetRef]);
+  });
 
   useEffect(() => {
     if (requestAutosaveRef) requestAutosaveRef.current = requestAutoSave;
-  }, [requestAutosaveRef]);
+  });
 
   const [showModeSelection, setShowModeSelection] = useState(false);
 
@@ -126,7 +128,7 @@ export default function MyLiftPlayer({
     // alert(videoStats?.views);
     const watchInfo = (selectedMode === 'full') ? {
       startDate: new Date().toLocaleString().replace(',', ''),
-      watchNumber: (videoStats?.views + 1),
+      watchNumber: ((videoStats?.views || 0) + 1),
     } : {};
     setPlayerState(prev => ({
       ...prev,
@@ -396,17 +398,31 @@ export default function MyLiftPlayer({
     return canvas.toDataURL("image/png");
   };
 
-  const onOpenCoursebot = () => {
-    const time = videoRef.current?.currentTime ?? 0;
-    const thumbnail = captureFrame();
+  const onOpenCoursebot = (mode: LevelBotMode = 'default') => {
+    if (mode === 'load') {
+      onRequestLoad();
+    } else {
+      const time = videoRef.current?.currentTime ?? 0;
+      const preview = captureFrame();
 
-    onRequestSave({
-      createdAt: new Date().toLocaleString().replace(',', ''),
-      floorId,
-      videoId: video.id,
-      timecode: time,
-      thumbnailUrl: thumbnail ?? ""
-    });
+      if (mode === 'save') {
+        onRequestSave({
+          createdAt: new Date().toLocaleString().replace(',', ''),
+          floorId,
+          videoId: video.id,
+          timecode: time,
+          thumbnailUrl: preview ?? ""
+        });
+      } else if (mode === 'autosave') {
+        onRequestAutosave({
+          createdAt: new Date().toLocaleString(),
+          floorId,
+          videoId: video.id,
+          thumbnailUrl: preview ?? "",
+          timecode: videoRef.current?.currentTime || 0
+        }, playerState);
+      }
+    }
   };
 
   const toggleFullscreen = async () => {

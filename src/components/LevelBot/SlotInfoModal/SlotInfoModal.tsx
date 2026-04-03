@@ -265,14 +265,14 @@ export default function SlotInfoModal({
                             </div>
                         </div>
 
-                        <div className="slot-info-modal__main-right">
+                        {!isReadOnly && (<div className="slot-info-modal__main-right">
                             {(isEditMode) && (isAutosave && data.data?.isAutosave && data.data.data.playerState) ? (
                                 <div className="slot-info-modal__autosave-details">
                                     <div className="slot-info-modal__autosave-details-item">
                                         <img src="/images/coursebot/slotinfo-modal/autosave-details/player-mode.svg" />
                                         <span>{data.data.data.playerState.mode === 'free' ? 'Выборочный просмотр' : 'Полноценный просмотр'}</span>
                                     </div>
-                                    {data.data.data.playerState.watchInfo?.watchNumber && (
+                                    {(typeof data.data.data.playerState.watchInfo?.watchNumber === 'number') && (
                                         <div className="slot-info-modal__autosave-details-item">
                                             <img src="/images/coursebot/slotinfo-modal/autosave-details/view-number.svg" />
                                             <span>{data.data.data.playerState.watchInfo.watchNumber}-й просмотр</span>
@@ -321,40 +321,65 @@ export default function SlotInfoModal({
                                     </button> */}
                                 </>
                             )}
-                        </div>
+                        </div>)}
                     </div>
 
                     {(!data.data || openCompletedWatchAutosave) ? (<></>) : (isAutosave) ? (
                         <div className="slot-info-modal__buttons">
-                            <div className="slot-info-modal__button-group">
+                            {isReadOnly ? (
+                                <>
+                                    <button
+                                        className="slot-info-modal__button mylift-player-button"
+                                        onClick={(e) => {
+                                            if (currentWatchInfo?.completed || currentWatchInfo?.end) {
+                                                AudioController.playCoursebotSound("select", "/audio/sound/coursebot/coursebot-select-button.wav");
+                                                setOpenCompletedWatchAutosave(true);
+                                            } else openInMyLiftPlayer(e);
+                                        }}
+                                    >
+                                        Открыть в <span className="mylift">MyLift Player</span>
+                                    </button>
+
+                                    <button
+                                        className="slot-info-modal__button coursebot-player-button"
+                                        onClick={openInCoursebotPlayer}
+                                    >
+                                        Открыть в Coursebot Player
+                                    </button>
+                                </>
+                            ) : (
+                                <div className="slot-info-modal__button-group">
+                                    <button
+                                        className="slot-info-modal__button mylift-player-button"
+                                        onClick={(e) => {
+                                            if (currentWatchInfo?.completed || currentWatchInfo?.end) {
+                                                AudioController.playCoursebotSound("select", "/audio/sound/coursebot/coursebot-select-button.wav");
+                                                setOpenCompletedWatchAutosave(true);
+                                            } else openInMyLiftPlayer(e);
+                                        }}
+                                    >
+                                        Открыть в <span className="mylift">MyLift Player</span>
+                                    </button>
+
+                                    <button
+                                        className="slot-info-modal__button coursebot-player-button"
+                                        onClick={openInCoursebotPlayer}
+                                    >
+                                        Открыть в Coursebot Player
+                                    </button>
+                                </div>
+                            )}
+                            {!isReadOnly && (
                                 <button
-                                    className="slot-info-modal__button mylift-player-button"
-                                    onClick={(e) => {
-                                        if (currentWatchInfo?.completed || currentWatchInfo?.end) {
-                                            AudioController.playCoursebotSound("select", "/audio/sound/coursebot/coursebot-select-button.wav");
-                                            setOpenCompletedWatchAutosave(true);
-                                        } else openInMyLiftPlayer(e);
+                                    className="slot-info-modal__button clear-autosave-button"
+                                    onClick={() => {
+                                        AudioController.playCoursebotSound("slotinfo_button");
+                                        setSlotDataEditMode('delete');
                                     }}
                                 >
-                                    Открыть в <span className="mylift">MyLift Player</span>
+                                    Очистить автосохранение
                                 </button>
-
-                                <button
-                                    className="slot-info-modal__button coursebot-player-button"
-                                    onClick={openInCoursebotPlayer}
-                                >
-                                    Открыть в Coursebot Player
-                                </button>
-                            </div>
-                            <button
-                                className="slot-info-modal__button clear-autosave-button"
-                                onClick={() => {
-                                    AudioController.playCoursebotSound("slotinfo_button");
-                                    setSlotDataEditMode('delete');
-                                }}
-                            >
-                                Очистить автосохранение
-                            </button>
+                            )}
                         </div>
                     ) : (
                         (

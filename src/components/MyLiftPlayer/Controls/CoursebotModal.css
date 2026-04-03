@@ -1,0 +1,86 @@
+.mylift-controls-modal.coursebot-modal {
+    width: 250px;
+    height: 400px;
+    background-color: #0044ff;
+    position: absolute;
+    top: -405px;
+    left: 74.5%;
+    /* Зависит от "position" Controls */
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+/* .mylift-controls-modal.coursebot-modal.player-mode-full {
+    height: 280px;
+    top: -285px;
+} */
+
+.mylift-controls-modal.coursebot-modal .coursebot-modal__header {
+    width: 100%;
+    height: 35px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.mylift-controls-modal.coursebot-modal .coursebot-modal__header span {
+    font-size: 17px;
+    color: #fff;
+}
+
+.mylift-controls-modal.coursebot-modal .coursebot-modal__header span::before {
+    position: relative;
+    display: inline-flex;
+    content: "";
+    width: 30px;
+    height: 30px;
+    background-image: url('/images/player/mylift-player/ui/modal-coursebot-icon.svg');
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: contain;
+    top: 3px;
+}
+
+.mylift-controls-modal.coursebot-modal .coursebot-modal__header img {
+    position: relative;
+    margin: 0;
+    padding: 0;
+    width: 30px;
+    height: 30px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    /* background-color: red; */
+}
+
+.mylift-controls-modal.coursebot-modal .coursebot-modal__options {
+    width: 100%;
+    display: flex;
+    height: 230px;
+    flex-direction: column;
+    align-items: center;
+}
+
+.mylift-controls-modal.coursebot-modal .coursebot-modal__slot-preview {
+    width: 150px;
+    height: 75px;
+    background-color: #323245;
+}
+
+.mylift-controls-modal.coursebot-modal .coursebot-modal__option {
+    width: 90%;
+    cursor: pointer;
+    pointer-events: all;
+    padding: 5px 0;
+    margin: 6px 0;
+    background-color: #fff;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+
+.mylift-controls-modal.coursebot-modal .coursebot-modal__option:disabled {
+    cursor: not-allowed;
+}

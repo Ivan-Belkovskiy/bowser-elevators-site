@@ -99,7 +99,7 @@ export default function LevelBotModal({
         fragments: [] as SlotData[],
     };
 
-    const videoTitle = currentFloor.videoData?.title ?? "Без видео";
+    const videoTitle = currentFloor.videoData?.title ?? "";
 
     const headMessage =
         mode === "save"

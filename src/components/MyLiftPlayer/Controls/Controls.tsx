@@ -7,17 +7,21 @@ import FullscreenButton from "./FullscreenButton";
 import ContextMenu from "../ContextMenu";
 import "./Controls.css";
 import { formatTime } from "@/utils/time";
+import AudioController from "@/core/audio/AudioController";
+import CoursebotModal from "./CoursebotModal";
+import { LevelBotMode } from "@/components/LevelBot/LevelBotModal";
+import { PlayerState } from "../MyLiftPlayer";
 
 interface ControlsProps {
   videoRef: React.RefObject<HTMLVideoElement | null>;
-  playerState: any;
+  playerState: PlayerState;
   setPlayerState: (fn: any) => void;
   mode: "free" | "full";
   allowedMin: number;
   allowedMax: number;
   containerRef: React.RefObject<HTMLDivElement | null>;
   isFullscreen: boolean;
-  onOpenCoursebot?: () => void;
+  onOpenCoursebot?: (mode?: LevelBotMode) => void;
   onButtonClick?: () => void;
   toggleFullscreen: () => void;
   // onFullscreenChange?: (isFullscreen: boolean) => void;
@@ -72,8 +76,10 @@ export default function Controls({
   //   }
   // };
 
+  const [coursebotModalOpened, setCoursebotModalOpened] = useState(false);
+
   return (
-    <div className="mylift-controls">
+    <div className={`mylift-controls ${coursebotModalOpened ? `active` : ``}`}>
       <div className="mylift-controls__left">
         <SeekButton
           videoRef={videoRef}
@@ -111,14 +117,51 @@ export default function Controls({
           <>
             <button className="mylift-controls__coursebot-button" onClick={async () => {
               onButtonClick?.();
-              if (isFullscreen) await toggleFullscreen();
-              onOpenCoursebot?.();
-            }}></button>
+              if (coursebotModalOpened) AudioController.playCoursebotSound("close", "/audio/sound/coursebot/coursebot-close-modal.wav");
+              else AudioController.playCoursebotSound("slot_click", "/audio/sound/coursebot/coursebot-slot-click-02.wav");
+              setCoursebotModalOpened(p => !p);
+              // AudioController.setVolume({
+              //   ...AudioController.volume,
+              //   coursebot: {
+              //     ...AudioController.volume.coursebot,
+              //     ui: {
+              //       ...AudioController.volume.coursebot.ui,
+              //       on: true,
+              //     }
+              //   }
+              // })
+              // if (isFullscreen) await toggleFullscreen();
+              // onOpenCoursebot?.();
+            }}>
+            </button>
             <img src="/images/player/mylift-player/ui/player-logo.png" className="mylift-player-logo" />
           </>
         )}
         <VolumeControl videoRef={videoRef} />
         <FullscreenButton containerRef={containerRef} isFullscreen={isFullscreen} toggleFullscreen={toggleFullscreen} />
+        <CoursebotModal
+          opened={coursebotModalOpened}
+          playerMode={playerState?.mode}
+          setOpened={setCoursebotModalOpened}
+          onSave={async () => {
+            onButtonClick?.();
+            setCoursebotModalOpened(false);
+            if (isFullscreen) await toggleFullscreen();
+            onOpenCoursebot?.('save');
+          }}
+          onAutosave={async () => {
+            onButtonClick?.();
+            setCoursebotModalOpened(false);
+            if (isFullscreen) await toggleFullscreen();
+            onOpenCoursebot?.('autosave');
+          }}
+          onLoad={async () => {
+            onButtonClick?.();
+            setCoursebotModalOpened(false);
+            if (isFullscreen) await toggleFullscreen();
+            onOpenCoursebot?.('load');
+          }}
+        />
       </div>
     </div>
   );

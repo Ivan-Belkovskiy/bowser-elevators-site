@@ -398,8 +398,10 @@ export default function ElevatorVideoPlayer({
 
     const openCoursebot = (mode: LevelBotMode, payload?: SavePayload, videoPlayerState?: PlayerState) => {
         setCoursebotMode(mode);
-        setSavePayload(payload);
-        setSavePlayerState(videoPlayerState);
+        if (mode !== 'load') {
+            setSavePayload(payload);
+            setSavePlayerState(videoPlayerState);
+        }
         setCoursebotOpened(true);
     }
 
@@ -645,6 +647,11 @@ export default function ElevatorVideoPlayer({
 
     const videoData = data.floors[currentFloor].videoData;
 
+    // useEffect(() => {
+    //     const videoStats = data.videoStats[videoData?.id || ""];
+    //     alert(data.videoStats[videoData?.id || ""]?.views);
+    // }, [videoData]);
+
     // -----------------------------
     // Render
     // -----------------------------
@@ -654,7 +661,7 @@ export default function ElevatorVideoPlayer({
             {videoData && (
                 <MyLiftPlayer
                     video={videoData}
-                    videoStats={data.videoStats[videoData.id]}
+                    videoStats={data.videoStats[videoData?.id || ""]}
                     liftId={data.id}
                     floorId={data.floors[currentFloor].id}
                     mode={playerMode}
@@ -666,6 +673,7 @@ export default function ElevatorVideoPlayer({
                             autoSaveToCoursebot(payload, playerState);
                         } else openCoursebot('autosave', payload, playerState);
                     }}
+                    onRequestLoad={() => openCoursebot('load')}
                     coursebotOptions={data.coursebot}
                     onInitialPlay={handleInitialPlay}
                     updateOpeningSlotData={setOpeningSlotData}
