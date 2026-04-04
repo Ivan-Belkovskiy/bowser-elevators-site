@@ -217,5 +217,35 @@ export const DISPLAYS: DisplayDefinition[] = [
                 ]
             }
         ]
+    },
+    {
+        id: "7SEGMENT_OLD",
+        label: "Табло Индикации Семисегментное (<2018 годы выпуска)",
+        preview: "/images/displays/7segment_old.png",
+        params: [
+            {
+                id: "endMoveBeep",
+                label: "Сигнал прибытия",
+                type: "select",
+                options: [
+                    {
+                        value: "off",
+                        label: "Выключен",
+                    },
+                    {
+                        value: "atDoorOpenClose",
+                        label: "При открытии/закрытии дверей",
+                        message: {
+                            type: "warning",
+                            text: "Проверьте звуки лифта на наличие сигнала прибытия — возможно наслоение звуков!!!"
+                        }
+                    },
+                    {
+                        value: "atEndMove",
+                        label: "При подъезде к этажу"
+                    }
+                ]
+            }
+        ]
     }
 ];
