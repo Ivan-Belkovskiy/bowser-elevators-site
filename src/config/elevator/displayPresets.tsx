@@ -1,3 +1,4 @@
+import { ElevatorDirections } from "@/types/elevator";
 import { DisplayRenderData } from "@/utils/elevator/displayGenerator";
 
 
@@ -658,7 +659,7 @@ export const elevatorDisplays: Record<string, any> = {
         newSegment: (floor: string | number, offset: number, color?: string) => {
             if (floor === " ") return '';
             if (floor != "-") floor = Number(floor);
-            color = (color === 'blue') ? '#00a4ff': '#ff0000';
+            color = (color === 'blue') ? '#00a4ff' : '#ff0000';
             offset = Number(offset);
             return (floor == "-" || !isNaN(floor)) ? `
                 <g fill="${color}" stroke-width="0">
@@ -706,10 +707,10 @@ export const elevatorDisplays: Record<string, any> = {
                     `
                 ) : (``)}
                 </g>
-                ` : ``;            
+                ` : ``;
         },
         upArrow: (condition: boolean, color?: string) => {
-            color = (color === 'blue') ? '#00a4ff': '#ff0000';
+            color = (color === 'blue') ? '#00a4ff' : '#ff0000';
             return (condition) ? `
                     <g fill="${color}">
                         <path d="M173.0797,160.47681c0,-0.72491 0.58766,-1.31257 1.31257,-1.31257c0.72491,0 1.31257,0.58766 1.31257,1.31257c0,0.72491 -0.58766,1.31257 -1.31257,1.31257c-0.72491,0 -1.31257,-0.58766 -1.31257,-1.31257z"/>
@@ -781,7 +782,7 @@ export const elevatorDisplays: Record<string, any> = {
                 ` : ``;
         },
         downArrow: (condition: boolean, color?: string) => {
-            color = (color === 'blue') ? '#00a4ff': '#ff0000';
+            color = (color === 'blue') ? '#00a4ff' : '#ff0000';
             return (condition) ? `
                     <g fill="${color}">
                         <path d="M298.79227,199.32172c0.72491,0 1.31257,0.58766 1.31257,1.31257c0,0.72491 -0.58766,1.31257 -1.31257,1.31257c-0.72491,0 -1.31257,-0.58766 -1.31257,-1.31257c0,-0.72491 0.58766,-1.31257 1.31257,-1.31257z"/>
@@ -970,12 +971,73 @@ export const elevatorDisplays: Record<string, any> = {
                                 <path d="M190.56982,198.91352l30.98539,103.20947h-62.4241z" fill="url(#color-2)" stroke-width="0"/>
                                 ` : ``}
                            ${elevatorDisplays['7SEGMENT_OLD'].newSegment(String(data.floor)?.[
-                                String(data.floor).length - 1
-                           ])}
+                String(data.floor).length - 1
+            ])}
 
                            ${elevatorDisplays['7SEGMENT_OLD'].newSegment(String(data.floor)?.[
-                                String(data.floor).length - 2
-                           ], -86)}
+                String(data.floor).length - 2
+            ], -86)}
+                        </g>
+                    </g>
+                </svg><!--rotationCenter:196.55746999999997:87.5-->
+            `;
+        }
+    },
+    "TL-D70": {
+        currentFloor: null,
+        currentImage: 1,
+        directionArrow: (dir: ElevatorDirections, offsetX: number = 0, offsetY: number = 0) => {
+            return (dir === 'UP') ? `
+                <g fill="none" stroke="#ffffff" stroke-width="10.5" stroke-linecap="round" stroke-miterlimit="10" transform="scale(2.1) translate(${offsetX} ${offsetY})">
+                    <g>
+                        <path d="M295.90169,293.03543l24.09831,-20.26812"/>
+                        <path d="M344.09831,293.03543l-24.09831,-20.26812"/>
+                    </g>
+                    <g>
+                        <path d="M295.90169,269.09671l24.09831,-20.26812"/>
+                        <path d="M320,248.8286l24.09831,20.26812"/>
+                    </g>
+                    <g>
+                        <path d="M295.90169,247.23269l24.09831,-20.26812"/>
+                        <path d="M320,226.96457l24.09831,20.26812"/>
+                    </g>
+                </g>
+            ` : (dir === 'DOWN') ? `
+                <g fill="none" stroke="#ffffff" stroke-width="10.5" stroke-linecap="round" stroke-miterlimit="10" transform="scale(2.1) translate(${offsetX} ${offsetY})">
+                    <g>
+                        <path d="M320,247.23269l-24.09831,-20.26812"/>
+                        <path d="M320,247.23269l24.09831,-20.26812"/>
+                    </g>
+                    <g>
+                        <path d="M295.90169,250.90329l24.09831,20.26812"/>
+                        <path d="M320,271.1714l24.09831,-20.26812"/>
+                    </g>
+                    <g>
+                        <path d="M295.90169,272.76731l24.09831,20.26812"/>
+                        <path d="M320,293.03543l24.09831,-20.26812"/>
+                    </g>
+                </g>
+            ` : '';
+        },
+        render: (data: DisplayRenderData) => {
+            // const generateRandom = (min: number, max: number) => {
+            //     const minCeiled = Math.ceil(min);
+            //     const maxFloored = Math.floor(max);
+            //     return Math.floor(Math.random() * (maxFloored - minCeiled) + minCeiled);
+            // }
+            // const imageNumber = String(data.floor !== elevatorDisplays['TL-D70'].currentFloor ? generateRandom(2, 6) : elevatorDisplays['TL-D70'].currentImage).padStart(2, "0");
+            // elevatorDisplays['TL-D70'].currentFloor = data.floor;
+            return `
+                <svg version="1.1"
+                    xmlns="http://www.w3.org/2000/svg"
+                    xmlns:xlink="http://www.w3.org/1999/xlink" width="${275 / 2}" height="${480 / 2}" viewBox="0,0,398,169.5" >
+                    <g transform="translate(-123.44253,-172.5)">
+                        <g stroke="none" stroke-miterlimit="10">
+                            <image href="/images/displays/tl-d70/background-images/bg_0${(data.floor % 6) + 1}.png" x="0" y="0" width="574" height="996" />
+                            ${elevatorDisplays['TL-D70'].directionArrow(data.direction, -165, -60)}
+                            <text class="floor-num" transform="translate(889.47453,235) scale(3.25255)" font-size="40" xml:space="preserve" fill="#ffffff" stroke="none" stroke-width="1" stroke-linecap="butt" font-family="TL-D70_Numbers" font-weight="normal" text-anchor="middle">
+                                <tspan x="0" dy="0">${data.floor}</tspan>
+                            </text>
                         </g>
                     </g>
                 </svg><!--rotationCenter:196.55746999999997:87.5-->

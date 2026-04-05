@@ -50,7 +50,6 @@ const VideoElement = forwardRef<HTMLVideoElement, VideoElementProps>(
         preload="auto"
         onContextMenu={(e) => e.preventDefault()}
         
-        // ГЛАВНОЕ ИСПРАВЛЕНИЕ ТУТ: Используем функциональный setState
         onLoadedMetadata={(e) => {
           const el = e.currentTarget;
           setPlayerState((prev: any) => ({

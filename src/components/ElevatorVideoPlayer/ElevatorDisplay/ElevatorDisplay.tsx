@@ -210,7 +210,11 @@ export default function ElevatorDisplay({
     return (
         <div
             className={`elevator-display ${inElevator ? 'in-elevator' : ''} ${editMode ? 'edit-mode' : ''} ${isEditing ? 'editing' : ''}`}
-            style={styles}
+            style={{
+                ...styles,
+                marginTop: (data?.type === "TL-D70" && inElevator) ? '-80px' : styles?.marginTop,
+                marginLeft: (data?.type === "TL-D70" && inElevator) ? '30px' : styles?.marginLeft
+            }}
             dangerouslySetInnerHTML={{
                 __html: generateDisplaySVG(type, {
                     floor: displayFloor,

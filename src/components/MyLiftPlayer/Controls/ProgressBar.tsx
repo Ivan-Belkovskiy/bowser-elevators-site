@@ -1,12 +1,14 @@
 import "./ProgressBar.css";
 
-import React, { useRef, useState, useEffect } from "react";
+import React, { useRef, useState, useEffect, Dispatch, SetStateAction } from "react";
 import PreviewThumbnail from "./PreviewThumbnail";
 import { formatTime } from "@/utils/time";
+import { PlayerState } from "../MyLiftPlayer";
 
 interface ProgressBarProps {
   videoRef: React.RefObject<HTMLVideoElement | null>;
-  playerState: any;
+  playerState: PlayerState;
+  setPlayerState: Dispatch<SetStateAction<PlayerState>>;
   allowedMin: number;
   allowedMax: number;
   mode: "free" | "full";
@@ -15,6 +17,7 @@ interface ProgressBarProps {
 export default function ProgressBar({
   videoRef,
   playerState,
+  setPlayerState,
   allowedMin,
   allowedMax,
   mode
@@ -72,7 +75,11 @@ export default function ProgressBar({
     const time = getTimeFromEvent(e);
     if (time === null) return;
 
-    // videoRef.current!.currentTime = time;
+    // setPlayerState(prev => ({
+    //   ...prev,
+    //   currentTime: time,
+    // }))
+    videoRef.current!.currentTime = time;
   };
 
   const onThumbDown = (e: React.MouseEvent<HTMLDivElement>) => {

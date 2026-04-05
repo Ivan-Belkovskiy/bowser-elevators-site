@@ -160,12 +160,12 @@ export default function MyLiftPlayer({
 
   const rewindWindow = 900;
   const allowedMin =
-    mode === 'full'
+    playerState.mode === 'full'
       ? Math.max(0, playerState.maxWatchedTime - rewindWindow)
       : 0;
 
   const allowedMax =
-    mode === 'full'
+    playerState.mode === 'full'
       ? playerState.maxWatchedTime
       : playerState.duration;
 
@@ -255,8 +255,6 @@ export default function MyLiftPlayer({
     };
   }, [playerState.playing, playerState.activated, playerState.ended]);
 
-  // !!! ВАЖНО: Исправить ошибку, которая возникает из-за отсутствия видео на этаже !!! //
-
   useEffect(() => {
     AutoSaveManager.reset();
   }, [video.id]);
@@ -317,14 +315,6 @@ export default function MyLiftPlayer({
 
   useEffect(() => {
     if (playerState.ended) {
-      // setPlayerState(prev => ({
-      //   ...prev,
-      //   watchInfo: {
-      //     ...prev.watchInfo,
-      //     endDate: new Date().toLocaleString().replace(',', ''),
-      //   }
-      // }));
-      // alert(playerState.mode)
       onVideoEnded?.({
         ...playerState,
         watchInfo: {
@@ -332,49 +322,9 @@ export default function MyLiftPlayer({
           endDate: new Date().toLocaleString().replace(',', ''),
         }
       }, video.id);
-      // onVideoEnded?.(playerState, video.id);
     }
   }, [playerState.ended]);
 
-  const [showWarning, setShowWarning] = useState(false);
-  const [saving, setSaving] = useState(false);
-
-  const handleDoorCloseAttempt = () => {
-    if (playerState.playing || playerState.currentTime > 0) {
-      setShowWarning(true);
-    } else {
-      // closeDoorsNormally();
-    }
-  };
-
-  const saveAndExit = async () => {
-    setSaving(true);
-
-    await AutoSaveManager.saveProgress(
-      playerState,
-      async (payload) => onRequestAutosave(payload, playerState)
-    );
-
-    setSaving(false);
-    setShowWarning(false);
-
-    closePlayer();
-    // closeDoorsNormally();
-  };
-
-  const exitWithoutSave = () => {
-    setShowWarning(false);
-    closePlayer();
-    // closeDoorsNormally();
-  };
-
-  const cancelWarning = () => {
-    setShowWarning(false);
-  };
-
-  // -----------------------------
-  // Close player (UI-level)
-  // -----------------------------
   const closePlayer = () => {
     setPlayerState(s => ({
       ...s,

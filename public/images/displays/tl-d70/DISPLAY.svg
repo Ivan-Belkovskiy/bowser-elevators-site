@@ -1,0 +1,26 @@
+<svg version="1.1"
+    xmlns="http://www.w3.org/2000/svg"
+    xmlns:xlink="http://www.w3.org/1999/xlink" width="275" height="486.5" viewBox="0,0,275,486.5">
+    <g transform="translate(-182.5,-15.71266)">
+        <g stroke-miterlimit="10">
+            <path d="M182.5,502.21266v-486.5h275v486.5z" fill="#9966ff" stroke="none" stroke-width="0" stroke-linecap="butt"/>
+            <text transform="translate(289.47453,172.36944) scale(3.05255,3.05255)" font-size="40" xml:space="preserve" fill="#ffffff" stroke="none" stroke-width="1" stroke-linecap="butt" font-family="Serif" font-weight="normal" text-anchor="start">
+                <tspan x="0" dy="0">1</tspan>
+            </text>
+            <g fill="none" stroke="#ffffff" stroke-width="10.5" stroke-linecap="round">
+                <g>
+                    <path d="M295.90169,372.03543l24.09831,-20.26812"/>
+                    <path d="M320,351.76731l24.09831,20.26812"/>
+                </g>
+                <g>
+                    <path d="M320,327.82859l-24.09831,20.26812"/>
+                    <path d="M320,327.8286l24.09831,20.26812"/>
+                </g>
+                <g>
+                    <path d="M295.90169,326.23269l24.09831,-20.26812"/>
+                    <path d="M320,305.96457l24.09831,20.26812"/>
+                </g>
+            </g>
+        </g>
+    </g>
+</svg><!--rotationCenter:137.50000191037134:244.28734067201552-->

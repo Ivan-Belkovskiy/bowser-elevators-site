@@ -247,5 +247,82 @@ export const DISPLAYS: DisplayDefinition[] = [
                 ]
             }
         ]
-    }
+    },
+    {
+        id: "TL-D70",
+        label: "Табло Индикации Графическое TL-D70",
+        preview: "/images/displays/tl-d70.png",
+        params: [
+            {
+                id: "voiceNotifications",
+                label: "Объявления этажей",
+                type: "select",
+                options: [
+                    {
+                        value: "off",
+                        label: "Отключены"
+                    },
+                    {
+                        value: "atEndMove",
+                        label: "При подъезде к этажу",
+                    },
+                    {
+                        value: "atDoorOpen",
+                        label: "При открытии дверей",
+                    }
+                ]
+            },
+            {
+                id: "endMoveBeep",
+                label: "Сигнал прибытия",
+                type: "select",
+                options: [
+                    {
+                        value: "off",
+                        label: "Отключен",
+                    },
+                    {
+                        value: "beforeFloorNotification",
+                        label: "Перед объявлением этажа",
+                        condition: {
+                            id: "voiceNotifications",
+                            values: ["atEndMove", "atDoorOpen"],
+                        }
+                    },
+                    {
+                        value: "atEndMove",
+                        label: "При подъезде к этажу",
+                    },
+                    {
+                        value: "atDoorOpen",
+                        label: "При открытии/закрытии дверей",
+                        message: {
+                            type: "warning",
+                            text: "Проверьте звуки лифта на наличие сигнала прибытия — возможно наслоение звуков!!!"
+                        }
+                    }
+                ]
+            },
+            // {
+            //     id: "endMoveBeepSound",
+            //     label: "Звук сигнала прибытия",
+            //     type: "select",
+            //     options: [
+            //         {
+            //             value: "01",
+            //             label: "Вариант №1",
+            //         },
+            //         {
+            //             value: "02",
+            //             label: "Вариант №2"
+            //         }
+            //     ]
+            // },
+            {
+                id: "backgroundMusic",
+                label: "Фоновая музыка",
+                type: "boolean",
+            }
+        ]
+    },
 ];

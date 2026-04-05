@@ -17,3 +17,15 @@
 .elevator-display.edit-mode.editing {
     outline: 5px solid #001aff;
 }
+
+@font-face {
+    font-family: 'TL-D70_Numbers';
+    src: url('/fonts/displays/tl-d70/Lato/Lato-Bold.ttf');
+    font-weight: 700;
+    font-style: normal;
+}
+
+.floor-num {
+    font-family: 'TL-D70_Numbers', sans-serif;
+    font-size: 63px;
+}

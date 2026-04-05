@@ -214,6 +214,6 @@ export type ElevatorDoorTypes = "central" | "telescopic" | "single";
 
 export type ElevatorDoorOpenDirections = "left" | "right" | null;
 
-export type ElevatorDisplayTypes = 'MLMLCD' | 'TIM2' | "7SEGMENT_NEW" | "7SEGMENT_OLD";
+export type ElevatorDisplayTypes = 'MLMLCD' | 'TIM2' | "7SEGMENT_NEW" | "7SEGMENT_OLD" | "TL-D70";
 
 export type ElevatorDirections = "UP" | "DOWN" | "NONE";

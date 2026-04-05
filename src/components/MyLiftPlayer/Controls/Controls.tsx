@@ -107,6 +107,7 @@ export default function Controls({
         <ProgressBar
           videoRef={videoRef}
           playerState={playerState}
+          setPlayerState={setPlayerState}
           allowedMin={allowedMin}
           allowedMax={allowedMax}
           mode={mode}
