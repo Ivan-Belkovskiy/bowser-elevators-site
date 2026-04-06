@@ -90,3 +90,14 @@
     background-color: #ff0000;
     color: #6b0000;
 }
+
+.elevator-images-modal__label.uploaded-file-name {
+    color: #0022ff;
+    font-weight: bold;
+    margin-right: 20px;
+}
+
+.elevator-images-modal__right {
+    display: flex;
+    align-items: center;justify-content: center;
+}

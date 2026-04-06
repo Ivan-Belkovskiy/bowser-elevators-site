@@ -76,11 +76,11 @@ export async function PUT(
     };
 
     const imageMap: Record<string, (lift: LiftJson, fileName: string) => void> = {
-      image_elevator_doors_left: (lift, name) => (lift.elevator.images.doors.left.url = `/Elevators/${userId}/${liftData.id}/assets/images/elevator/${name}`),
-      image_elevator_doors_right: (lift, name) => (lift.elevator.images.doors.right.url = `/Elevators/${userId}/${liftData.id}/assets/images/elevator/${name}`),
-      image_elevator_walls_left: (lift, name) => (lift.elevator.images.walls.left.url = `/Elevators/${userId}/${liftData.id}/assets/images/elevator/${name}`),
-      image_elevator_walls_right: (lift, name) => (lift.elevator.images.walls.right.url = `/Elevators/${userId}/${liftData.id}/assets/images/elevator/${name}`),
-      image_elevator_panel: (lift, name) => (lift.elevator.images.panel.url = `/Elevators/${userId}/${liftData.id}/assets/images/elevator/${name}`),
+      image_elevator_left_door: (lift, name) => (lift.elevator.images.doors.left.url = `/Elevators/${userId}/${liftData.id}/assets/images/elevator/${name}`),
+      image_elevator_right_door: (lift, name) => (lift.elevator.images.doors.right.url = `/Elevators/${userId}/${liftData.id}/assets/images/elevator/${name}`),
+      image_elevator_left_wall: (lift, name) => (lift.elevator.images.walls.left.url = `/Elevators/${userId}/${liftData.id}/assets/images/elevator/${name}`),
+      image_elevator_right_wall: (lift, name) => (lift.elevator.images.walls.right.url = `/Elevators/${userId}/${liftData.id}/assets/images/elevator/${name}`),
+      image_elevator_button_panel: (lift, name) => (lift.elevator.images.panel.url = `/Elevators/${userId}/${liftData.id}/assets/images/elevator/${name}`),
     };
 
     if (formData.has('completed_video_id')) {
@@ -153,7 +153,10 @@ export async function PUT(
 
         liftData.coursebot.slots[slotData.floorId].fragments[slotData.slotId] = {
           ...liftData.coursebot.slots[slotData.floorId].fragments[slotData.slotId],
-          ...slotData,
+          data: {
+            ...liftData.coursebot.slots[slotData.floorId].fragments[slotData.slotId].data,
+            ...slotData,
+          }
         }
       }
     } else if (formData.has('coursebot__autosave_clear')) {

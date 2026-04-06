@@ -1,17 +1,28 @@
 import { LiftJson } from "@/types/elevator";
 import "./ElevatorImagesModal.css";
 import FileUploader from "@/components/FileUploader/FileUploader";
-import { Dispatch, SetStateAction } from "react";
+import { Dispatch, SetStateAction, useEffect, useState } from "react";
 
 export type ElevatorImagesModalType = "leftWall" | "rightWall" | "leftDoor" | "rightDoor" | "buttonPanel";
+
 
 export default function ElevatorImagesModal({ elevator, setElevatorData, type, onSave, onClose }: {
     elevator: LiftJson;
     type?: ElevatorImagesModalType | null;
     setElevatorData?: Dispatch<SetStateAction<LiftJson>>;
-    onSave?: () => void;
+    onSave?: (uploaded: Record<ElevatorImagesModalType, File | null>) => void;
     onClose?: () => void;
 }) {
+
+    const [oldImageData, setOldImageData] = useState(() =>
+        structuredClone(elevator.elevator.images)
+    );
+
+    useEffect(() => {
+        if (type) {
+            setOldImageData(structuredClone(elevator.elevator.images));
+        }
+    }, [type]);
 
     const info = {
         leftWall: {
@@ -20,18 +31,18 @@ export default function ElevatorImagesModal({ elevator, setElevatorData, type, o
             title: "Левая стена лифта",
         },
         rightWall: {
-            top: 0,
-            left: 0,
+            top: 100,
+            left: 150,
             title: "Правая стена лифта",
         },
         leftDoor: {
-            top: 0,
-            left: 0,
+            top: 100,
+            left: 850,
             title: "Левая дверь лифта",
         },
         rightDoor: {
-            top: 0,
-            left: 0,
+            top: 100,
+            left: 30,
             title: "Правая дверь лифта",
         },
         buttonPanel: {
@@ -41,10 +52,27 @@ export default function ElevatorImagesModal({ elevator, setElevatorData, type, o
         },
     };
 
+    const [uploadedFiles, setUploadedFiles] = useState({
+        leftDoor: null as (File | null),
+        rightDoor: null as (File | null),
+        leftWall: null as (File | null),
+        rightWall: null as (File | null),
+        buttonPanel: null as (File | null),
+    });
+
     const updateImageData = (type?: ElevatorImagesModalType | null, file?: File) => {
         if (!type || !file) return;
-        const imageData = { ...elevator.elevator.images };
-        if (type === 'buttonPanel') imageData.panel.url = URL.createObjectURL(file);
+
+        const imageData = structuredClone(elevator.elevator.images);
+        const newUrl = URL.createObjectURL(file);
+
+        setUploadedFiles(prev => ({ ...prev, [type]: file }));
+
+        if (type === 'buttonPanel') imageData.panel.url = newUrl;
+        if (type === 'leftDoor') imageData.doors.left.url = newUrl;
+        if (type === 'rightDoor') imageData.doors.right.url = newUrl;
+        if (type === 'leftWall') imageData.walls.left.url = newUrl;
+        if (type === 'rightWall') imageData.walls.right.url = newUrl;
 
         setElevatorData?.({
             ...elevator,
@@ -52,8 +80,18 @@ export default function ElevatorImagesModal({ elevator, setElevatorData, type, o
                 ...elevator.elevator,
                 images: imageData,
             }
-        })
-    }
+        });
+    };
+
+    const path = type ? (
+        (type === 'buttonPanel') ? elevator.elevator.images.panel :
+            (type === 'leftDoor') ? elevator.elevator.images.doors.left :
+                (type === 'rightDoor') ? elevator.elevator.images.doors.right :
+                    (type === 'leftWall') ? elevator.elevator.images.walls.left :
+                        elevator.elevator.images.walls.right
+    ).url : null;
+
+    const fileName = path ? path.split('/').pop() : null;
 
 
     if (type) return (
@@ -67,12 +105,15 @@ export default function ElevatorImagesModal({ elevator, setElevatorData, type, o
 
                     </div>
                     <div className="elevator-images-modal__right">
+                        {(fileName && !uploadedFiles[type]) && <span className="elevator-images-modal__label uploaded-file-name">{fileName}</span>}
                         <FileUploader
                             btnClass="elevator-images-modal__button upload-image-button"
+                            msgClass="elevator-images-modal__label uploaded-file-name"
                             label={{
-                                upload: "Загрузить изображение...",
+                                upload: (fileName && !uploadedFiles[type]) ? "Заменить изображение..." : "Загрузить изображение...",
                                 replace: "Заменить изображение..."
                             }}
+                            file={uploadedFiles[type] || undefined}
                             accept="image/*"
                             onUpload={(e) => updateImageData(type, e.target.files?.[0])}
 
@@ -83,8 +124,25 @@ export default function ElevatorImagesModal({ elevator, setElevatorData, type, o
 
                 </section>
                 <div className="elevator-images-modal__buttons">
-                    <button className="elevator-images-modal__button modal-button save-button" onClick={onSave}>Сохранить изменения</button>
-                    <button className="elevator-images-modal__button modal-button close-button" onClick={onClose}>Отменить изменения</button>
+                    <button className="elevator-images-modal__button modal-button save-button" onClick={() => onSave?.(uploadedFiles)}>Сохранить изменения</button>
+                    <button className="elevator-images-modal__button modal-button close-button" onClick={() => {
+                        setElevatorData?.({
+                            ...elevator,
+                            elevator: {
+                                ...elevator.elevator,
+                                images: oldImageData,
+                            }
+                        });
+                        setUploadedFiles({
+                            leftDoor: null as (File | null),
+                            rightDoor: null as (File | null),
+                            leftWall: null as (File | null),
+                            rightWall: null as (File | null),
+                            buttonPanel: null as (File | null),
+                        });
+                        // alert(JSON.stringify(oldImageData));
+                        onClose?.();
+                    }}>Отменить изменения</button>
                 </div>
             </div>
         </div>

@@ -202,3 +202,8 @@ input[type=checkbox]:disabled {
 .mylift-editor-modal__message.uploaded-image-name {
     margin-left: 10px;
 }
+
+.mylift-editor-modal__label {
+    margin-left: 5px;
+    /* font-weight: bold; */
+}

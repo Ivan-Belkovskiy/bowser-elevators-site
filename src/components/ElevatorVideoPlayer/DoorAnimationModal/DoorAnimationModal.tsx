@@ -11,6 +11,7 @@ import {
     useState,
     MouseEvent as ReactMouseEvent,
 } from "react";
+import AudioController from "@/core/audio/AudioController";
 
 export interface DoorAnimationModalProps {
     elevator: LiftJson;
@@ -133,10 +134,12 @@ export default function DoorAnimationModal({
         // alert(soundUrl);
 
         if (soundUrl) {
-            const audio = new Audio(soundUrl);
-            audioRef.current = audio;
-            audio.currentTime = (startTime / duration) * (audio.duration || 0);
-            audio.play().catch(() => {});
+            if (animKind === "open") AudioController.playDoorOpen(soundUrl);
+            else AudioController.playDoorClose(soundUrl);
+            // const audio = new Audio(soundUrl);
+            // audioRef.current = audio;
+            // audio.currentTime = (startTime / duration) * (audio.duration || 0);
+            // audio.play().catch(() => {});
         }
 
         let frameId: number;

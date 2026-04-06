@@ -42,22 +42,22 @@ export default function SlotInfoModal({
     onOpenInMyLiftPlayer?: (mode?: MyLiftPlayerMode) => void;
     onOpenInCoursebotPlayer?: () => void;
 }) {
-    const [data, setData] = useState(slotData);
+    // const [data, setData] = useState(slotData);
     const [titleInput, setTitleInput] = useState("");
     const [slotDataEditMode, setSlotDataEditMode] = useState<"title" | "delete" | null>(null);
     const [openCompletedWatchAutosave, setOpenCompletedWatchAutosave] = useState(false);
 
-    const currentData = (data?.data?.isAutosave) ? data?.data.data.main : data?.data?.data as CommonSlotData;
+    const currentData = (slotData?.data?.isAutosave) ? slotData?.data.data.main : slotData?.data?.data as CommonSlotData;
 
     const isEmpty = currentData?.empty;
-    const isAutosave = data?.isAutosave ?? false;
+    const isAutosave = slotData?.isAutosave ?? false;
 
     useEffect(() => {
-        setData(slotData);
+        // setData(slotData);
         if (currentData?.title) setTitleInput(currentData.title);
     }, [slotData]);
 
-    if (!data) {
+    if (!slotData) {
         return (
             <div className="slot-info-modal closed"></div>
         );
@@ -105,8 +105,8 @@ export default function SlotInfoModal({
         }, 400);
     }
 
-    const currentWatchInfo = (data.data?.isAutosave && data?.data?.data && data.data.data.playerState.watchInfo?.watchNumber) ? videoStats?.watchHistory?.[
-        data.data.data.playerState.watchInfo.watchNumber - 1
+    const currentWatchInfo = (slotData.data?.isAutosave && slotData?.data?.data && slotData.data.data.playerState.watchInfo?.watchNumber) ? videoStats?.watchHistory?.[
+        slotData.data.data.playerState.watchInfo.watchNumber - 1
     ] : undefined;
 
     // alert(JSON.stringify(videoStats))
@@ -138,7 +138,7 @@ export default function SlotInfoModal({
                 </div>
             )}
 
-            {((isEmpty && !isSaveMode && !isAutosaveMode) || isAutosave && !data.data) && (
+            {((isEmpty && !isSaveMode && !isAutosaveMode) || isAutosave && !slotData.data) && (
                 <div className="slot-info-modal__notification empty-slot-notification">
                     <span className="slot-info-modal__label">{
                         (isAutosave) ?
@@ -266,22 +266,22 @@ export default function SlotInfoModal({
                         </div>
 
                         {!isReadOnly && (<div className="slot-info-modal__main-right">
-                            {(isEditMode) && (isAutosave && data.data?.isAutosave && data.data.data.playerState) ? (
+                            {(isEditMode) && (isAutosave && slotData.data?.isAutosave && slotData.data.data.playerState) ? (
                                 <div className="slot-info-modal__autosave-details">
                                     <div className="slot-info-modal__autosave-details-item">
                                         <img src="/images/coursebot/slotinfo-modal/autosave-details/player-mode.svg" />
-                                        <span>{data.data.data.playerState.mode === 'free' ? 'Выборочный просмотр' : 'Полноценный просмотр'}</span>
+                                        <span>{slotData.data.data.playerState.mode === 'free' ? 'Выборочный просмотр' : 'Полноценный просмотр'}</span>
                                     </div>
-                                    {(typeof data.data.data.playerState.watchInfo?.watchNumber === 'number') && (
+                                    {(typeof slotData.data.data.playerState.watchInfo?.watchNumber === 'number') && (
                                         <div className="slot-info-modal__autosave-details-item">
                                             <img src="/images/coursebot/slotinfo-modal/autosave-details/view-number.svg" />
-                                            <span>{data.data.data.playerState.watchInfo.watchNumber}-й просмотр</span>
+                                            <span>{slotData.data.data.playerState.watchInfo.watchNumber}-й просмотр</span>
                                         </div>
                                     )}
-                                    {data.data.data.playerState.watchInfo?.startDate && (
+                                    {slotData.data.data.playerState.watchInfo?.startDate && (
                                         <div className="slot-info-modal__autosave-details-item">
                                             <img src="/images/coursebot/slotinfo-modal/autosave-details/start-date.svg" />
-                                            <span>Начало просмотра: {data.data.data.playerState.watchInfo?.startDate}</span>
+                                            <span>Начало просмотра: {slotData.data.data.playerState.watchInfo?.startDate}</span>
                                         </div>
                                     )}
                                     {currentWatchInfo && (
@@ -324,7 +324,7 @@ export default function SlotInfoModal({
                         </div>)}
                     </div>
 
-                    {(!data.data || openCompletedWatchAutosave) ? (<></>) : (isAutosave) ? (
+                    {(!slotData.data || openCompletedWatchAutosave) ? (<></>) : (isAutosave) ? (
                         <div className="slot-info-modal__buttons">
                             {isReadOnly ? (
                                 <>

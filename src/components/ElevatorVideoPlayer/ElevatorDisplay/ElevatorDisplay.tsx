@@ -212,7 +212,7 @@ export default function ElevatorDisplay({
             className={`elevator-display ${inElevator ? 'in-elevator' : ''} ${editMode ? 'edit-mode' : ''} ${isEditing ? 'editing' : ''}`}
             style={{
                 ...styles,
-                marginTop: (data?.type === "TL-D70" && inElevator) ? '-80px' : styles?.marginTop,
+                marginTop: (data?.type === "TL-D70" && inElevator) ? '-95px' : styles?.marginTop,
                 marginLeft: (data?.type === "TL-D70" && inElevator) ? '30px' : styles?.marginLeft
             }}
             dangerouslySetInnerHTML={{

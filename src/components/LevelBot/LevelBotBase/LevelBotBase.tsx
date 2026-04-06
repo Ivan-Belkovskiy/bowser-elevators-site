@@ -99,8 +99,9 @@ export default function LevelbotBase({
                     setBouncingSlotIndex(null);
                     addTimer(setTimeout(() => {
                         setIsSaving(false);
-                        setSaveComplete(true);
+                        setSaveComplete(false);
                         setSavingIndex(null);
+                        onAutoSave?.();
                         closeModal?.();
                     }, 1200));
                 }, 800));
@@ -126,7 +127,8 @@ export default function LevelbotBase({
         if ((isSaving || saveComplete) && savingIndex === idx) {
             return savePayload?.thumbnailUrl || currentDataUrl;
         }
-        return currentDataUrl;
+        // alert();
+        return currentDataUrl ? `${currentDataUrl}?t=${new Date().getTime()}` : undefined;
     };
 
     // const [isWatchListOpened, setWatchListOpened] = useState(false);

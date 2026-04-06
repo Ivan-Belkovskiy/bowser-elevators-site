@@ -8,6 +8,7 @@ import { CATEGORIES, CategoryDefinition } from "@/constants/elevatorPanel";
 import { LiftJson } from "@/types/elevator";
 import ElevatorImagesModal, { ElevatorImagesModalType } from "../ElevatorVideoPlayer/ElevatorImagesModal/ElevatorImagesModal";
 import { useRouter } from "next/navigation";
+import { camelToSnakeCase } from "@/utils/string";
 
 export default function MyLiftEditor({ elevator }: { elevator: LiftJson }) {
     const [modalCategory, setModalCategory] = useState<CategoryDefinition | null>(null);
@@ -24,6 +25,39 @@ export default function MyLiftEditor({ elevator }: { elevator: LiftJson }) {
     const onSaveData = (updated: LiftJson) => {
         setEditingLiftData(updated);
         switchCategory(null);
+    }
+
+    const onSaveElevatorImages = async (uploaded: Record<ElevatorImagesModalType, File | null>) => {
+        try {
+            const formData = new FormData();
+            for (const key in uploaded) {
+                const value = uploaded[key as ElevatorImagesModalType];
+                const name = `image_elevator_${camelToSnakeCase(key)}`;
+                if (value) formData.append(name, value);
+                // alert(name);
+            }            
+
+            const res = await fetch(`/api/elevators/${elevator.id}`, {
+                method: "PUT",
+                body: formData,
+            });
+
+            const data: { success: boolean; lift: LiftJson } = await res.json();
+
+            if (data.success) {
+                setEditingLiftData(data.lift);
+            }
+            setImageEditor(null);
+        } catch (error) {
+
+        }
+        // const imageMap: Record<string, (lift: LiftJson, fileName: string) => void> = {
+        //       image_elevator_doors_left: (lift, name) => (lift.elevator.images.doors.left.url = `/Elevators/${userId}/${liftData.id}/assets/images/elevator/${name}`),
+        //       image_elevator_doors_right: (lift, name) => (lift.elevator.images.doors.right.url = `/Elevators/${userId}/${liftData.id}/assets/images/elevator/${name}`),
+        //       image_elevator_walls_left: (lift, name) => (lift.elevator.images.walls.left.url = `/Elevators/${userId}/${liftData.id}/assets/images/elevator/${name}`),
+        //       image_elevator_walls_right: (lift, name) => (lift.elevator.images.walls.right.url = `/Elevators/${userId}/${liftData.id}/assets/images/elevator/${name}`),
+        //       image_elevator_panel: (lift, name) => (lift.elevator.images.panel.url = `/Elevators/${userId}/${liftData.id}/assets/images/elevator/${name}`),
+        //     };
     }
 
     useEffect(() => setEditingLiftData(elevator), [elevator]);
@@ -74,7 +108,7 @@ export default function MyLiftEditor({ elevator }: { elevator: LiftJson }) {
                 elevator={editingLiftData}
                 setElevatorData={setEditingLiftData}
                 type={imageEditor}
-                onSave={() => true}
+                onSave={onSaveElevatorImages}
                 onClose={() => setImageEditor(null)}
             />
         </div>

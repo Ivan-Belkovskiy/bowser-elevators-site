@@ -658,7 +658,7 @@ export default function ElevatorVideoPlayer({
     return (
         <>
             {(url.startsWith('/mylift/elevator')) && <title>{`${data.title}`}</title>}
-            {videoData && (
+            {(videoData && data.videoStats?.[videoData.id]) && (
                 <MyLiftPlayer
                     video={videoData}
                     videoStats={data.videoStats[videoData?.id || ""]}
@@ -919,6 +919,7 @@ export default function ElevatorVideoPlayer({
                                                 onConfirmExitMyLiftPlayer();
                                             }
                                         }}
+                                        onOverwriteFragment={saveFragmentData}
                                         onClearAutosave={clearCoursebotAutosave}
                                         onEditFragment={editFragmentData}
                                         onDeleteFragment={deleteFragmentData}

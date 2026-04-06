@@ -322,7 +322,7 @@ export default function MyLiftEditorModal({ activeCondition, category, elevator,
                                 <h2 className="mylift-editor-modal__subtitle">Звуковые эффекты</h2>
                                 <div className="mylift-editor-modal__property">
                                     <span>Открытие дверей ::</span>
-                                    {(editingSoundEffects?.doorOpen instanceof File) ? <></> : <span className="mylift-editor-modal__label">{editingSoundEffects?.doorOpen?.replace(/\/.*(?=\/)./g, '')}</span>}
+                                    {(editingSoundEffects?.doorOpen instanceof File) ? <></> : <span className="mylift-editor-modal__label">{editingSoundEffects?.doorOpen?.split('/').pop()}</span>}
                                     <FileUploader
                                         btnClass="mylift-editor-modal__button upload-sound-button"
                                         label="Загрузить аудиофайл..."
@@ -337,7 +337,7 @@ export default function MyLiftEditorModal({ activeCondition, category, elevator,
                                 </div>
                                 <div className="mylift-editor-modal__property">
                                     <span>Закрытие дверей ::</span>
-                                    {(editingSoundEffects?.doorClose instanceof File) ? <></> : <span className="mylift-editor-modal__label">{editingSoundEffects?.doorClose?.replace(/\/.*(?=\/)./g, '')}</span>}
+                                    {(editingSoundEffects?.doorClose instanceof File) ? <></> : <span className="mylift-editor-modal__label">{editingSoundEffects?.doorClose?.split('/').pop()}</span>}
                                     <FileUploader
                                         btnClass="mylift-editor-modal__button upload-sound-button"
                                         label="Загрузить аудиофайл..."
@@ -352,7 +352,7 @@ export default function MyLiftEditorModal({ activeCondition, category, elevator,
                                 </div>
                                 <div className="mylift-editor-modal__property">
                                     <span>Нажатие на кнопку ::</span>
-                                    {(editingSoundEffects?.buttonClick instanceof File) ? <></> : <span className="mylift-editor-modal__label">{editingSoundEffects?.buttonClick?.replace(/\/.*(?=\/)./g, '')}</span>}
+                                    {(editingSoundEffects?.buttonClick instanceof File) ? <></> : <span className="mylift-editor-modal__label">{editingSoundEffects?.buttonClick?.split('/').pop()}</span>}
                                     <FileUploader
                                         btnClass="mylift-editor-modal__button upload-sound-button"
                                         label="Загрузить аудиофайл..."
@@ -367,7 +367,7 @@ export default function MyLiftEditorModal({ activeCondition, category, elevator,
                                 </div>
                                 <div className="mylift-editor-modal__property">
                                     <span>Начало движения лифта ::</span>
-                                    {(editingSoundEffects?.movement?.start instanceof File) ? <></> : <span className="mylift-editor-modal__label">{editingSoundEffects?.movement?.start?.replace(/\/.*(?=\/)./g, '')}</span>}
+                                    {(editingSoundEffects?.movement?.start instanceof File) ? <></> : <span className="mylift-editor-modal__label">{editingSoundEffects?.movement?.start?.split('/').pop()}</span>}
                                     <FileUploader
                                         btnClass="mylift-editor-modal__button upload-sound-button"
                                         label="Загрузить аудиофайл..."
@@ -385,7 +385,7 @@ export default function MyLiftEditorModal({ activeCondition, category, elevator,
                                 </div>
                                 <div className="mylift-editor-modal__property">
                                     <span>Движение лифта ::</span>
-                                    {(editingSoundEffects?.movement?.move instanceof File) ? <></> : <span className="mylift-editor-modal__label">{editingSoundEffects?.movement?.move?.replace(/\/.*(?=\/)./g, '')}</span>}
+                                    {(editingSoundEffects?.movement?.move instanceof File) ? <></> : <span className="mylift-editor-modal__label">{editingSoundEffects?.movement?.move?.split('/').pop()}</span>}
                                     <FileUploader
                                         btnClass="mylift-editor-modal__button upload-sound-button"
                                         label="Загрузить аудиофайл..."
@@ -403,7 +403,7 @@ export default function MyLiftEditorModal({ activeCondition, category, elevator,
                                 </div>
                                 <div className="mylift-editor-modal__property">
                                     <span>Остановка лифта ::</span>
-                                    {(editingSoundEffects?.movement?.end instanceof File) ? <></> : <span className="mylift-editor-modal__label">{editingSoundEffects?.movement?.end?.replace(/\/.*(?=\/)./g, '')}</span>}
+                                    {(editingSoundEffects?.movement?.end instanceof File) ? <></> : <span className="mylift-editor-modal__label">{editingSoundEffects?.movement?.end?.split('/').pop()}</span>}
                                     <FileUploader
                                         btnClass="mylift-editor-modal__button upload-sound-button"
                                         label="Загрузить аудиофайл..."
@@ -425,8 +425,8 @@ export default function MyLiftEditorModal({ activeCondition, category, elevator,
                         <>
                             <section className="mylift-editor-modal__section">
                                 <h2 className="mylift-editor-modal__subtitle">Внешний вид</h2>
-                                <p>Данный раздел находится в процессе разработки...</p>
-                                {/* <div className="mylift-editor-modal__property elevator-image">
+                                {/* <p>Данный раздел находится в процессе разработки...</p> */}
+                                <div className="mylift-editor-modal__property elevator-image">
                                     <span className="mylift-editor-modal__label">Левая стена лифта:</span>
                                     <button
                                         className="mylift-editor-modal__button upload-image-button"
@@ -460,7 +460,7 @@ export default function MyLiftEditorModal({ activeCondition, category, elevator,
                                         className="mylift-editor-modal__button upload-image-button"
                                         onClick={() => setImageEditorType('rightDoor')}
                                     >Настроить...</button>
-                                </div> */}
+                                </div>
                             </section>
                             <section className="mylift-editor-modal__section">
                                 <h2 className="mylift-editor-modal__subtitle">Кнопочная панель</h2>
