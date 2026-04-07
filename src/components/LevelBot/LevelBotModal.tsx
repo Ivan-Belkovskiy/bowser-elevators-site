@@ -140,11 +140,11 @@ export default function LevelBotModal({
     useEffect(() => {
         AudioController.setVolume({
             music: {
-                ...AudioController.volume.music,
+                // ...AudioController.volume.music,
                 on: false,
             },
             elevator: {
-                ...AudioController.volume.elevator,
+                // ...AudioController.volume.elevator,
                 on: false,
             }
         });
@@ -155,11 +155,11 @@ export default function LevelBotModal({
             AudioController.stopCoursebotMusic();
             AudioController.setVolume({
             music: {
-                ...AudioController.volume.music,
+                // ...AudioController.volume.music,
                 on: true,
             },
             elevator: {
-                ...AudioController.volume.elevator,
+                // ...AudioController.volume.elevator,
                 on: true,
             }
         })

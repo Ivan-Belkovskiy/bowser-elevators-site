@@ -341,7 +341,7 @@ export default function ElevatorVideoPlayer({
         }
         await AudioController.playElevatorButtonClick(data.elevator.soundEffects.buttonClick || "");
         if (isCoursebotTransit) return;
-        
+
         if (button.type === "floor") {
             if (!validateAccessCondition(button.destinationFloor)) return;
             if (currentFloor === button.destinationFloor) openDoors();
@@ -596,6 +596,14 @@ export default function ElevatorVideoPlayer({
     // const [isModeSelectorOpened, setModeSelectorOpened] = useState(false);
 
     const updateModeSelectorOpened = (val: boolean) => {
+        if (val === false) {
+            AudioController.setVolume({
+                music: {
+                    // ...AudioController.volume.music,
+                    on: true,
+                }
+            });
+        }
         modeSelectorState.current = val;
         setModeSelectorOpened(val);
     }

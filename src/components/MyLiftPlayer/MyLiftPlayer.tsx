@@ -114,7 +114,7 @@ export default function MyLiftPlayer({
   const handleInitialPlay = () => {
     AudioController.setVolume({
       music: {
-        ...AudioController.volume.music,
+        // ...AudioController.volume.music,
         on: false,
       }
     });

@@ -12,7 +12,7 @@ export default function PlayPauseButton({ videoRef, playerState, setPlayerState,
 
       AudioController.setVolume({
         music: {
-          ...AudioController.volume.music,
+          // ...AudioController.volume.music,
           on: true,
         }
       });
@@ -24,7 +24,7 @@ export default function PlayPauseButton({ videoRef, playerState, setPlayerState,
 
       AudioController.setVolume({
         music: {
-          ...AudioController.volume.music,
+          // ...AudioController.volume.music,
           on: false,
         }
       });

@@ -80,10 +80,10 @@ class AudioController {
     // ============================================================
 
     enableElevatorMusic() {
-        this.elevatorMusicEnabled = true;
-        if (!this.globalMuted && !this.elevatorMusicMuted) {
+        if (!this.globalMuted && !this.elevatorMusicMuted && !this.elevatorMusicEnabled) {
             this.startMusicCycle();
         }
+        this.elevatorMusicEnabled = true;
     }
 
     disableElevatorMusic() {
@@ -197,7 +197,7 @@ class AudioController {
         if (this.globalMuted) return;
 
         this.floorAnnouncement = new Audio(
-            `/audio/notifications/mlm-lcd/floors/floor-${floor}${[7,8].includes(floor) ? '.mp3' : '.m4a'}`
+            `/audio/notifications/mlm-lcd/floors/floor-${floor}${[7, 8].includes(floor) ? '.mp3' : '.m4a'}`
         );
         this.floorAnnouncement.volume = this.volume.elevator.on ? this.volume.elevator.volume : 0;
 
@@ -232,8 +232,8 @@ class AudioController {
 
         this.endMoveBeep = new Audio(
             (displayType === "MLMLCD") ? `/audio/notifications/mlm-lcd/end-move-beep.mp3` :
-            (displayType === "TL-D70") ? `/audio/notifications/tl-d70/end-move-beep.mp3`
-            : `/audio/notifications/tim-2/end-move-beep.m4a`
+                (displayType === "TL-D70") ? `/audio/notifications/tl-d70/end-move-beep.mp3`
+                    : `/audio/notifications/tim-2/end-move-beep.m4a`
         );
 
         this.endMoveBeep.volume = this.volume.elevator.on ? this.volume.elevator.volume : 0;
@@ -316,12 +316,41 @@ class AudioController {
         this.stopMovementLoop();
     }
 
-    setVolume(data: Partial<typeof this.volume>) {
-        this.volume = {
-            ...this.volume,
-            ...data,
-        };
+    setVolume(data: any) {
+        if (data.music) {
+            this.volume.music = {
+                ...this.volume.music,
+                ...data.music,
+            }
+        }
 
+        if (data.elevator) {
+            this.volume.elevator = {
+                ...this.volume.elevator,
+                ...data.elevator,
+            }
+        }
+
+        if (data.coursebot) {
+            if (data.coursebot.music) {
+                this.volume.coursebot.music = {
+                    ...this.volume.coursebot.music,
+                    ...data.coursebot.music,
+                }
+            }
+            if (data.coursebot.ui) {
+                this.volume.coursebot.ui = {
+                    ...this.volume.coursebot.ui,
+                    ...data.coursebot.ui,
+                }
+            }
+        }
+        // this.volume = {
+        //     ...this.volume,
+        //     ...data,
+        // };
+
+        
         if (this.elevatorMusic) this.elevatorMusic.volume = (this.volume.music.on) ? this.volume.music.volume : 0;
         if (this.movementStart) this.movementStart.volume = (this.volume.elevator.on) ? this.volume.elevator.volume : 0;
         if (this.movementLoop) this.movementLoop.volume = (this.volume.elevator.on) ? this.volume.elevator.volume : 0;
@@ -335,6 +364,9 @@ class AudioController {
         for (const key in this.coursebotSounds) {
             this.coursebotSounds[key].volume = (this.volume.coursebot.ui.on) ? this.volume.coursebot.ui.volume : 0;
         }
+
+        // if (this.elevatorMusic) this.elevatorMusic.volume = 0;
+        // alert(this.elevatorMusic);
     }
 
     unmuteAll() {

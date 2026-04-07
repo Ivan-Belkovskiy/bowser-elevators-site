@@ -55,6 +55,7 @@
     flex-direction: column;
     align-items: center;
     gap: 20px;
+    overflow-y: auto;
 }
 
 .watch-list-modal__container.opened {

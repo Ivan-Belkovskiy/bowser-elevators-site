@@ -100,7 +100,7 @@ export default function ElevatorDisplay({
                         await AudioController.playEndMoveBeep(type);
                         AudioController.setVolume({
                             music: {
-                                ...AudioController.volume.music,
+                                // ...AudioController.volume.music,
                                 on: false,
                             }
                         });
@@ -109,7 +109,7 @@ export default function ElevatorDisplay({
                         AudioController.playFloorNotification(floor)?.then(() => {
                             AudioController.setVolume({
                                 music: {
-                                    ...AudioController.volume.music,
+                                    // ...AudioController.volume.music,
                                     on: true,
                                 }
                             });
