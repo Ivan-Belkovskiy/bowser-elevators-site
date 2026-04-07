@@ -11,8 +11,8 @@ export default function CoursebotModal({ opened, playerMode = 'free', setOpened,
     onAutosave?: () => void;
     onLoad?: () => void;
 }) {
-    if (opened) return (
-        <div className={`mylift-controls-modal coursebot-modal player-mode-${playerMode}`}>
+    /*if (opened) */ return (
+        <div className={`mylift-controls-modal coursebot-modal player-mode-${playerMode} ${opened ? 'opened' : ''}`}>
             <div className="coursebot-modal__header">
                 <span>Уровнебот</span>
             </div>

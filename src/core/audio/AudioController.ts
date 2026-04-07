@@ -92,7 +92,8 @@ class AudioController {
     }
 
     private startMusicCycle() {
-        if (!this.elevatorMusicEnabled || this.globalMuted || this.elevatorMusicMuted || this.elevatorMusic) return;
+        if (this.globalMuted || this.elevatorMusicMuted) return;
+        // if (!this.elevatorMusicEnabled || this.globalMuted || this.elevatorMusicMuted || this.elevatorMusic) return;
 
 
         const trackNumber = ((this.currentTrack - 1) % 5) + 1;
@@ -196,7 +197,7 @@ class AudioController {
         if (this.globalMuted) return;
 
         this.floorAnnouncement = new Audio(
-            `/audio/notifications/mlm-lcd/floors/floor-${floor}${floor === 7 ? '.mp3' : '.m4a'}`
+            `/audio/notifications/mlm-lcd/floors/floor-${floor}${[7,8].includes(floor) ? '.mp3' : '.m4a'}`
         );
         this.floorAnnouncement.volume = this.volume.elevator.on ? this.volume.elevator.volume : 0;
 
@@ -230,7 +231,8 @@ class AudioController {
 
 
         this.endMoveBeep = new Audio(
-            (displayType === "MLMLCD") ? `/audio/notifications/mlm-lcd/end-move-beep.mp3`
+            (displayType === "MLMLCD") ? `/audio/notifications/mlm-lcd/end-move-beep.mp3` :
+            (displayType === "TL-D70") ? `/audio/notifications/tl-d70/end-move-beep.mp3`
             : `/audio/notifications/tim-2/end-move-beep.m4a`
         );
 

@@ -1,14 +1,29 @@
 .mylift-controls-modal.coursebot-modal {
     width: 250px;
-    height: 400px;
+    /* height: 400px; */
     background-color: #0044ff;
     position: absolute;
-    top: -405px;
+    /* top: -405px; */
     left: 74.5%;
     /* Зависит от "position" Controls */
     display: flex;
     flex-direction: column;
     align-items: center;
+    overflow-y: auto;
+    height: 0px;
+    top: -5px;
+    transition: all 0.15s ease 0s;
+    pointer-events: all;
+}
+
+.mylift-controls-modal.coursebot-modal::-webkit-scrollbar {
+    display: none;
+}
+
+.mylift-controls-modal.coursebot-modal.opened {
+    height: 400px;
+    top: -405px;
+    pointer-events: none;
 }
 
 /* .mylift-controls-modal.coursebot-modal.player-mode-full {

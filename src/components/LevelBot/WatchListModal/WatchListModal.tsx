@@ -11,7 +11,7 @@ export default function WatchListModal({ opened, data, onClose }: { opened?: boo
                     <div className="watch-list-modal__list">
                         {data?.watchHistory?.map((item, idx) => {
                             return (
-                                <div className="watch-list-modal__block">
+                                <div className="watch-list-modal__block" key={idx}>
                                     <div className="watch-list-modal__block-left">
                                         <span>№{idx + 1}</span>
                                     </div>

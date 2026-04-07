@@ -35,7 +35,7 @@ export interface MyLiftPlayerProps {
   resetRef?: RefObject<(() => void) | null>;
   requestAutosaveRef?: RefObject<(() => void) | null>;
   onlyFullModeAutosave?: boolean;
-  videoStats: VideoStats;
+  videoStats?: VideoStats;
 
   updateOpeningSlotData?: Dispatch<SetStateAction<{
     main: SlotData,
@@ -110,8 +110,6 @@ export default function MyLiftPlayer({
   useEffect(() => {
     if (requestAutosaveRef) requestAutosaveRef.current = requestAutoSave;
   });
-
-  const [showModeSelection, setShowModeSelection] = useState(false);
 
   const handleInitialPlay = () => {
     AudioController.setVolume({

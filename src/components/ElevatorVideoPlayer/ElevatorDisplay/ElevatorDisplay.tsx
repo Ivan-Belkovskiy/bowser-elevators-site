@@ -38,15 +38,13 @@ export default function ElevatorDisplay({
     options?: ElevatorDisplayConfig['options']
 }) {
     const prevFloor = useRef<number>(floor);
-    const lastAnnouncedFloor = useRef<number | null>(null); // Чтобы не повторять объявление
+    const lastAnnouncedFloor = useRef<number | null>(null);
     const prevDirection = useRef<ElevatorDirections>(direction);
     const prevDoorState = useRef<ElevatorDoorState | undefined>(doorState);
 
     const offsetRef = useRef(1);
     const [offset, setOffset] = useState(1);
     const [displayFloor, setDisplayFloor] = useState(floor);
-
-    // --- Логика уведомлений ---
 
     const triggerNotification = (triggerType: "atEndMove" | "atDoorOpen" | "atDoorClose") => {
         if (editMode) return;
@@ -131,7 +129,7 @@ export default function ElevatorDisplay({
         }
 
         if (moveState === "MOVE" || direction === "NONE") {
-            lastAnnouncedFloor.current = null;
+            // lastAnnouncedFloor.current = null;
         }
 
     }, [moveState, floor, direction, options]);

@@ -316,23 +316,22 @@ export default function ElevatorVideoPlayer({
 
     ////////////////////////
 
-    const [warningMode, setWarningMode] = useState<"strict_exit" | "free_exit" | null>(null);
-    const [showWarning, setShowWarning] = useState<boolean>(false);
+    const videoData = data.floors[currentFloor].videoData;
 
-    const handleDoorCloseAttempt = () => {
-        if (!playerStateRef.current?.activated) {
-            closeDoors();
-            return;
-        }
+    const validateAccessCondition = (floor: number) => {
+        const condition = data.floors[floor].accessCondition;
+        if (condition?.type === 'free') return true;
+        if (condition?.type === 'blocked') return false;
+        if (condition?.type === 'viewCount') {
+            if (data.videoStats) {
+                const videoId = data.floors[condition.floor - 1]?.videoData?.id;
+                const videoStats = data.videoStats[videoId || ""];
+                if (videoStats?.views) return (videoStats.views >= condition.requiredViews);
+                else return false;
 
-        if (playerStateRef.current?.mode === 'full') {
-            setWarningMode('strict_exit');
-            setShowWarning(true);
-        } else {
-            setWarningMode('free_exit');
-            setShowWarning(true);
+            } else return false;
         }
-    };
+    }
 
     const onButtonClick = async (button: ElevatorButton, btnIdx: number, blockIdx: number) => {
         if (editMode) {
@@ -342,8 +341,9 @@ export default function ElevatorVideoPlayer({
         }
         await AudioController.playElevatorButtonClick(data.elevator.soundEffects.buttonClick || "");
         if (isCoursebotTransit) return;
-
+        
         if (button.type === "floor") {
+            if (!validateAccessCondition(button.destinationFloor)) return;
             if (currentFloor === button.destinationFloor) openDoors();
             else callElevator(button.destinationFloor);
             return;
@@ -501,13 +501,13 @@ export default function ElevatorVideoPlayer({
         if (playerState.mode === 'full') {
             const formData = new FormData();
             // const watchData = playerState.watchInfo;
-            alert(JSON.stringify({
-                ...playerState,
-                watchInfo: {
-                    ...playerState.watchInfo,
-                    endDate: new Date().toLocaleString().replace(',', ''),
-                }
-            }));
+            // alert(JSON.stringify({
+            //     ...playerState,
+            //     watchInfo: {
+            //         ...playerState.watchInfo,
+            //         endDate: new Date().toLocaleString().replace(',', ''),
+            //     }
+            // }));
             formData.append('completed_video_id', id);
             formData.append('video_player_state', JSON.stringify({
                 ...playerState,
@@ -645,8 +645,6 @@ export default function ElevatorVideoPlayer({
 
     useEffect(() => setData(liftData), [liftData]);
 
-    const videoData = data.floors[currentFloor].videoData;
-
     // useEffect(() => {
     //     const videoStats = data.videoStats[videoData?.id || ""];
     //     alert(data.videoStats[videoData?.id || ""]?.views);
@@ -658,10 +656,10 @@ export default function ElevatorVideoPlayer({
     return (
         <>
             {(url.startsWith('/mylift/elevator')) && <title>{`${data.title}`}</title>}
-            {(videoData && data.videoStats?.[videoData.id]) && (
+            {(videoData) && (
                 <MyLiftPlayer
                     video={videoData}
-                    videoStats={data.videoStats[videoData?.id || ""]}
+                    videoStats={data.videoStats?.[videoData?.id || ""]}
                     liftId={data.id}
                     floorId={data.floors[currentFloor].id}
                     mode={playerMode}
@@ -796,6 +794,8 @@ export default function ElevatorVideoPlayer({
                                     ...activeStyles,
                                 };
 
+                                const disabled = (button.type === 'floor') ? !validateAccessCondition(button.destinationFloor) : false;
+
                                 return (
                                     <button
                                         key={index}
@@ -806,6 +806,7 @@ export default function ElevatorVideoPlayer({
                                                 ? "edit-active"
                                                 : ""
                                             }`}
+                                        disabled={disabled && !editMode}
                                         style={styles as CSSProperties}
                                         onClick={() => onButtonClick(button, index, 0)}
                                     >
