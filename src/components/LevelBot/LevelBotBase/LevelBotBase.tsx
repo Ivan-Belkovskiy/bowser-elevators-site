@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect, useState, useRef, Dispatch, SetStateAction } from "react";
+import React, { useEffect, useState, useRef, Dispatch, SetStateAction, MouseEvent } from "react";
 import "./LevelBotBase.css";
 import { CoursebotFloorSlotConfig, LiftJson, SlotData } from "@/types/elevator";
 import { LevelBotMode, LevelBotTransitionState, SavePayload } from "../LevelBotModal";
@@ -10,7 +10,20 @@ import { VideoData } from "@/types/data/VideoData";
 import WatchListModal from "../WatchListModal/WatchListModal";
 import { MyLiftPlayerMode } from "@/components/MyLiftPlayer/MyLiftPlayer";
 
+interface ClickedSlotInfo {
+    idx: number;
+    data?: SlotData;
+    position: {
+        x: number;
+        y: number;
+        mouseX: number;
+        mouseY: number;
+    }
+}
+
 export default function LevelbotBase({
+    elevatorId,
+    floorId,
     slotData,
     coursebotMode,
     transitionState,
@@ -25,12 +38,15 @@ export default function LevelbotBase({
     onOpenInCoursebotPlayer,
     onSaveFragment,
     onAutoSave,
+    onSlotReplace,
     onClearAutosave,
     onOverwriteFragment,
     onDeleteFragment,
     onEditFragment,
     closeModal,
 }: {
+    elevatorId?: string;
+    floorId?: string;
     slotData?: CoursebotFloorSlotConfig;
     coursebotMode: LevelBotMode;
     transitionState: LevelBotTransitionState;
@@ -45,12 +61,16 @@ export default function LevelbotBase({
     onOpenInCoursebotPlayer?: (slot: SlotData, isAutosave?: boolean) => void;
     onSaveFragment?: (title: string, slotIndex: number) => void;
     onAutoSave?: () => void;
+    onSlotReplace?: (idx1: number, idx2: number) => void;
     onClearAutosave?: () => void;
     onOverwriteFragment?: (title: string, slotIndex: number) => void;
     onDeleteFragment?: (slotIndex: number) => void;
     onEditFragment?: (data: EditingSlotData, slotIndex: number) => void;
     closeModal?: () => void;
 }) {
+
+    const [tempSlotData, setTempSlotData] = useState<CoursebotFloorSlotConfig | null>(null);
+
     const [selectedSlot, setSelectedSlot] = useState<{
         isAutosave: boolean;
         index: number;
@@ -133,6 +153,132 @@ export default function LevelbotBase({
 
     // const [isWatchListOpened, setWatchListOpened] = useState(false);
 
+    const contentRef = useRef<HTMLDivElement | null>(null);
+
+    const [clickedSlot, setClickedSlot] = useState<ClickedSlotInfo | null>(null);
+    const [movingSlot, setMovingSlot] = useState<ClickedSlotInfo | null>(null);
+    const clickedSlotRef = useRef<ClickedSlotInfo | null>(null);
+
+    const calculateSlotIdxByPosition = (slot: { x: number; y: number }) => {
+        const SLOT_WIDTH = 200;
+        const SLOT_HEIGHT = 167;
+        const COLUMNS = 4;
+
+        const col = ( Math.round(slot.x / SLOT_WIDTH) + 1 );
+        const row = Math.round(slot.y / SLOT_HEIGHT);
+
+        return (col + (row * COLUMNS));
+    };
+
+    const onSlotMoveStart = (e: MouseEvent<HTMLDivElement>, slotIdx: number, data?: SlotData) => {
+        if (!e || !slotIdx) return;
+
+        const rect = (e.currentTarget as HTMLDivElement).getBoundingClientRect();
+        const container = contentRef.current;
+
+        if (!container) return;
+
+        const containerRect = container.getBoundingClientRect();
+
+        setClickedSlot({
+            idx: slotIdx,
+            data: data,
+            position: {
+                x: rect.left - containerRect.left + container.scrollLeft,
+                y: rect.top - containerRect.top + container.scrollTop,
+                mouseX: e.clientX,
+                mouseY: e.clientY
+            }
+        });
+    };
+
+    const onSlotMove = (e: MouseEvent<HTMLDivElement>) => {
+        if (!e || !clickedSlot) return;
+
+        const deltaX = e.clientX - clickedSlot.position.mouseX;
+        const deltaY = e.clientY - clickedSlot.position.mouseY;
+
+        setMovingSlot({
+            ...clickedSlot,
+            position: {
+                ...clickedSlot.position,
+                x: clickedSlot.position.x + deltaX,
+                y: clickedSlot.position.y + deltaY,
+            }
+        });
+    };
+
+
+    // const replaceSlots = async (floorId: string, idx1: number, idx2: number) => {
+    //     try {
+    //         const formData = new FormData();
+    //         formData.append("coursebot_slot_replace", `${floorId}-${idx1}-${idx2}`);
+
+    //         // alert(`${floorId}-${idx1}-${idx2}`);
+    //         const res = await fetch(`/api/elevators/${elevatorId}`, {
+    //             method: "PUT",
+    //             body: formData,
+    //         });
+
+    //         const data: { success: boolean; lift: LiftJson } = await res.json();
+
+    //         if (data.success) {
+    //             // alert('successfully replaced slots!');
+    //         }
+
+    //     } catch (error) {
+
+    //     }
+    // }
+
+    const onSlotMoveEnd = (e: MouseEvent<HTMLDivElement>) => {
+        if (!e || !clickedSlot) return;
+        if (!movingSlot) openSlot(false, clickedSlot.idx, clickedSlot.data);
+
+        if (!floorId) return;
+        const contentRect = contentRef.current?.getBoundingClientRect();
+
+        if (contentRect && movingSlot) {
+            const newIdx = calculateSlotIdxByPosition({
+                x: movingSlot.position.x,
+                y: movingSlot.position.y
+            }/*, {
+                width: contentRect.width,
+                height: contentRect.height
+            } */);
+
+            onSlotReplace?.((movingSlot.idx - 1), (newIdx - 2));
+
+            // alert(`new: ${newIdx - 2}\nold: ${movingSlot.idx - 1}`);
+        }
+
+        setMovingSlot(null);
+        setClickedSlot(null);
+    }
+
+    useEffect(() => {
+        let frameId: number;
+        let timer = 0;
+
+        clickedSlotRef.current = clickedSlot;
+        // alert(JSON.stringify(clickedSlot));
+
+        const timeHandler = () => {
+            if (!clickedSlotRef.current) return;
+            timer++;
+
+            if (timer > 30) {
+                setMovingSlot(clickedSlot);
+                // alert('START MOVE!');
+            } else requestAnimationFrame(timeHandler);
+        }
+
+        frameId = requestAnimationFrame(timeHandler);
+
+        return () => cancelAnimationFrame(frameId);
+
+    }, [clickedSlot]);
+
     const videoData = currentVideo;
 
     const viewsCount = videoStats?.[videoData?.id || ""]?.views || 0;
@@ -192,7 +338,12 @@ export default function LevelbotBase({
                 onClearAutosave={() => { closeSlot(); onClearAutosave?.(); }}
             />
 
-            <div className="coursebot-base__content">
+            <div
+                className={`coursebot-base__content ${movingSlot ? `slot-move-mode` : ``}`}
+                ref={contentRef}
+                onMouseMove={(e) => onSlotMove(e)}
+                onMouseUp={(e) => onSlotMoveEnd(e)}
+            >
                 <WatchListModal opened={watchListOpened} data={watchData} onClose={() => setWatchListOpened?.(false)} />
                 <div
                     className={`coursebot-base__slot autosave 
@@ -216,18 +367,30 @@ export default function LevelbotBase({
                         const thumb = getSlotImage(slotIndex, slot.data?.thumbnailUrl);
 
                         return (
-                            <div
-                                key={idx}
-                                className={`coursebot-base__slot ${bouncingSlotIndex === slotIndex ? "bouncing" : ""}`}
-                                onClick={() => openSlot(false, slotIndex, slot)}
-                            >
-                                <div className={`coursebot-slot__preview ${thumb ? 'with-data' : ''} ${fillingSlotIndex === slotIndex ? "filling" : ""}`}>
-                                    {thumb && <img src={thumb} alt={slot.data?.title} />}
+                            <>
+                                {(movingSlot?.idx === slotIndex) && <div className="coursebot-base__slot empty-slot"></div>}
+                                <div
+                                    key={idx}
+                                    className={`coursebot-base__slot ${bouncingSlotIndex === slotIndex ? "bouncing" : ""} ${movingSlot?.idx === slotIndex ? `moving` : ``}`}
+                                    style={(movingSlot?.idx === slotIndex) ? {
+                                        position: 'absolute',
+                                        left: `${movingSlot.position?.x}px`,
+                                        top: `${movingSlot.position?.y}px`,
+                                        zIndex: 50,
+                                    } : {}}
+                                    onMouseDown={(e) => onSlotMoveStart(e, slotIndex, slot)} // Для перемещения слотов
+                                // onMouseMove={(e) => onSlotMove(e, slotIndex)}
+                                // onMouseUp={(e) => onSlotMoveEnd(e, slotIndex)}
+                                // onClick={() => (movingSlot?.idx !== slotIndex) && openSlot(false, slotIndex, slot)}
+                                >
+                                    <div className={`coursebot-slot__preview ${thumb ? 'with-data' : ''} ${fillingSlotIndex === slotIndex ? "filling" : ""}`}>
+                                        {thumb && <img src={thumb} alt={slot.data?.title} />}
+                                    </div>
+                                    <span className="coursebot-slot__title">
+                                        {slot.data?.title ? (slot.data?.title.length > 10 ? slot.data?.title.slice(0, 11) + '...' : slot.data?.title) : ""}
+                                    </span>
                                 </div>
-                                <span className="coursebot-slot__title">
-                                    {slot.data?.title ? (slot.data?.title.length > 10 ? slot.data?.title.slice(0, 11) + '...' : slot.data?.title) : ""}
-                                </span>
-                            </div>
+                            </>
                         );
                     }
                 })}

@@ -50,6 +50,7 @@ export interface LevelBotModalProps {
 
     onSaveFragment?: (payload: SavePayload & { title: string; slotIndex: number }) => void;
     onAutoSave?: (payload?: SavePayload) => void;
+    onSlotReplace?: (floorId: string, idx1: number, idx2: number) => void;
     onClearAutosave?: (floorId: string) => void;
     onOverwriteFragment?: (payload: SavePayload & { title: string; slotIndex: number }) => void;
     onDeleteFragment?: (slotIndex: number, floorId: string) => void;
@@ -66,6 +67,7 @@ export default function LevelBotModal({
     onOpenInCoursebotPlayer,
     onSaveFragment,
     onAutoSave,
+    onSlotReplace,
     onClearAutosave,
     onOverwriteFragment,
     onEditFragment,
@@ -182,6 +184,8 @@ export default function LevelBotModal({
             />
 
             <LevelbotBase
+                elevatorId={elevator.id}
+                floorId={activeFloorId}
                 currentVideo={currentFloor.videoData}
                 videoStats={elevator.videoStats}
                 slotData={floorSlots}
@@ -214,6 +218,8 @@ export default function LevelBotModal({
                 }}
 
                 onAutoSave={() => onAutoSave?.(savePayload)}
+
+                onSlotReplace={(idx1, idx2) => onSlotReplace?.(currentFloorId, idx1, idx2)}
 
                 onOverwriteFragment={(title, slotIndex) => {
                     if (!savePayload) return;

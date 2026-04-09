@@ -109,6 +109,40 @@ export async function PUT(
           });
         }
       }
+    } else if (formData.has('coursebot_slot_replace')) {
+      const data = formData.get('coursebot_slot_replace');
+      if (typeof data === 'string') {
+        const floorId = data.split('-')[0];
+        const startIdx = Number(data.split('-')[1]);
+        const endIdx = Number(data.split('-')[2]);
+
+        // return NextResponse.json({
+        //   floorId,
+        //   startIdx,
+        //   endIdx
+        // });
+
+        if (floorId && !isNaN(startIdx) && !isNaN(endIdx)) {
+          const firstSlot = {
+            ...liftData.coursebot.slots[floorId].fragments[startIdx]
+          };
+
+          const secondSlot = {
+            ...liftData.coursebot.slots[floorId].fragments[endIdx]
+          };
+
+          // return NextResponse.json({
+          //   firstSlot,
+          //   secondSlot
+          // });
+
+          if (firstSlot && secondSlot) {
+            liftData.coursebot.slots[floorId].fragments[startIdx] = secondSlot;
+            liftData.coursebot.slots[floorId].fragments[endIdx] = firstSlot;
+          }
+        }
+      }
+
     } else if (formData.has('coursebot__autosave')) {
       const data = formData.get('coursebot__autosave');
       const state = formData.get('coursebot__autosave--player_state');

@@ -97,8 +97,11 @@
     display: flex;
     justify-content: center;
     align-items: center;
-    animation: levelbot-head-lines 0.7s linear infinite reverse;
 }
+
+/* .levelbot-head.animating {
+    animation: levelbot-head-lines 0.7s linear infinite reverse;
+} */
 
 .levelbot-head::before,
 .levelbot-head::after {

@@ -84,6 +84,7 @@
     gap: 13px;
     max-height: 530px;
     overflow-y: auto;
+    position: relative;
 }
 
 .coursebot-base__slot {
@@ -276,4 +277,19 @@
     background-color: #23395e;
     border-radius: 5px;
     color: #fff;
+}
+
+
+.coursebot-base__slot.moving {
+    scale: 1.08 !important;
+    transition: none;
+    cursor: move !important;
+}
+
+.coursebot-base__content.slot-move-mode:hover {
+    cursor: move !important;
+}
+
+.coursebot-base__slot.empty-slot {
+    opacity: 0;
 }

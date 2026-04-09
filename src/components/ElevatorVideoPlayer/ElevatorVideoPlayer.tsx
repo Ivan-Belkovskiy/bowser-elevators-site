@@ -450,6 +450,29 @@ export default function ElevatorVideoPlayer({
         }
     }
 
+    const replaceCoursebotSlots = async (floorId: string, idx1: number, idx2: number) => {
+        try {
+            const formData = new FormData();
+            formData.append("coursebot_slot_replace", `${floorId}-${idx1}-${idx2}`);
+
+            // alert(`${floorId}-${idx1}-${idx2}`);
+            const res = await fetch(`/api/elevators/${data.id}`, {
+                method: "PUT",
+                body: formData,
+            });
+
+            const json: { success: boolean; lift: LiftJson } = await res.json();
+
+            if (json.success) {
+                setData(json.lift);
+                // alert('successfully replaced slots!');
+            }
+
+        } catch (error) {
+
+        }
+    }
+
     const editFragmentData = async (changes: EditingSlotData, floorId: string, slotId: number) => {
         const formData = new FormData();
         const updates = {
@@ -928,6 +951,7 @@ export default function ElevatorVideoPlayer({
                                                 onConfirmExitMyLiftPlayer();
                                             }
                                         }}
+                                        onSlotReplace={replaceCoursebotSlots}
                                         onOverwriteFragment={saveFragmentData}
                                         onClearAutosave={clearCoursebotAutosave}
                                         onEditFragment={editFragmentData}
