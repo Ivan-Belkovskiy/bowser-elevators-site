@@ -9,7 +9,7 @@ export async function GET(req: NextRequest) {
     return new NextResponse("Missing path", { status: 400 });
   }
 
-  const realPath = filePath; // путь на диске, например D:/Media/Video/...
+  const realPath = filePath;
 
   if (!fs.existsSync(realPath)) {
     return new NextResponse("File not found", { status: 404 });

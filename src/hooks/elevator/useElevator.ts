@@ -28,7 +28,7 @@ export function useElevator(floor: number, elevatorData: LiftJson, controlData: 
     const [calls, setCalls] = useState<ElevatorCall[]>([]);
     const [isMoving, setMovingState] = useState(false);
     const [moveState, setMoveState] = useState<ElevatorMoveState>("");
-    const [currentY, setCurrentY] = useState(0); // Текущая координата в этажах (дробная)
+    const [currentY, setCurrentY] = useState(0);
 
     const control = useRef(controlData);
 
@@ -36,13 +36,12 @@ export function useElevator(floor: number, elevatorData: LiftJson, controlData: 
         control.current = controlData;
     }, [controlData]);
 
-    // Используем Ref для физики, чтобы не вызывать ререндер на каждом расчете
     const state = useRef({
         pos: 0,
-        vel: 0, // Скорость (этажей в кадр)
-        accel: 0.0001, // Ускорение
-        maxVel: 0.0055, // Макс. скорость (дает ~2 сек на этаж)
-        brakingDist: 0.2, // Дистанция начала торможения (в этажах)
+        vel: 0,
+        accel: 0.0001,
+        maxVel: 0.0055,
+        brakingDist: 0.2,
         currentFloor,
         direction: "NONE" as ElevatorDirections,
         calls: [] as ElevatorCall[],
@@ -51,12 +50,6 @@ export function useElevator(floor: number, elevatorData: LiftJson, controlData: 
         moveState: "" as ElevatorMoveState,
         delay: 0,
         nextAction: null as string | null,
-        // pos: 0,
-        // vel: 0, // Скорость (этажей в кадр)
-        // accel: 0.0002, // Ускорение
-        // maxVel: 0.0083, // Макс. скорость (дает ~2 сек на этаж)
-        // brakingDist: 0.4, // Дистанция начала торможения (в этажах)
-        // currentFloor,
     });
 
     const callElevator = (floor: number, priority?: ElevatorCallPriority) => {
@@ -168,7 +161,6 @@ export function useElevator(floor: number, elevatorData: LiftJson, controlData: 
         setCalls(s.calls);
         setTargetFloor(stopFloor);
 
-        // console.log(`Команда "Отмена": лифт совершит доезд до ${stopFloor + 1} этажа`);
     }, [updateDirection]);
 
     useEffect(() => {

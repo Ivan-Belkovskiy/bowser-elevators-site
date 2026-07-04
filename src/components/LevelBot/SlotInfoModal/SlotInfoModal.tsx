@@ -3,7 +3,7 @@ import { LevelBotMode, SavePayload } from "../LevelBotModal";
 import "./SlotInfoModal.css";
 import { MouseEvent, useEffect, useState } from "react";
 import AudioController from "@/core/audio/AudioController";
-import { MyLiftPlayerMode } from "@/components/MyLiftPlayer/MyLiftPlayer";
+import { MyLiftPlayerMode, PlayerState } from "@/components/MyLiftPlayer/MyLiftPlayer";
 
 export interface EditingSlotData {
     title?: string;
@@ -12,6 +12,7 @@ export interface EditingSlotData {
 export default function SlotInfoModal({
     mode,
     slotData,
+    playerState,
     videoStats,
     savePayload,
     onClose,
@@ -25,6 +26,7 @@ export default function SlotInfoModal({
 }: {
     mode: LevelBotMode;
     videoStats?: VideoStats;
+    playerState?: PlayerState;
     slotData?: {
         isAutosave: boolean;
         index: number;
@@ -91,6 +93,7 @@ export default function SlotInfoModal({
 
     const openInMyLiftPlayer = (e: MouseEvent<HTMLButtonElement>, playerMode?: MyLiftPlayerMode) => {
         AudioController.playCoursebotSound("select", "/audio/sound/coursebot/coursebot-select-button.wav");
+        if (playerState?.activated) return;
         // if (e.target instanceof HTMLButtonElement) e.target.style.scale = "1.1";
         setTimeout(() => {
             onOpenInMyLiftPlayer?.(playerMode);

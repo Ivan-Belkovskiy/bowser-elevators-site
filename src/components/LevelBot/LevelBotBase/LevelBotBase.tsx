@@ -8,7 +8,7 @@ import SlotInfoModal, { EditingSlotData } from "../SlotInfoModal/SlotInfoModal";
 import AudioController from "@/core/audio/AudioController";
 import { VideoData } from "@/types/data/VideoData";
 import WatchListModal from "../WatchListModal/WatchListModal";
-import { MyLiftPlayerMode } from "@/components/MyLiftPlayer/MyLiftPlayer";
+import { MyLiftPlayerMode, PlayerState } from "@/components/MyLiftPlayer/MyLiftPlayer";
 
 interface ClickedSlotInfo {
     idx: number;
@@ -22,12 +22,12 @@ interface ClickedSlotInfo {
 }
 
 export default function LevelbotBase({
-    elevatorId,
     floorId,
     slotData,
     coursebotMode,
     transitionState,
     savePayload,
+    playerState,
     videoStats,
     currentVideo,
     watchListOpened,
@@ -54,6 +54,7 @@ export default function LevelbotBase({
     videoStats?: LiftJson['videoStats'];
     currentVideo?: VideoData;
     watchListOpened?: boolean;
+    playerState?: PlayerState;
     setWatchListOpened?: Dispatch<SetStateAction<boolean>>;
     onSlotModalOpened?: () => void;
     onSlotModalClosed?: () => void;
@@ -164,7 +165,7 @@ export default function LevelbotBase({
         const SLOT_HEIGHT = 167;
         const COLUMNS = 4;
 
-        const col = ( Math.round(slot.x / SLOT_WIDTH) + 1 );
+        const col = (Math.round(slot.x / SLOT_WIDTH) + 1);
         const row = Math.round(slot.y / SLOT_HEIGHT);
 
         return (col + (row * COLUMNS));
@@ -175,6 +176,8 @@ export default function LevelbotBase({
 
         const rect = (e.currentTarget as HTMLDivElement).getBoundingClientRect();
         const container = contentRef.current;
+
+
 
         if (!container) return;
 
@@ -194,6 +197,7 @@ export default function LevelbotBase({
 
     const onSlotMove = (e: MouseEvent<HTMLDivElement>) => {
         if (!e || !clickedSlot) return;
+        if (!movingSlot) return;
 
         const deltaX = e.clientX - clickedSlot.position.mouseX;
         const deltaY = e.clientY - clickedSlot.position.mouseY;
@@ -248,6 +252,8 @@ export default function LevelbotBase({
             } */);
 
             onSlotReplace?.((movingSlot.idx - 1), (newIdx - 2));
+            AudioController.playCoursebotSound("tab_switch_drop");
+
 
             // alert(`new: ${newIdx - 2}\nold: ${movingSlot.idx - 1}`);
         }
@@ -256,19 +262,26 @@ export default function LevelbotBase({
         setClickedSlot(null);
     }
 
+    const timerRef = useRef(0);
+
+
     useEffect(() => {
         let frameId: number;
-        let timer = 0;
+        // let timer = 0;
 
         clickedSlotRef.current = clickedSlot;
         // alert(JSON.stringify(clickedSlot));
 
         const timeHandler = () => {
             if (!clickedSlotRef.current) return;
-            timer++;
+            timerRef.current++;
+            // alert(timerRef.current);
+            // timer++;
 
-            if (timer > 30) {
+            if (timerRef.current > 50) {
                 setMovingSlot(clickedSlot);
+                timerRef.current = 0;
+                AudioController.playCoursebotSound("slot_start_move");
                 // alert('START MOVE!');
             } else requestAnimationFrame(timeHandler);
         }
@@ -308,6 +321,7 @@ export default function LevelbotBase({
 
             <SlotInfoModal
                 mode={coursebotMode}
+                playerState={playerState}
                 slotData={selectedSlot}
                 savePayload={savePayload}
                 videoStats={videoStats?.[videoData?.id || ""]}
@@ -337,14 +351,15 @@ export default function LevelbotBase({
                 onDelete={() => { closeSlot(); selectedSlot && onDeleteFragment?.(selectedSlot.index); }}
                 onClearAutosave={() => { closeSlot(); onClearAutosave?.(); }}
             />
-
+ 
+            <WatchListModal opened={watchListOpened} data={watchData} onClose={() => setWatchListOpened?.(false)} />
             <div
                 className={`coursebot-base__content ${movingSlot ? `slot-move-mode` : ``}`}
                 ref={contentRef}
                 onMouseMove={(e) => onSlotMove(e)}
                 onMouseUp={(e) => onSlotMoveEnd(e)}
             >
-                <WatchListModal opened={watchListOpened} data={watchData} onClose={() => setWatchListOpened?.(false)} />
+                {/* <WatchListModal opened={watchListOpened} data={watchData} onClose={() => setWatchListOpened?.(false)} /> */}
                 <div
                     className={`coursebot-base__slot autosave 
                         ${coursebotMode === "save" ? "locked" : ""}

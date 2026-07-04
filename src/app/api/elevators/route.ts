@@ -6,14 +6,13 @@ import { LiftJson, ElevatorButton, ButtonBlock, Floor, CoursebotFloorSlotConfig,
 
 export async function GET(req: NextRequest) {
   try {
-    const userId = "demoUser"; // позже возьмём из авторизации
+    const userId = "demoUser"; 
     const basePath = path.join(process.cwd(), "Elevators", userId);
 
     if (!fs.existsSync(basePath)) {
       return NextResponse.json({ success: true, elevators: [] });
     }
 
-    // Список всех папок лифтов
     const liftIds = fs.readdirSync(basePath);
 
     const elevators = liftIds.map((liftId) => {
@@ -30,7 +29,14 @@ export async function GET(req: NextRequest) {
       return { id: liftId, error: "Нет lift.json" };
     });
 
-    return NextResponse.json({ success: true, elevators });
+    const response = NextResponse.json({ success: true, elevators });
+
+    response.headers.set('Access-Control-Allow-Origin', '*');
+    response.headers.set('Access-Control-Allow-Methods', 'GET, OPTIONS');
+    // response.headers.set('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+
+    return response;
+    // return NextResponse.json({ success: true, elevators });
   } catch (err: any) {
     return NextResponse.json({ success: false, error: err.message }, { status: 500 });
   }
@@ -362,4 +368,14 @@ export async function POST(req: NextRequest) {
   } catch (err: any) {
     return NextResponse.json({ success: false, error: err.message }, { status: 500 });
   }
+}
+
+// To Access from other origins
+
+export async function OPTIONS() {
+  const response = new Response(null, { status: 204 });
+  response.headers.set('Access-Control-Allow-Origin', '*');
+  response.headers.set('Access-Control-Allow-Methods', 'GET, OPTIONS');
+  response.headers.set('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+  return response;
 }

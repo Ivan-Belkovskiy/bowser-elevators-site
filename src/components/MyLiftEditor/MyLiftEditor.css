@@ -102,11 +102,11 @@
 
 .mylift-editor__button.active-button:not(:disabled) {
     outline: 4px solid #00ffea;
-    background-color: #00b7ff;
+    background-color: #0077ff;
 }
 
 .mylift-editor__button.active-button:not(:disabled) .mylift-editor__button-tooltip {
-    background-color: #00b7ff;
+    background-color: #0077ff;
 }
 
 .mylift-editor__button.exit-button .mylift-editor__button-tooltip {

@@ -11,6 +11,30 @@
     z-index: 500;
 }
 
+.new-elevator-modal__close-btn {
+    position: absolute;
+    top: 30px;
+    right: 30px;
+    width: 70px;
+    height: 70px;
+    border: 5px solid #0099ff;
+    background-color: #fff;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 50px;
+    color: #0099ff;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: all 0.2s ease 0s;
+}
+
+.new-elevator-modal__close-btn:hover {
+    font-size: 55px;
+    background-color: #00d9ff;
+    color: #ff0000;
+    border-color: #ff0000;
+}
 
 .new-elevator-modal__container {
     width: 80%;

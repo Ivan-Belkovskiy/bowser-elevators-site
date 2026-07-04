@@ -12,7 +12,7 @@ import FileUploader from "../FileUploader/FileUploader";
 import { useRouter } from "next/navigation";
 import FloorSelector from "../ElevatorVideoPlayer/FloorSelector/FloorSelector";
 import { Floor } from "@/types/elevator";
-export default function NewElevatorModal() {
+export default function NewElevatorModal({ onClose }: { onClose?: () => void }) {
     const [openedModal, setOpenedModal] = useState<VideoSettingsModalProps | null>(null);
     const [floors, setFloors] = useState<FloorConfig[]>([]);
     const [elevatorName, setElevatorName] = useState<string>('');
@@ -152,6 +152,7 @@ export default function NewElevatorModal() {
 
     return (
         <div className="new-elevator-modal">
+            <button className="new-elevator-modal__close-btn" onClick={onClose}>×</button>
             <div className="new-elevator-modal__container">
                 <h1 className="new-elevator-modal__title">Новый Лифт</h1>
                 <div className="new-elevator-modal__content">

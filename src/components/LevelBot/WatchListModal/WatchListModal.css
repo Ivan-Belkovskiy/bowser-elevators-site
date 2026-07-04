@@ -1,8 +1,9 @@
 .watch-list-modal__container {
     position: absolute;
     width: calc(100% - 40px);
-    margin-left: -93px;
-    margin-top: -36px;
+    /* margin-left: -93px; */
+    margin-left: 18px;
+    /* margin-top: -36px; */
     background-size: 100% 25px;
     height: 569px;
     z-index: 50;

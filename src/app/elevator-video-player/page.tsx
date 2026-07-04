@@ -53,7 +53,7 @@ export default function ElevatorVideoPlayerPage() {
                 </div>
                 <button className="add-lift" onClick={() => setModalOpened(true)}>Добавить Лифт</button>
             </main>
-            {modalOpened && <NewElevatorModal />}
+            {modalOpened && <NewElevatorModal onClose={() => setModalOpened(false)} />}
         </div>
     );
 }

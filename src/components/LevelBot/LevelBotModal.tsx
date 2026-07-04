@@ -8,7 +8,7 @@ import LevelBotHead from "./LevelBotHead/LevelBotHead";
 import LevelbotBase from "./LevelBotBase/LevelBotBase";
 import LevelBotSidebar from "./LevelBotSidebar/LevelBotSidebar";
 import { EditingSlotData } from "./SlotInfoModal/SlotInfoModal";
-import { MyLiftPlayerMode } from "../MyLiftPlayer/MyLiftPlayer";
+import { MyLiftPlayerMode, PlayerState } from "../MyLiftPlayer/MyLiftPlayer";
 
 export type LevelBotMode = "default" | "load" | "save" | "autosave";
 
@@ -38,6 +38,7 @@ export interface LevelBotTransitionConfig {
 
 export interface LevelBotModalProps {
     elevator: LiftJson;
+    playerState?: PlayerState | null;
     activeFloorId: string;
     mode: LevelBotMode;
 
@@ -59,6 +60,7 @@ export interface LevelBotModalProps {
 
 export default function LevelBotModal({
     elevator,
+    playerState,
     activeFloorId,
     mode,
     savePayload,
@@ -186,6 +188,7 @@ export default function LevelBotModal({
             <LevelbotBase
                 elevatorId={elevator.id}
                 floorId={activeFloorId}
+                playerState={playerState || undefined}
                 currentVideo={currentFloor.videoData}
                 videoStats={elevator.videoStats}
                 slotData={floorSlots}

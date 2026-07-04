@@ -296,9 +296,33 @@ export default function ElevatorVideoPlayer({
         });
     };
 
+
+    const saveLiftJson = async () => {
+            try {
+                const formData = new FormData();
+                formData.append("updated_lift_json", JSON.stringify(data));
+    
+                const res = await fetch(`/api/elevators/${data.id}`, {
+                    method: "PUT",
+                    body: formData,
+                });
+    
+                const result: { success: boolean; lift: LiftJson } = await res.json();
+    
+                if (result.success) {
+                    setData(result.lift);
+                }
+            } catch (error) {
+    
+            }
+        }
+
+
+
     const onMouseUpBlock = () => {
         if (editingBlock) setEditingBlock([editingBlock[0], "active"]);
         setDragInfo(null);
+        saveLiftJson();
     };
 
     const editingBlockIs = (idx: number, action: string) =>
@@ -941,6 +965,7 @@ export default function ElevatorVideoPlayer({
                                 <>
                                     <LevelBotModal
                                         elevator={data}
+                                        playerState={playerStateRef.current}
                                         activeFloorId={data.floors[currentFloor].id}
                                         mode={coursebotMode}
                                         onClose={() => setCoursebotOpened(false)}

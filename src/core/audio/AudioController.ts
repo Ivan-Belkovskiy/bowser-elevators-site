@@ -275,7 +275,8 @@ class AudioController {
             ["select", "/audio/sound/coursebot/coursebot-select-button.wav"],
             ["slotinfo_button", "/audio/sound/coursebot/coursebot-slotinfo-button.wav"],
             ["watchlist_button", "/audio/sound/coursebot/coursebot-watch-list-button.wav"],
-            ["watchlist_close_btn", "/audio/sound/coursebot/coursebot-watchlist-close-btn.wav"]
+            ["watchlist_close_btn", "/audio/sound/coursebot/coursebot-watchlist-close-btn.wav"],
+            ["slot_start_move", "/audio/sound/coursebot/coursebot-slot-start-move.wav"]
         ];
         data.forEach((([name, url]) => {
             if (!this.coursebotSounds[name]) this.coursebotSounds[name] = new Audio(url);

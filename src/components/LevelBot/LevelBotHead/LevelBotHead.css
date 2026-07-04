@@ -74,12 +74,12 @@
 .levelbot-head__container {
     position: absolute;
     top: 0;
-    width: 641px;
+    width: 681px;
     height: 79px;
     animation: levelbot-head-animation 2s linear infinite;
     z-index: 10;
     /* margin: 0 auto; */
-    left: 345px;
+    left: 305px;
 }
 
 .levelbot-head {
@@ -89,7 +89,7 @@
     border: 9px solid #6b6b7a;
     background: linear-gradient(0deg, #0d2645 0%, #0d2645 20%, #0a223d 20%, #0a223d 80%, #0d2645 80%);
     background-size: 100% 9px;
-    width: 641px;
+    width: 681px;
     height: 79px;
     border-radius: 4px;
     left: -9px;
@@ -117,8 +117,8 @@
     z-index: 10;
 }
 
-.levelbot-head::before { left: 242px; }
-.levelbot-head::after { left: 344px; }
+.levelbot-head::before { left: 272px; }
+.levelbot-head::after { left: 374px; }
 
 .levelbot-head__text {
     color: #a7ff6d;
@@ -142,7 +142,7 @@
 
 .levelbot-head__right {
     top: 30px;
-    left: 575px;
+    left: 615px;
     transform: rotateY(180deg);
     animation: levelbot-head-part-right-anim 2s linear infinite;
 }
