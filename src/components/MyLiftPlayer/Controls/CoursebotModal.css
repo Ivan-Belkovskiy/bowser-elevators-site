@@ -99,3 +99,17 @@
 .mylift-controls-modal.coursebot-modal .coursebot-modal__option:disabled {
     cursor: not-allowed;
 }
+
+
+.mylift-player.version-v2 {
+
+    .mylift-controls-modal.coursebot-modal {
+        background-color: #ffa600;
+    }
+
+    .coursebot-modal__header span {
+        color: #fff;
+        font-weight: 800;
+    }
+
+}

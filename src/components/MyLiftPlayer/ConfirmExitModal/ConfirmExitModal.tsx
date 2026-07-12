@@ -4,30 +4,53 @@ import { MyLiftPlayerMode } from '../MyLiftPlayer';
 
 interface ConfirmExitModalProps {
     playerMode: MyLiftPlayerMode;
+    info?: ConfirmExitModalInfo;
     visible: boolean;
     onConfirm: () => void;
     onSaveAndExit: () => void;
     onClose: () => void;
 }
 
-export default function ConfirmExitModal({ playerMode, visible, onConfirm, onSaveAndExit, onClose }: ConfirmExitModalProps) {
+export interface ConfirmExitModalInfo {
+    action: 'exit' | 'select';
+    onConfirm?: () => void;
+    onSaveAndExit?: () => void;
+    onClose?: () => void;
+}
+
+export default function ConfirmExitModal({ playerMode, info, visible, onConfirm, onSaveAndExit, onClose }: ConfirmExitModalProps) {
     if (!visible) return null;
 
     return (
         <div className="confirm-exit-modal__overlay">
             <div className="confirm-exit-modal">
-                <h2 className='confirm-exit-modal__header'>{`Выйти из MyLift Player? ${(playerMode === 'full') ? "Несохраненный прогресс будет удален!" : ""}`}</h2>
+                <h2 className='confirm-exit-modal__header'>{`${(info?.action === 'exit') ? `Выйти из MyLift Player` : `Выбрать другое видео`}? ${(playerMode === 'full') ? "Несохраненный прогресс будет удален!" : ""}`}</h2>
                 <div className="confirm-exit-modal__buttons">
                     {(playerMode === 'free') ? (
                         <>
-                            <button className="confirm-exit-modal__button" onClick={onClose}>Остаться</button>
-                            <button className="confirm-exit-modal__button close-button" onClick={onConfirm}>Выйти</button>
+                            <button className="confirm-exit-modal__button" onClick={() => {
+                                onClose();
+                                info?.onClose?.();
+                            }}>Остаться</button>
+                            <button className="confirm-exit-modal__button close-button" onClick={() => {
+                                onConfirm();
+                                info?.onConfirm?.();
+                            }}>{(info?.action === 'select') ? "Переключить видео" : "Выйти"}</button>
                         </>
                     ) : (
                         <>
-                            <button className="confirm-exit-modal__button" onClick={onSaveAndExit}>Сохранить и выйти</button>
-                            <button className="confirm-exit-modal__button close-button" onClick={onConfirm}>Выйти без сохранения</button>
-                            <button className="confirm-exit-modal__button" onClick={onClose}>Вернуться в MyLift Player</button>
+                            <button className="confirm-exit-modal__button" onClick={() => {
+                                onSaveAndExit();
+                                info?.onSaveAndExit?.();
+                            }}>Сохранить и {(info?.action === 'select') ? "переключить" : "выйти"}</button>
+                            <button className="confirm-exit-modal__button close-button" onClick={() => {
+                                onConfirm();
+                                info?.onConfirm?.();
+                            }}>{(info?.action === 'select') ? "Переключить" : "Выйти"} без сохранения</button>
+                            <button className="confirm-exit-modal__button" onClick={() => {
+                                onClose();
+                                info?.onClose?.();
+                            }}>Вернуться в MyLift Player</button>
                         </>
                     )}
                 </div>

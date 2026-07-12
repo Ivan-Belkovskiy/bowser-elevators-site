@@ -18,8 +18,9 @@ import { useSimpleElevator } from "@/hooks/elevator/useSimpleElevator";
 import ElevatorImagesModal, { ElevatorImagesModalType } from "./ElevatorImagesModal/ElevatorImagesModal";
 import { useElevator } from "@/hooks/elevator/useElevator";
 import PlayModeModal from "../MyLiftPlayer/PlayModeModal";
-import ConfirmExitModal from "../MyLiftPlayer/ConfirmExitModal/ConfirmExitModal";
+import ConfirmExitModal, { ConfirmExitModalInfo } from "../MyLiftPlayer/ConfirmExitModal/ConfirmExitModal";
 import { usePathname } from "next/navigation";
+import { getVideoData } from "@/types/data/VideoData";
 
 export type ElevatorDoorState = "closed" | "closing" | "opened" | "opening";
 
@@ -53,6 +54,8 @@ export default function ElevatorVideoPlayer({
 
     const [isModeSelectorOpened, setModeSelectorOpened] = useState(false);
     const [isExitPlayerModalOpened, setExitPlayerModalOpened] = useState(false);
+    const [exitPlayerModalCallback, setExitPlayerModalCallback] = useState<() => void | null>();
+    const [exitPlayerModalInfo, setExitPlayerModalInfo] = useState<ConfirmExitModalInfo>();
     const [playerMode, setPlayerMode] = useState<"full" | "free">("free");
     const activatePlayerRef = useRef<((mode: MyLiftPlayerMode) => void) | null>(null);
     const resetPlayerRef = useRef<(() => void) | null>(null);
@@ -252,8 +255,6 @@ export default function ElevatorVideoPlayer({
         openFinishTimeoutRef.current = setTimeout(() => {
             updateDoorState("closed");
 
-            // ДВЕРИ ЗАКРЫЛИСЬ - ПРОВЕРЯЕМ, НЕ НУЖНО ЛИ ЕХАТЬ ДАЛЬШЕ
-            // tryStartMoving();
 
         }, data.elevator.doorConfig.animations.close.durationMs);
     };
@@ -298,24 +299,24 @@ export default function ElevatorVideoPlayer({
 
 
     const saveLiftJson = async () => {
-            try {
-                const formData = new FormData();
-                formData.append("updated_lift_json", JSON.stringify(data));
-    
-                const res = await fetch(`/api/elevators/${data.id}`, {
-                    method: "PUT",
-                    body: formData,
-                });
-    
-                const result: { success: boolean; lift: LiftJson } = await res.json();
-    
-                if (result.success) {
-                    setData(result.lift);
-                }
-            } catch (error) {
-    
+        try {
+            const formData = new FormData();
+            formData.append("updated_lift_json", JSON.stringify(data));
+
+            const res = await fetch(`/api/elevators/${data.id}`, {
+                method: "PUT",
+                body: formData,
+            });
+
+            const result: { success: boolean; lift: LiftJson } = await res.json();
+
+            if (result.success) {
+                setData(result.lift);
             }
+        } catch (error) {
+
         }
+    }
 
 
 
@@ -340,7 +341,11 @@ export default function ElevatorVideoPlayer({
 
     ////////////////////////
 
-    const videoData = data.floors[currentFloor].videoData;
+    const [currentVideoN, setCurrentVideoN] = useState(0);
+
+    const videoData = getVideoData(data.floors[currentFloor].videoData, currentVideoN);
+
+    const videoList = data.floors[currentFloor].videoData?.myLiftV2Update ? data.floors[currentFloor].videoData.videoList : undefined;
 
     const validateAccessCondition = (floor: number) => {
         const condition = data.floors[floor].accessCondition;
@@ -348,7 +353,7 @@ export default function ElevatorVideoPlayer({
         if (condition?.type === 'blocked') return false;
         if (condition?.type === 'viewCount') {
             if (data.videoStats) {
-                const videoId = data.floors[condition.floor - 1]?.videoData?.id;
+                const videoId = getVideoData(data.floors[condition.floor - 1]?.videoData, 0)?.id;
                 const videoStats = data.videoStats[videoId || ""];
                 if (videoStats?.views) return (videoStats.views >= condition.requiredViews);
                 else return false;
@@ -379,6 +384,9 @@ export default function ElevatorVideoPlayer({
                     if (!isMoving) openDoors();
                 } else if (button.action.command === "doorClose") {
                     if (playerStateRef.current?.activated) {
+                        setExitPlayerModalInfo({
+                            action: 'exit',
+                        });
                         setExitPlayerModalOpened(true);
                     } else {
                         closeDoors();
@@ -398,6 +406,28 @@ export default function ElevatorVideoPlayer({
             }
         }
     };
+
+
+    const onSelectVideo = (n: number) => {
+        if (playerStateRef.current?.activated) {
+            setExitPlayerModalInfo({
+                action: 'select',
+                onConfirm: () => {
+                    setCurrentVideoN(n);
+                    resetPlayerRef.current?.();
+                },
+                onSaveAndExit: () => {
+                    setCurrentVideoN(n);
+                    resetPlayerRef.current?.();
+                },
+                onClose: () => { },
+            });
+            setExitPlayerModalOpened(true);
+        } else {
+            setCurrentVideoN(n);
+            resetPlayerRef.current?.();
+        }
+    }
 
     // -----------------------------
     // Save button changes
@@ -713,7 +743,14 @@ export default function ElevatorVideoPlayer({
             {(url.startsWith('/mylift/elevator')) && <title>{`${data.title}`}</title>}
             {(videoData) && (
                 <MyLiftPlayer
+                    playerVersion={videoList ? 'v2' : 'v1'}
+
+                    videoN={currentVideoN}
+                    videoList={videoList}
                     video={videoData}
+
+                    onSelectVideo={onSelectVideo}
+
                     videoStats={data.videoStats?.[videoData?.id || ""]}
                     liftId={data.id}
                     floorId={data.floors[currentFloor].id}
@@ -955,6 +992,7 @@ export default function ElevatorVideoPlayer({
 
                             <ConfirmExitModal
                                 playerMode={playerStateRef.current?.mode || "free"}
+                                info={exitPlayerModalInfo}
                                 visible={isExitPlayerModalOpened}
                                 onConfirm={onConfirmExitMyLiftPlayer}
                                 onSaveAndExit={onSaveAndExitMyLiftPlayer}

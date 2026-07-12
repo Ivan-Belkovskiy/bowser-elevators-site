@@ -2,6 +2,7 @@
     display: flex;
     justify-content: center;
     align-items: center;
+    position: relative;
 }
 
 .mylift-player__play-btn {
@@ -48,8 +49,48 @@
     scale: 1.5;
 }
 
+.mylift-player.version-v2 {
+
+    .mylift-player__play-btn {
+        background-image: url('/images/player/mylift-player/V2/ui/main-play-button.svg');
+        scale: 1.6;
+    }
+
+    .mylift-player__play-btn::after {
+        background-image: url('/images/player/mylift-player/V2/ui/main-play-button-hover.svg');
+    }
+
+    .mylift-player__play-btn:hover {
+        scale: 1.75;
+    }
+
+}
+
+
 .mylift-player:hover .mylift-controls {
     translate: 0 0;
     pointer-events: all;
     opacity: 1;
+}
+
+.mylift-player__video-select {
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    background-color: #ffa600;
+    color: #ffffff;
+    pointer-events: none;
+    opacity: 0;
+    transition: all 0.25s ease 0s;
+    padding: 5px;
+    cursor: pointer;
+}
+
+.mylift-player__video-select:focus {
+    outline: 2px solid #fbff00;
+}
+
+.mylift-player:hover .mylift-player__video-select {
+    opacity: 1;
+    pointer-events: all;
 }

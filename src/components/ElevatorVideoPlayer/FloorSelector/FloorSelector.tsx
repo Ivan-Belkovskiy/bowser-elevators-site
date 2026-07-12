@@ -28,6 +28,8 @@ export default function FloorSelector({ floorList,
 
     useEffect(() => setFloors(floorList), [floorList]);
 
+    
+
     return (
         <div className="floor-selector">
             <div className="floor-selector__block flex-col floor-list" style={styles}>

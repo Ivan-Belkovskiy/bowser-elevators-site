@@ -1,4 +1,4 @@
-import { CommonSlotData, SlotData, VideoStats } from "@/types/elevator";
+import { CommonSlotData, getVideoStats, SlotData, VideoStats } from "@/types/elevator";
 import { LevelBotMode, SavePayload } from "../LevelBotModal";
 import "./SlotInfoModal.css";
 import { MouseEvent, useEffect, useState } from "react";
@@ -108,7 +108,9 @@ export default function SlotInfoModal({
         }, 400);
     }
 
-    const currentWatchInfo = (slotData.data?.isAutosave && slotData?.data?.data && slotData.data.data.playerState.watchInfo?.watchNumber) ? videoStats?.watchHistory?.[
+    const vStats = getVideoStats(videoStats, 0);
+
+    const currentWatchInfo = (slotData.data?.isAutosave && slotData?.data?.data && slotData.data.data.playerState.watchInfo?.watchNumber) ? vStats?.watchHistory?.[
         slotData.data.data.playerState.watchInfo.watchNumber - 1
     ] : undefined;
 

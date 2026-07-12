@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useRef, useEffect, CSSProperties, Dispatch, SetStateAction, RefObject } from 'react';
-import { VideoData } from '@/types/data/VideoData';
+import { getVideoData, VideoData, VideoDataV1 } from '@/types/data/VideoData';
 import { LevelBotMode, SavePayload } from '@/components/LevelBot/LevelBotModal';
 import "./MyLiftPlayer.css";
 
@@ -11,14 +11,14 @@ import WarningModal from './WarningModal';
 
 import AutoSaveManager from './AutoSaveManager';
 import StatsManager from './StatsManager';
-import { AutosaveSlotData, LiftJson, SlotData, VideoStats } from '@/types/elevator';
+import { AutosaveSlotData, getVideoStats, LiftJson, SlotData, VideoStats } from '@/types/elevator';
 import PlayModeModal from './PlayModeModal';
 import AudioController from '@/core/audio/AudioController';
 
 export type MyLiftPlayerMode = "full" | "free";
 
 export interface MyLiftPlayerProps {
-  video: VideoData;
+  video: VideoDataV1;
   liftId: string;
   floorId: string;
   mode: MyLiftPlayerMode;
@@ -46,6 +46,12 @@ export interface MyLiftPlayerProps {
   onRequestLoad: () => void;
   onInitialPlay?: () => void;
   onVideoEnded?: (playerState: PlayerState, videoId: string) => void;
+
+  onSelectVideo?: (videoNumber: number) => void; // only for MyLift Player V2.0
+  playerVersion?: 'v2' | 'v1';
+
+  videoN: number;
+  videoList?: VideoDataV1[];
 }
 
 export interface MyLiftPlayerWatchData {
@@ -65,7 +71,7 @@ export interface PlayerState {
   loading: boolean,
   ended: boolean,
   mode: MyLiftPlayerMode;
-  watchInfo?: MyLiftPlayerWatchData,
+  watchInfo?: MyLiftPlayerWatchData;
 }
 
 export default function MyLiftPlayer({
@@ -81,6 +87,7 @@ export default function MyLiftPlayer({
   playerStateRef,
   activateRef,
   resetRef,
+  onSelectVideo, // only for MyLift Player V2.0
   requestAutosaveRef,
   onlyFullModeAutosave,
   videoStats,
@@ -90,12 +97,24 @@ export default function MyLiftPlayer({
   onRequestAutosave,
   onInitialPlay,
   onVideoEnded,
+
+  playerVersion = 'v1',
+  videoN,
+  videoList,
 }: MyLiftPlayerProps) {
 
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const containerRef = useRef<HTMLDivElement | null>(null);
 
+  // const [videoN, setVideoN] = useState(0);
+
   const [isFullscreen, setIsFullscreen] = useState(false);
+
+  const vStats = getVideoStats(videoStats);
+
+  // const playerVersion = (video.myLiftV2Update) ? 'v2' : 'v1';
+
+  // const videoD = getVideoData(video, videoN);
 
   // if (!video) return null;
 
@@ -126,7 +145,7 @@ export default function MyLiftPlayer({
     // alert(videoStats?.views);
     const watchInfo = (selectedMode === 'full') ? {
       startDate: new Date().toLocaleString().replace(',', ''),
-      watchNumber: ((videoStats?.views || 0) + 1),
+      watchNumber: ((vStats?.views || 0) + 1),
     } : {};
     setPlayerState(prev => ({
       ...prev,
@@ -192,7 +211,7 @@ export default function MyLiftPlayer({
 
   const requestAutoSave = () => {
     const preview = captureFrame();
-    if (preview) {
+    if (preview && video) {
       onRequestAutosave({
         createdAt: new Date().toLocaleString(),
         floorId,
@@ -423,7 +442,7 @@ export default function MyLiftPlayer({
   // Render
   // -----------------------------
   return (
-    <div className="mylift-player" ref={containerRef} style={{
+    <div className={`mylift-player version-${playerVersion}`} ref={containerRef} style={{
       ...styles,
       width: isFullscreen ? '100vw' : styles?.width || "600px",
       height: isFullscreen ? '100vh' : styles?.height,
@@ -436,8 +455,26 @@ export default function MyLiftPlayer({
         setPlayerState={setPlayerState}
       />
 
+      {(playerVersion === 'v2' && (videoList)) && (
+        <div className="mylift-player__select-container">
+          <select
+            className="mylift-player__video-select"
+            value={videoN}
+            onChange={(e) => {
+              onSelectVideo?.(Number(e.target.value));
+            }}
+          >{
+              videoList.map((v, idx) => (
+                <option value={idx} key={idx}>[{idx + 1}] {v.title || `Видео ${idx + 1}`}</option>
+              ))
+            }</select>
+        </div>
+      )}
+
       {playerState.activated ? (
         <Controls
+          playerVersion={playerVersion}
+          videoList={videoList}
           videoRef={videoRef}
           playerState={playerState}
           setPlayerState={setPlayerState}

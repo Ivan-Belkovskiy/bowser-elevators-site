@@ -103,6 +103,42 @@ export interface CoursebotFloorSlotConfig {
   fragments: SlotData[];
 };
 
+// export type VideoStats = {
+
+//   myLiftV2Update: true;
+
+//   videoList: {
+
+//     views: number;
+//     firstWatched?: string;
+//     lastWatched?: string;
+//     totalWatchTime?: number;
+//     progress?: number; // 0–1
+//     completed?: boolean;
+//     watchHistory?: {
+//       start: string; // Дата+время начала просмотра
+//       end: string; // Дата+время завершения просмотра
+//       watchTime: number; // Просмотренное время в секундах
+//       completed: boolean;
+//     }[];
+
+//   }[];
+// } | {
+//   myLiftV2Update?: false;
+//   views: number;
+//   firstWatched?: string;
+//   lastWatched?: string;
+//   totalWatchTime?: number;
+//   progress?: number; // 0–1
+//   completed?: boolean;
+//   watchHistory?: {
+//     start: string; // Дата+время начала просмотра
+//     end: string; // Дата+время завершения просмотра
+//     watchTime: number; // Просмотренное время в секундах
+//     completed: boolean;
+//   }[];
+// }
+
 export interface VideoStats {
   views: number;
   firstWatched?: string;
@@ -118,6 +154,15 @@ export interface VideoStats {
   }[];
 }
 
+export const getVideoStats = (stats?: VideoStats, videoIdx?: number /* For V2 */) => {
+  return stats;
+  // if (!stats) return undefined;
+  // if (stats.myLiftV2Update) {
+  //   return stats.videoList[videoIdx || 0];
+  // } else {
+  //   return stats;
+  // }
+}
 
 export interface LiftJson {
   id: string;

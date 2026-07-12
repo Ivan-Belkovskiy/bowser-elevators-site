@@ -1,15 +1,16 @@
-import { VideoStats } from "@/types/elevator";
+import { getVideoStats, VideoStats } from "@/types/elevator";
 import "./WatchListModal.css";
 import AudioController from "@/core/audio/AudioController";
 
 export default function WatchListModal({ opened, data, onClose }: { opened?: boolean; data?: VideoStats, onClose?: () => void }) {
+    const newData = getVideoStats(data);
     return (
         <div className={`watch-list-modal__container ${opened ? `opened` : ``}`}>
             <div className="watch-list-modal">
                 <div className="watch-list-modal__main">
                     <h1 className="watch-list-modal__title">История просмотров:</h1>
                     <div className="watch-list-modal__list">
-                        {data?.watchHistory?.map((item, idx) => {
+                        {newData?.watchHistory?.map((item, idx) => {
                             return (
                                 <div className="watch-list-modal__block" key={idx}>
                                     <div className="watch-list-modal__block-left">

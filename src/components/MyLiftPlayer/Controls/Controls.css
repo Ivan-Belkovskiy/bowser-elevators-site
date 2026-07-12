@@ -14,6 +14,10 @@
     pointer-events: none;
 }
 
+.mylift-player.version-v2 .mylift-controls {
+    background-color: #ff9900;
+}
+
 .mylift-controls.active {
     translate: 0 0;
     pointer-events: all;

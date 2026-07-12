@@ -126,8 +126,16 @@ export default function NewElevatorModal({ onClose }: { onClose?: () => void }) 
         }
 
         floors.forEach((floor, idx) => {
-            if (floor.videoData?.image instanceof File) {
-                formData.append(`image_floor_${idx}`, floor.videoData.image, floor.videoData.image.name);
+            if (floor.videoData?.myLiftV2Update) {
+                floor.videoData.videoList.forEach((d, vIdx) => {
+                    if (d.image instanceof File) {
+                        formData.append(`image_floor_${idx}_video_${vIdx}`, d.image, d.image.name);
+                    }
+                });
+            } else {
+                if (floor.videoData?.image instanceof File) {
+                    formData.append(`image_floor_${idx}`, floor.videoData.image, floor.videoData.image.name);
+                }
             }
         });
 

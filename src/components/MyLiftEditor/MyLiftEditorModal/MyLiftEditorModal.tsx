@@ -223,8 +223,16 @@ export default function MyLiftEditorModal({ activeCondition, category, elevator,
             const formData = new FormData();
             formData.append("updated_lift_json", JSON.stringify(liftData));
             liftData.floors.forEach((floor, idx) => {
-                if (floor.videoData?.image instanceof File) {
-                    formData.append(`image_floor_${idx}`, floor.videoData.image, floor.videoData.image.name);
+                if (floor.videoData?.myLiftV2Update) {
+                    floor.videoData.videoList.forEach(d => {
+                        if (d.image instanceof File) {
+                            formData.append(`image_floor_${idx}`, d.image, d.image.name);
+                        }
+                    });
+                } else {
+                    if (floor.videoData?.image instanceof File) {
+                        formData.append(`image_floor_${idx}`, floor.videoData.image, floor.videoData.image.name);
+                    }
                 }
             });
             if (editingSoundEffects) for (const key in editingSoundEffects) {

@@ -92,16 +92,20 @@ export async function PUT(
             watchHistory: [],
           }
         } else {
-          liftData.videoStats[videoId].views += 1;
+          if (liftData.videoStats[videoId].myLiftV2Update) {
+
+          } else {
+            liftData.videoStats[videoId].views += 1;
+          }
         }
 
-        if (!liftData.videoStats[videoId].watchHistory) liftData.videoStats[videoId].watchHistory = [];
+        if (!liftData.videoStats[videoId].myLiftV2Update && !liftData.videoStats[videoId].watchHistory) liftData.videoStats[videoId].watchHistory = [];
 
         const data = formData.get('video_player_state');
 
         if (typeof data === 'string') {
           const playerState: PlayerState = JSON.parse(data);
-          if (playerState.watchInfo?.startDate && playerState.watchInfo?.endDate) liftData.videoStats[videoId].watchHistory.push({
+          if (playerState.watchInfo?.startDate && playerState.watchInfo?.endDate && !liftData.videoStats[videoId].myLiftV2Update && liftData.videoStats[videoId].watchHistory) liftData.videoStats[videoId].watchHistory.push({
             start: playerState.watchInfo.startDate,
             end: playerState.watchInfo.endDate,
             watchTime: playerState.duration,
@@ -266,7 +270,15 @@ export async function PUT(
           const targetDir = path.join(assetsPath, "assets", "images", "floors");
           fs.mkdirSync(targetDir, { recursive: true });
           fs.writeFileSync(path.join(targetDir, value.name), buffer);
-          if (liftData.floors[floorIdx].videoData) liftData.floors[floorIdx].videoData.image = `/Elevators/${userId}/${liftData.id}/assets/images/floors/${value.name}`;
+          if (liftData.floors[floorIdx].videoData) {
+            if (liftData.floors[floorIdx].videoData.myLiftV2Update) {
+              for (let i = 0; i < liftData.floors[floorIdx].videoData.videoList.length; i++) {
+                liftData.floors[floorIdx].videoData.videoList[i].image = `/Elevators/${userId}/${liftData.id}/assets/images/floors/${value.name}`;
+              }
+            } else {
+              liftData.floors[floorIdx].videoData.image = `/Elevators/${userId}/${liftData.id}/assets/images/floors/${value.name}`;
+            }
+          }
         } else if (soundMap[key] && value instanceof File) {
           soundMap[key](liftData, value.name);
           const targetDir = path.join(assetsPath, "assets", "sounds");
@@ -418,7 +430,7 @@ export async function DELETE(
 ) {
   try {
     const { id } = await context.params;
-    const userId = "demoUser"; // позже возьмём из авторизации
+    const userId = "demoUser";
 
     const basePath = path.join(process.cwd(), "Elevators", userId, id);
 
@@ -429,7 +441,6 @@ export async function DELETE(
       );
     }
 
-    // Удаляем папку рекурсивно
     fs.rmSync(basePath, { recursive: true, force: true });
 
     return NextResponse.json({ success: true, message: `Лифт ${id} удалён` });

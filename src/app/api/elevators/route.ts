@@ -6,7 +6,7 @@ import { LiftJson, ElevatorButton, ButtonBlock, Floor, CoursebotFloorSlotConfig,
 
 export async function GET(req: NextRequest) {
   try {
-    const userId = "demoUser"; 
+    const userId = "demoUser";
     const basePath = path.join(process.cwd(), "Elevators", userId);
 
     if (!fs.existsSync(basePath)) {
@@ -352,7 +352,13 @@ export async function POST(req: NextRequest) {
           targetDir = path.join(assetsPath, "assets", "images", "floors");
           const floorIdx = Number(key.replace(/\D/g, ''));
           if (liftJson.floors[floorIdx].videoData) {
-            liftJson.floors[floorIdx].videoData.image = `/Elevators/${userId}/${liftId}/assets/images/floors/${value.name}`;
+            if (liftJson.floors[floorIdx].videoData.myLiftV2Update) {
+              for (let i = 0; i < liftJson.floors[floorIdx].videoData.videoList.length; i++) {
+                liftJson.floors[floorIdx].videoData.videoList[i].image = `/Elevators/${userId}/${liftId}/assets/images/floors/${value.name}`;
+              }
+            } else {
+              liftJson.floors[floorIdx].videoData.image = `/Elevators/${userId}/${liftId}/assets/images/floors/${value.name}`;
+            }
           }
         } else {
           targetDir = path.join(assetsPath, "assets", "images");

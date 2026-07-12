@@ -2,11 +2,11 @@
 
 import React, { useEffect, useState, useRef, Dispatch, SetStateAction, MouseEvent } from "react";
 import "./LevelBotBase.css";
-import { CoursebotFloorSlotConfig, LiftJson, SlotData } from "@/types/elevator";
+import { CoursebotFloorSlotConfig, getVideoStats, LiftJson, SlotData } from "@/types/elevator";
 import { LevelBotMode, LevelBotTransitionState, SavePayload } from "../LevelBotModal";
 import SlotInfoModal, { EditingSlotData } from "../SlotInfoModal/SlotInfoModal";
 import AudioController from "@/core/audio/AudioController";
-import { VideoData } from "@/types/data/VideoData";
+import { getVideoData, VideoData } from "@/types/data/VideoData";
 import WatchListModal from "../WatchListModal/WatchListModal";
 import { MyLiftPlayerMode, PlayerState } from "@/components/MyLiftPlayer/MyLiftPlayer";
 
@@ -292,11 +292,15 @@ export default function LevelbotBase({
 
     }, [clickedSlot]);
 
-    const videoData = currentVideo;
+    const [currentVideoNumber, setCurrentVideoNumber] = useState(0);
 
-    const viewsCount = videoStats?.[videoData?.id || ""]?.views || 0;
+    const videoData = getVideoData(currentVideo, currentVideoNumber);
 
-    const watchData = videoStats?.[videoData?.id || ""];
+    const vStats = getVideoStats(videoStats?.[videoData?.id || ""], currentVideoNumber);
+
+    const viewsCount = vStats?.views || 0;
+
+    const watchData = vStats;
 
     return (
         <div className="coursebot-base" data-mode={coursebotMode}>

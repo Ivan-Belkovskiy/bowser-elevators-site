@@ -11,8 +11,16 @@ import AudioController from "@/core/audio/AudioController";
 import CoursebotModal from "./CoursebotModal";
 import { LevelBotMode } from "@/components/LevelBot/LevelBotModal";
 import { PlayerState } from "../MyLiftPlayer";
+import { VideoData } from "@/types/data/VideoData";
 
 interface ControlsProps {
+  playerVersion?: 'v1' | 'v2';
+  videoList?: {
+        id: string;
+        title?: string | undefined;
+        url: string;
+        image?: string | File | undefined;
+    }[];
   videoRef: React.RefObject<HTMLVideoElement | null>;
   playerState: PlayerState;
   setPlayerState: (fn: any) => void;
@@ -28,6 +36,8 @@ interface ControlsProps {
 }
 
 export default function Controls({
+  playerVersion = 'v1',
+  videoList,
   videoRef,
   playerState,
   setPlayerState,
@@ -135,7 +145,7 @@ export default function Controls({
               // onOpenCoursebot?.();
             }}>
             </button>
-            <img src="/images/player/mylift-player/ui/player-logo.png" className="mylift-player-logo" />
+            <img src={`/images/player/mylift-player/player-logo-${playerVersion}.png`} className="mylift-player-logo" />
           </>
         )}
         <VolumeControl videoRef={videoRef} />
@@ -163,6 +173,7 @@ export default function Controls({
             onOpenCoursebot?.('load');
           }}
         />
+       
       </div>
     </div>
   );

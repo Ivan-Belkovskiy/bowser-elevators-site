@@ -4,6 +4,7 @@ import "./VolumeControl.css";
 export default function VolumeControl({ videoRef }: any) {
   const [showSlider, setShowSlider] = useState(false);
   const [volume, setVolume] = useState(1);
+  const [volumeOff, setVolumeOff] = useState(false);
 
   const toggleMute = () => {
     const video = videoRef.current;
@@ -13,6 +14,7 @@ export default function VolumeControl({ videoRef }: any) {
     if (!video.muted) {
       video.volume = volume;
     }
+    setVolumeOff(video.muted);
   };
 
   const onVolumeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -26,7 +28,7 @@ export default function VolumeControl({ videoRef }: any) {
   };
 
   const video = videoRef.current;
-  const isMuted = video?.muted || volume === 0;
+  const isMuted = (video?.muted || volumeOff) || volume === 0;
 
   return (
     <div

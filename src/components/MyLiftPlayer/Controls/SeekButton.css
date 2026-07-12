@@ -38,3 +38,25 @@
   cursor: default;
   transform: none; */
 }
+
+
+.mylift-player.version-v2 {
+
+  .mylift-seek-button {
+    scale: 0.7;
+    transition: scale 0.25s ease 0s;
+  }
+
+  .mylift-seek-button:hover {
+    scale: 0.8;
+  }
+
+  .mylift-seek-button.left {
+    background-image: url('/images/player/mylift-player/V2/ui/controls-left-button.svg') !important;
+  }
+
+  .mylift-seek-button.right {
+    background-image: url('/images/player/mylift-player/V2/ui/controls-right-button.svg') !important;
+  }
+
+}

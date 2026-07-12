@@ -45,3 +45,29 @@
   font-weight: bold;
   margin-left: 15px;
 }
+
+.mylift-player.version-v2 {
+
+  .mylift-controls__time-display {
+    color: #fff;
+  }
+
+  .mylift-progress {
+    background-color: #fff;
+    border-radius: 0;
+    height: 15px;
+  }
+
+  .mylift-progress-thumb {
+    background-color: #9e5f00;
+    display: none;
+    scale: 1;
+  }
+
+  .mylift-progress-bar {
+    background-color: #0066ff;
+    border-radius: 0;
+    /* transition: width 0.04s linear; */
+  }
+
+}

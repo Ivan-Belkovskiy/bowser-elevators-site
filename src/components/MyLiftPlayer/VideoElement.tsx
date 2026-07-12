@@ -1,4 +1,4 @@
-import { VideoData } from "@/types/data/VideoData";
+import { getVideoData, VideoData, VideoDataV1 } from "@/types/data/VideoData";
 import React, {
   useEffect,
   useImperativeHandle,
@@ -7,7 +7,7 @@ import React, {
 } from "react";
 
 interface VideoElementProps {
-  video: VideoData;
+  video: VideoDataV1;
   playerState: any;
   setPlayerState: (fn: any) => void;
 }
@@ -38,6 +38,7 @@ const VideoElement = forwardRef<HTMLVideoElement, VideoElementProps>(
         el.currentTime = playerState.currentTime;
       }
     }, [playerState.currentTime]);
+
 
     return (
       <video
