@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import fs from "fs";
 import path from "path";
-import { LiftJson, Floor, ElevatorButton, ButtonBlock, ElevatorButtonStyles, ElevatorDisplayConfig } from "@/types/elevator";
+import { LiftJson, Floor, ElevatorButton, ButtonBlock, ElevatorButtonStyles, ElevatorDisplayConfig, SlotData } from "@/types/elevator";
 import { SavePayload } from "@/components/LevelBot/LevelBotModal";
 import { PlayerState } from "@/components/MyLiftPlayer/MyLiftPlayer";
 
@@ -92,20 +92,16 @@ export async function PUT(
             watchHistory: [],
           }
         } else {
-          if (liftData.videoStats[videoId].myLiftV2Update) {
-
-          } else {
-            liftData.videoStats[videoId].views += 1;
-          }
+          liftData.videoStats[videoId].views += 1;
         }
 
-        if (!liftData.videoStats[videoId].myLiftV2Update && !liftData.videoStats[videoId].watchHistory) liftData.videoStats[videoId].watchHistory = [];
+        if (!liftData.videoStats[videoId].watchHistory) liftData.videoStats[videoId].watchHistory = [];
 
         const data = formData.get('video_player_state');
 
         if (typeof data === 'string') {
           const playerState: PlayerState = JSON.parse(data);
-          if (playerState.watchInfo?.startDate && playerState.watchInfo?.endDate && !liftData.videoStats[videoId].myLiftV2Update && liftData.videoStats[videoId].watchHistory) liftData.videoStats[videoId].watchHistory.push({
+          if (playerState.watchInfo?.startDate && playerState.watchInfo?.endDate && liftData.videoStats[videoId].watchHistory) liftData.videoStats[videoId].watchHistory.push({
             start: playerState.watchInfo.startDate,
             end: playerState.watchInfo.endDate,
             watchTime: playerState.duration,
@@ -127,22 +123,28 @@ export async function PUT(
         // });
 
         if (floorId && !isNaN(startIdx) && !isNaN(endIdx)) {
-          const firstSlot = {
-            ...liftData.coursebot.slots[floorId].fragments[startIdx]
-          };
+          const floorSlots = liftData.coursebot.slots[floorId];
+          if (floorSlots.myLiftV2Update) {
 
-          const secondSlot = {
-            ...liftData.coursebot.slots[floorId].fragments[endIdx]
-          };
+          } else {
 
-          // return NextResponse.json({
-          //   firstSlot,
-          //   secondSlot
-          // });
+            const firstSlot = {
+              ...floorSlots.fragments[startIdx]
+            };
 
-          if (firstSlot && secondSlot) {
-            liftData.coursebot.slots[floorId].fragments[startIdx] = secondSlot;
-            liftData.coursebot.slots[floorId].fragments[endIdx] = firstSlot;
+            const secondSlot = {
+              ...floorSlots.fragments[endIdx]
+            };
+
+            // return NextResponse.json({
+            //   firstSlot,
+            //   secondSlot
+            // });
+
+            if (firstSlot && secondSlot) {
+              floorSlots.fragments[startIdx] = secondSlot;
+              floorSlots.fragments[endIdx] = firstSlot;
+            }
           }
         }
       }
@@ -169,7 +171,9 @@ export async function PUT(
 
           fs.writeFileSync(targetPath, Buffer.from(base64, "base64"));
 
-          liftData.coursebot.slots[slotData.floorId].autosave = {
+          const floorData = liftData.coursebot.slots[slotData.floorId];
+
+          const autosaveData: SlotData = {
             isAutosave: true,
             data: {
               main: {
@@ -181,7 +185,27 @@ export async function PUT(
               },
               playerState: playerState,
             }
+          };
+
+          if (floorData.myLiftV2Update) {
+
+          } else {
+            floorData.autosave = autosaveData;
           }
+
+          // liftData.coursebot.slots[slotData.floorId].autosave = {
+          //   isAutosave: true,
+          //   data: {
+          //     main: {
+          //       id: 0,
+          //       empty: false,
+          //       ...slotData,
+          //       thumbnailUrl: `/Elevators/${userId}/${liftData.id}/assets/images/coursebot/${slotData.videoId}/AUTOSAVE.png`,
+          //       createdAt: new Date().toLocaleString().replace(',', ''),
+          //     },
+          //     playerState: playerState,
+          //   }
+          // };
         }
       }
     } else if (formData.has('coursebot__edit_fragment')) {
@@ -189,11 +213,17 @@ export async function PUT(
       if (data && typeof data === 'string') {
         const slotData = JSON.parse(data);
 
-        liftData.coursebot.slots[slotData.floorId].fragments[slotData.slotId] = {
-          ...liftData.coursebot.slots[slotData.floorId].fragments[slotData.slotId],
-          data: {
-            ...liftData.coursebot.slots[slotData.floorId].fragments[slotData.slotId].data,
-            ...slotData,
+        const floorData = liftData.coursebot.slots[slotData.floorId];
+
+        if (floorData.myLiftV2Update) {
+
+        } else {
+          floorData.fragments[slotData.slotId] = {
+            ...floorData.fragments[slotData.slotId],
+            data: {
+              ...floorData.fragments[slotData.slotId].data,
+              ...slotData,
+            }
           }
         }
       }
@@ -206,18 +236,30 @@ export async function PUT(
         //   // id: 0,
         //   empty: true,
         // }
-        liftData.coursebot.slots[floorId].autosave = undefined;
+        const floorData = liftData.coursebot.slots[floorId];
+
+        if (floorData.myLiftV2Update) {
+
+        } else {
+          floorData.autosave = undefined;
+        }
       }
     } else if (formData.has('coursebot__delete_fragment')) {
       const data = formData.get('coursebot__delete_fragment');
       if (data && typeof data === 'string') {
         const slotData = JSON.parse(data);
 
-        liftData.coursebot.slots[slotData.floorId].fragments[slotData.slotId] = {
-          isAutosave: false,
-          data: {
-            id: slotData.slotId,
-            empty: true
+        const floorData = liftData.coursebot.slots[slotData.floorId];
+
+        if (floorData.myLiftV2Update) {
+
+        } else {
+          floorData.fragments[slotData.slotId] = {
+            isAutosave: false,
+            data: {
+              id: slotData.slotId,
+              empty: true
+            }
           }
         }
       }
@@ -239,16 +281,21 @@ export async function PUT(
 
         fs.writeFileSync(targetPath, Buffer.from(base64, "base64"));
 
+        const floorData = liftData.coursebot.slots[payload.floorId];
 
-        liftData.coursebot.slots[payload.floorId].fragments[payload.slotIndex] = {
-          isAutosave: false,
-          data: {
-            id: payload.slotIndex,
-            title: payload.title,
-            empty: false,
-            createdAt: new Date().toLocaleString().replace(',', ''),
-            thumbnailUrl: `/Elevators/${userId}/${liftData.id}/assets/images/coursebot/${payload.videoId}/slot_${payload.slotIndex}.png`,
-            timecode: payload.timecode,
+        if (floorData.myLiftV2Update) {
+
+        } else {
+          floorData.fragments[payload.slotIndex] = {
+            isAutosave: false,
+            data: {
+              id: payload.slotIndex,
+              title: payload.title,
+              empty: false,
+              createdAt: new Date().toLocaleString().replace(',', ''),
+              thumbnailUrl: `/Elevators/${userId}/${liftData.id}/assets/images/coursebot/${payload.videoId}/slot_${payload.slotIndex}.png`,
+              timecode: payload.timecode,
+            }
           }
         }
       }

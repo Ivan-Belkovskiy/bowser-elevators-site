@@ -98,10 +98,27 @@ export interface DoorAnimationConfig {
   keyframes: DoorKeyframe[];
 }
 
-export interface CoursebotFloorSlotConfig {
+export type CoursebotFloorSlotConfig = {
+  myLiftV2Update?: false;
   autosave?: SlotData;
   fragments: SlotData[];
+} | {
+  myLiftV2Update: true;
+  data: {
+    [videoId: string]: {
+      autosave?: SlotData;
+      fragments: SlotData[];
+    };
+  }
 };
+
+export const getCoursebotSlotData = (data?: CoursebotFloorSlotConfig, videoId?: string) => {
+  if (!data) return undefined;
+  if (data.myLiftV2Update) {
+    if (!videoId) return undefined;
+    return data.data[videoId];
+  } else return data;
+}
 
 // export type VideoStats = {
 

@@ -11,7 +11,7 @@ export default function VideoFileNavigation({ defaultPath, onClose, onSelect }: 
         const segments = normalized.split('/');
         if (segments.length <= 1) return normalized.endsWith('/') ? normalized : normalized + '/';
 
-        segments.pop(); // удалить последний сегмент
+        segments.pop();
         const parent = segments.join('/');
         return parent.endsWith(':') ? parent + '/' : parent;
     }

@@ -2,7 +2,7 @@
 
 import React, { useEffect, useState, useRef, Dispatch, SetStateAction, MouseEvent } from "react";
 import "./LevelBotBase.css";
-import { CoursebotFloorSlotConfig, getVideoStats, LiftJson, SlotData } from "@/types/elevator";
+import { CoursebotFloorSlotConfig, getCoursebotSlotData, getVideoStats, LiftJson, SlotData } from "@/types/elevator";
 import { LevelBotMode, LevelBotTransitionState, SavePayload } from "../LevelBotModal";
 import SlotInfoModal, { EditingSlotData } from "../SlotInfoModal/SlotInfoModal";
 import AudioController from "@/core/audio/AudioController";
@@ -302,8 +302,30 @@ export default function LevelbotBase({
 
     const watchData = vStats;
 
+    const cSlotData = getCoursebotSlotData(slotData, videoData?.id); // Добавить изменение структуры хранения слотов при изменении версии плеера в настройках видео!
+
     return (
         <div className="coursebot-base" data-mode={coursebotMode}>
+            {(currentVideo?.myLiftV2Update) && <div className={`coursebot-base__video-block ${(transitionState === 'idle' && !selectedSlot && !watchListOpened) ? `active` : ``}`}>
+                <select
+                    className="coursebot-base__video-select"
+                    value={currentVideoNumber}
+                    onChange={(e) => {
+                        AudioController.playCoursebotSound("tab_switch_drop");
+                        setCurrentVideoNumber(Number(e.target.value));
+                    }}
+                >
+                    {currentVideo.videoList.map((v, i) => (
+                        <option value={i} key={i}>[{i + 1}] {v.title || `Видео ${i + 1}`}</option>
+                    ))}
+                </select>
+                {/* <button
+                    className="coursebot-base__button view-history-button"
+                    onClick={() => {
+                        AudioController.playCoursebotSound("watchlist_button");
+                        setWatchListOpened?.(true);
+                    }}>⇑</button> */}
+            </div>}
             {(videoData && videoStats && coursebotMode === 'default') && <div className={`coursebot-base__stats-block ${(transitionState === 'idle' && !selectedSlot && !watchListOpened) ? `active` : ``}`}>
                 <span>Просмотрено: {viewsCount + `${[2, 3, 4].includes(viewsCount) ? " раза" : " раз"}`}</span>
                 <button
@@ -355,7 +377,7 @@ export default function LevelbotBase({
                 onDelete={() => { closeSlot(); selectedSlot && onDeleteFragment?.(selectedSlot.index); }}
                 onClearAutosave={() => { closeSlot(); onClearAutosave?.(); }}
             />
- 
+
             <WatchListModal opened={watchListOpened} data={watchData} onClose={() => setWatchListOpened?.(false)} />
             <div
                 className={`coursebot-base__content ${movingSlot ? `slot-move-mode` : ``}`}
@@ -368,19 +390,19 @@ export default function LevelbotBase({
                     className={`coursebot-base__slot autosave 
                         ${coursebotMode === "save" ? "locked" : ""}
                         ${bouncingSlotIndex === 0 ? "bouncing" : ""}`}
-                    onClick={() => openSlot(true, 0, slotData?.autosave)}
+                    onClick={() => openSlot(true, 0, cSlotData?.autosave)}
                 >
                     <div className={`coursebot-slot__preview 
-                        ${(slotData?.autosave?.isAutosave) && (getSlotImage(0, slotData.autosave.data?.main?.thumbnailUrl)) ? 'with-data' : ''} 
+                        ${(cSlotData?.autosave?.isAutosave) && (getSlotImage(0, cSlotData.autosave.data?.main?.thumbnailUrl)) ? 'with-data' : ''} 
                         ${fillingSlotIndex === 0 ? "filling" : ""}`}>
-                        {(slotData?.autosave?.isAutosave) && getSlotImage(0, slotData.autosave.data?.main?.thumbnailUrl) && (
-                            <img src={getSlotImage(0, slotData.autosave.data.main.thumbnailUrl)} alt="autosave" />
+                        {(cSlotData?.autosave?.isAutosave) && getSlotImage(0, cSlotData.autosave.data?.main?.thumbnailUrl) && (
+                            <img src={getSlotImage(0, cSlotData.autosave.data.main.thumbnailUrl)} alt="autosave" />
                         )}
                     </div>
                     <span className="coursebot-slot__title">Автосохранение</span>
                 </div>
 
-                {slotData?.fragments.map((slot, idx) => {
+                {cSlotData?.fragments.map((slot, idx) => {
                     const slotIndex = idx + 1;
                     if (!slot.isAutosave) {
                         const thumb = getSlotImage(slotIndex, slot.data?.thumbnailUrl);

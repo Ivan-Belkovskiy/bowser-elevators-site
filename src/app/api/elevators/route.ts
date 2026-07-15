@@ -89,21 +89,53 @@ export async function POST(req: NextRequest) {
     } = {};
 
     floors.forEach((floor, idx) => {
-      coursebotSlotConfig[floor.id] = {
-        autosave: undefined,
-        fragments: []
-      };
+      if (floor.videoData?.myLiftV2Update) {
+        coursebotSlotConfig[floor.id] = {
+          myLiftV2Update: true,
+          data: {},
+        };
 
-      for (let i = 0; i < 51; i++) {
-        coursebotSlotConfig[floor.id].fragments.push({
-          isAutosave: false,
-          data: {
-            id: i,
-            empty: true,
+        floor.videoData.videoList.forEach(video => {
+          const slotConfig = coursebotSlotConfig[floor.id];
+          if (slotConfig.myLiftV2Update) {
+            slotConfig.data[video.id] = {
+              autosave: undefined,
+              fragments: Array(51).fill(null, 0, 51).map((_, idx) => ({
+                isAutosave: false,
+                data: {
+                  id: idx,
+                  empty: true,
+                }
+              }))
+            }
           }
         });
+      } else {
+        coursebotSlotConfig[floor.id] = {
+          myLiftV2Update: false,
+          autosave: undefined,
+          fragments: Array(51).fill(null, 0, 51).map((_, idx) => ({
+            isAutosave: false,
+            data: {
+              id: idx,
+              empty: true,
+            }
+          }))
+        };
+
+        // for (let i = 0; i < 51; i++) {
+        //   if (!coursebotSlotConfig[floor.id].myLiftV2Update) {
+        //     coursebotSlotConfig[floor.id].fragments.push({
+        //       isAutosave: false,
+        //       data: {
+        //         id: i,
+        //         empty: true,
+        //       }
+        //     });
+        //   }
+        // }
       }
-    })
+    });
 
     const liftJson: LiftJson = {
       id: liftId,
